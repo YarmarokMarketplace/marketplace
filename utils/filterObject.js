@@ -1,16 +1,25 @@
 const buildFilterObject = (params) => { 
     const { category, goodtype, priceRange } = params;
-    const formattedPriceRange = priceRange.split("-");
-    const minPrice = Number(formattedPriceRange[0]);
-    const maxPrice = Number(formattedPriceRange[1]);
+    let minPrice = 0;
+    let maxPrice = 0;
+    if (priceRange) {
+        const formattedPriceRange = priceRange.split("-");
+        minPrice = Number(formattedPriceRange[0]);
+        maxPrice = Number(formattedPriceRange[1]);
+    }
     if (goodtype && !priceRange) { 
         return { $and: [{ category }, { goodtype }] }
     }
     if (goodtype && priceRange) { 
-        return { $and: [{ category }, { goodtype }, { price: { $in: [minPrice, maxPrice] } }] }
+        return { $and: 
+            [{ category }, 
+            { goodtype }, 
+            { $and: [ { price: { $gte: minPrice, $lte: maxPrice } }]}
+            ] 
+        }
     }
     if (!goodtype && priceRange) {
-        return { $and: [{ category }, { price: { $in: [minPrice, maxPrice] } }] }
+        return { $and: [{ category },  { $and: [ { price: { $gte: minPrice, $lte: maxPrice } }]}] }
     }
     else return { category };
 }
