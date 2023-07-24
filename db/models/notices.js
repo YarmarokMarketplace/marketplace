@@ -36,9 +36,6 @@ const noticeSchema = new Schema(
       type: Number,
       required: true,
     },
-    comments: {
-      type: String,
-    },
   },
   { versionKey: false, timestamps: true }
 );
@@ -68,7 +65,6 @@ const addNoticeSchema = Joi.object({
     "any.required": "Enter good's price and currency",
     })
   ,
-  comments: Joi.string(),
 });
 
 
