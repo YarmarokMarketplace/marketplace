@@ -297,8 +297,7 @@
           "description",
           "price",
           "location",
-          "category",
-          "photo"
+          "category"
         ],
         "properties": {
           "title": {
@@ -339,10 +338,6 @@
             "type": "integer",
             "example": 2500
           },
-          "comments": {
-            "type": "string",
-            "example": "Very good chair for you home"
-          },
           "goodtype": {
             "type": "string",
             "enum": [
@@ -351,7 +346,7 @@
             ],
             "example": "new"
           },
-          "photo": {
+          "photos": {
             "type": "string",
             "format": "binary"
           }
@@ -411,11 +406,6 @@
           "price": {
             "type": "integer",
             "example": 2500
-          },
-          "comments": {
-            "type": "string",
-            "description": "additional information about notice or seller",
-            "example": "Call from 19:00"
           },
           "createdAt": {
             "type": "string",
