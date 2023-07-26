@@ -67,6 +67,18 @@ const addNotice = async (req, res) => {
   });  
 };
 
+const getNoticeById = async (req, res) => {
+  const { id } = req.params;
+
+  const notice = await Notice.findById(id);
+  if (!notice) {
+    throw HttpError.NotFoundError("Notice not found");
+  }
+  res.status(201).json({
+    data: notice,
+   });
+};
+    
 const removeNotice = async (req, res) => {
   const { id } = req.params;
 
@@ -77,8 +89,7 @@ const removeNotice = async (req, res) => {
   res.status(204).json({
     data: {
       message: "Notice deleted",
-    },
-  });
+    }});
 };
 
 const updateNotice = async (req, res) => {
@@ -101,13 +112,14 @@ const updateNotice = async (req, res) => {
     status: 'success',
     code: 201,
     result,
-  });
+   });
 };
 
 module.exports = {
   getAllNotices: controllerWrapper(getAllNotices),
   getNoticesByCategory: controllerWrapper(getNoticesByCategory),
   addNotice: controllerWrapper(addNotice),
+  getNoticeById: controllerWrapper(getNoticeById),
   removeNotice: controllerWrapper(removeNotice),
   updateNotice: controllerWrapper(updateNotice),
 };

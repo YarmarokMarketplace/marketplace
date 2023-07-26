@@ -306,6 +306,41 @@
         }
       }
     },
+      "get": {
+        "summary": "Find the notice by ID",
+        "tags": [
+          "Notices"
+        ],
+        "description": "Find the notices by it's unique identifier",
+        "operationId": "getNoticeById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Find the notices by id",
+              "example": "6494c145ddb3a57412f3d4b4"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddNoticeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          }
+        }
+      },
     "/main": {
       "get": {
         "summary": "Get all categories",
@@ -333,8 +368,8 @@
           }
         }
       }
-    }
-  },
+      }
+    },
   "components": {
     "schemas": {
       "ListOfNoticesResponse": {
@@ -603,4 +638,4 @@
       }
     }
   }
-}
+  }
