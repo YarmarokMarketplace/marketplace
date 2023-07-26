@@ -46,6 +46,28 @@
         ],
         "description": "Find all existing notices",
         "operationId": "getAllNotices",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Page number for pagination",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Number of articles per page.",
+              "default": 9
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful operation",
@@ -120,6 +142,65 @@
               "type": "string",
               "description": "Category for search"
             }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Page number for pagination",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Number of articles per page.",
+              "default": 9
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Type of sorting.",
+              "enum": [
+                "newest",
+                "oldest",
+                "cheapest",
+                "expensive"
+              ],
+              "default": "newest"
+            }
+          },
+          {
+            "name": "goodtype",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Type of filtering.",
+              "enum": [
+                "new",
+                "used"
+              ]
+            }
+          },
+          {
+            "name": "priceRange",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Type of filtering.",
+              "example": "100-199"
+            }
           }
         ],
         "responses": {
@@ -138,6 +219,56 @@
           },
           "404": {
             "description": "Any notices for the given category"
+          }
+        }
+      }
+    },
+    "/notices/{id}": {
+      "patch": {
+        "summary": "Update notice info",
+        "tags": [
+          "Notices"
+        ],
+        "description": "Update notice information in the database",
+        "operationId": "updateNotice",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "example": "6490564f8f85c705511c5de2",
+            "schema": {
+              "type": "string",
+              "description": "Backend-generated unique identifier"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNoticeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddNoticeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "404": {
+            "description": "Notice not found"
           }
         }
       }
@@ -249,9 +380,63 @@
           "description",
           "price",
           "location",
-          "category",
-          "photo"
+          "category"
         ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "The chair for sale"
+          },
+          "description": {
+            "type": "string",
+            "example": "Very good chair for your home"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "business-and-services",
+              "for-free",
+              "children's-world",
+              "home-and-garden",
+              "help",
+              "electricity",
+              "spare-parts-for-transport",
+              "fashion-and-style",
+              "realty",
+              "exchange",
+              "repair",
+              "work",
+              "animals",
+              "goods-to-win",
+              "hobbies-recreation-sports"
+            ],
+            "example": "home-and-garden"
+          },
+          "location": {
+            "type": "string",
+            "example": "Kyiv"
+          },
+          "price": {
+            "type": "integer",
+            "example": 2500
+          },
+          "goodtype": {
+            "type": "string",
+            "enum": [
+              "used",
+              "new"
+            ],
+            "example": "new"
+          },
+          "photos": {
+            "type": "string",
+            "format": "binary"
+          }
+        }
+      },
+      "UpdateNoticeRequest": {
+        "type": "object",
         "properties": {
           "title": {
             "type": "string",
@@ -348,10 +533,13 @@
             "type": "string",
             "example": "Very good chair for your home"
           },
-          "photo": {
-            "type": "string",
-            "description": "notice image url",
-            "example": "photos\\\\2FtTgOgfRKgaEsqQxVhPG_pet.jpg"
+          "photos": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "notice image url",
+              "example": "https://yarmarok-bucket.s3.amazonaws.com/BSqREaubo3hWhDvb6lNZ3_2.jpg"
+            }
           },
           "location": {
             "type": "string",
@@ -360,11 +548,6 @@
           "price": {
             "type": "integer",
             "example": 2500
-          },
-          "comments": {
-            "type": "string",
-            "description": "additional information about notice or seller",
-            "example": "Call from 19:00"
           },
           "createdAt": {
             "type": "string",
