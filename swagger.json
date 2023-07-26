@@ -370,8 +370,8 @@
           }
         }
       }
-    }
-  },
+      }
+    },
   "components": {
     "schemas": {
       "ListOfNoticesResponse": {
@@ -641,4 +641,3 @@
     }
   }
   }
-}
