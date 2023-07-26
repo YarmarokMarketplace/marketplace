@@ -273,6 +273,39 @@
         }
       }
     },
+    "/notices/notice/{id}": {
+      "delete": {
+        "tags": [
+          "Notices"
+        ],
+        "summary": "Delete the notice",
+        "description": "Delete the notice from the database",
+        "operationId": "removeNotice",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of notice that needs to be deleted",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Delete the notice with the specified ID"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "404": {
+            "description": "Notice not found"
+          }
+        }
+      }
+    },
     "/main": {
       "get": {
         "summary": "Get all categories",
