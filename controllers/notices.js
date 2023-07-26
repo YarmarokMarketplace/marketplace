@@ -89,7 +89,7 @@ const removeNotice = async (req, res) => {
   res.status(204).json({
     data: {
       message: "Notice deleted",
-    });
+    }});
 };
 
 const updateNotice = async (req, res) => {
