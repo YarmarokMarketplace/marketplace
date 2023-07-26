@@ -9,7 +9,7 @@ const noticeSchema = new Schema(
       type: String,
       required: true,
           enum: ["auto", "business-and-services", "for-free", "children's-world", "home-and-garden", "help",
-              "electricity", "spare-parts-for-transport", "fashion-and-style", "realty", "exchange",
+              "electronics", "spare-parts-for-transport", "fashion-and-style", "realty", "exchange",
           "repair", "work", "animals", "goods-to-win", "hobbies-recreation-sports"],
     },
     goodtype: {
@@ -33,11 +33,8 @@ const noticeSchema = new Schema(
       required: true,
     },
     price: {
-      type: String,
+      type: Number,
       required: true,
-    },
-    comments: {
-      type: String,
     },
   },
   { versionKey: false, timestamps: true }
@@ -68,7 +65,6 @@ const addNoticeSchema = Joi.object({
     "any.required": "Enter good's price and currency",
     })
   ,
-  comments: Joi.string(),
 });
 
 const updateNoticeSchema = Joi.object({
