@@ -67,9 +67,33 @@ const addNotice = async (req, res) => {
   });  
 };
 
+const updateNotice = async (req, res) => {
+  const { id } = req.params;
+  const noticeData = req.body;
+  let data;
+  if (req.files) {
+    const uploaded = req.files.map(reqfile => reqfile.location);
+    data = { ...noticeData, photos: uploaded}
+  } else {
+    data = { ...noticeData }
+  }
+  
+  const result = await Notice.findByIdAndUpdate(id, data, { new: true });
+  
+  if (!result) {
+    throw new HttpError(404, 'Project not found');
+  }
+  res.status(201).json({
+    status: 'success',
+    code: 201,
+    result,
+  });
+};
+
 
 module.exports = {
   getAllNotices: controllerWrapper(getAllNotices),
   getNoticesByCategory: controllerWrapper(getNoticesByCategory),
   addNotice: controllerWrapper(addNotice),
+  updateNotice: controllerWrapper(updateNotice),
 };

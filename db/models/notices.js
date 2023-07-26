@@ -67,10 +67,22 @@ const addNoticeSchema = Joi.object({
   ,
 });
 
+const updateNoticeSchema = Joi.object({
+  category: Joi.string(),
+  goodtype: Joi.string(),
+  title: Joi.string(),
+  photos: Joi.string(),
+  description: Joi.string(),
+  location: Joi.string(),
+  price: Joi.string(),
+  comments: Joi.string(),
+});
+
 
 const Notice = model("notice", noticeSchema);
 
 module.exports = {
   Notice,
   addNoticeSchema,
+  updateNoticeSchema,
 };

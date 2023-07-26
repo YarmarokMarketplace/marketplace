@@ -223,6 +223,56 @@
         }
       }
     },
+    "/notices/{id}": {
+      "patch": {
+        "summary": "Update notice info",
+        "tags": [
+          "Notices"
+        ],
+        "description": "Update notice information in the database",
+        "operationId": "updateNotice",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "example": "6490564f8f85c705511c5de2",
+            "schema": {
+              "type": "string",
+              "description": "Backend-generated unique identifier"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNoticeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddNoticeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "404": {
+            "description": "Notice not found"
+          }
+        }
+      }
+    },
     "/main": {
       "get": {
         "summary": "Get all categories",
@@ -347,6 +397,65 @@
             "example": "new"
           },
           "photos": {
+            "type": "string",
+            "format": "binary"
+          }
+        }
+      },
+      "UpdateNoticeRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "The chair for sale"
+          },
+          "description": {
+            "type": "string",
+            "example": "Very good chair for your home"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "business-and-services",
+              "for-free",
+              "children's-world",
+              "home-and-garden",
+              "help",
+              "electricity",
+              "spare-parts-for-transport",
+              "fashion-and-style",
+              "realty",
+              "exchange",
+              "repair",
+              "work",
+              "animals",
+              "goods-to-win",
+              "hobbies-recreation-sports"
+            ],
+            "example": "home-and-garden"
+          },
+          "location": {
+            "type": "string",
+            "example": "Kyiv"
+          },
+          "price": {
+            "type": "integer",
+            "example": 2500
+          },
+          "comments": {
+            "type": "string",
+            "example": "Very good chair for you home"
+          },
+          "goodtype": {
+            "type": "string",
+            "enum": [
+              "used",
+              "new"
+            ],
+            "example": "new"
+          },
+          "photo": {
             "type": "string",
             "format": "binary"
           }
