@@ -5,9 +5,6 @@ const validateBody = require('../../../utils/validateBody');
 const upload = require('../../../utils/upload');
 const isValidId = require('../../../middlewares/isValidId');
 
-router.get('/:category', getNoticesByCategory);
-router.post('/', upload.array('photos', 6), validateBody(addNoticeSchema), addNotice);
-
 const { addNotice, getNoticesByCategory, getAllNotices, updateNotice, removeNotice, getNoticeById } = require('../../../controllers/notices');
 const { addNoticeSchema, updateNoticeSchema} = require('../../../db/models/notices');
 

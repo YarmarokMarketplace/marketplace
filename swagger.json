@@ -306,7 +306,6 @@
         }
       }
     },
-     "/notices/notice/{id}": {
       "get": {
         "summary": "Find the notice by ID",
         "tags": [
@@ -341,8 +340,7 @@
             "description": "Bad request"
           }
         }
-      }
-    },
+      },
     "/main": {
       "get": {
         "summary": "Get all categories",
