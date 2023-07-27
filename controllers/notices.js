@@ -106,7 +106,7 @@ const updateNotice = async (req, res) => {
   const result = await Notice.findByIdAndUpdate(id, data, { new: true });
   
   if (!result) {
-    throw new HttpError(404, 'Project not found');
+    throw new HttpError(404, 'Notice not found');
   }
   res.status(201).json({
     status: 'success',
@@ -115,6 +115,21 @@ const updateNotice = async (req, res) => {
    });
 };
 
+const toggleActive = async (req, res) => {
+  const {id} = req.params;
+
+  const result = await Notice.findByIdAndUpdate(id, req.body, { new: true });
+
+  if (!result) {
+    throw HttpError.NotFoundError("Notice not found");
+  }
+  res.status(200).json({
+    data: {
+      message: "Status is changed",
+      result,
+    }});
+}
+
 module.exports = {
   getAllNotices: controllerWrapper(getAllNotices),
   getNoticesByCategory: controllerWrapper(getNoticesByCategory),
@@ -122,4 +137,5 @@ module.exports = {
   getNoticeById: controllerWrapper(getNoticeById),
   removeNotice: controllerWrapper(removeNotice),
   updateNotice: controllerWrapper(updateNotice),
+  toggleActive: controllerWrapper(toggleActive),
 };
