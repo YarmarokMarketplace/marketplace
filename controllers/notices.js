@@ -5,6 +5,8 @@ const controllerWrapper = require("../utils/controllerWrapper");
 const buildFilterObject = require("../utils/filterObject");
 const buildSortObject = require("../utils/sortObject");
 
+
+
 const getAllNotices = async (req, res) => {
   const { page = 1, limit = 9 } = req.query;
   const skip = (page - 1) * limit;
@@ -35,7 +37,9 @@ const getNoticesByCategory = async (req, res) => {
   const { page = 1, limit = 9, goodtype, priceRange, sort} = req.query;
   const { category } = req.params;
   const skip = (page - 1) * limit;
-  const query = { category, goodtype, priceRange };
+  const query = { category, goodtype, priceRange, active: true };
+
+
 
   const result = await Notice.find(buildFilterObject(query))
   .limit(limit * 1)
@@ -115,6 +119,33 @@ const updateNotice = async (req, res) => {
    });
 };
 
+const checkIsActive = async (req, res) => {
+  
+  const today = new Date();
+  const thirtyDays = today.getTime() - (10*24*60*60*1000);
+
+  await Notice.aggregate([
+    { $match: 
+        { createdAt: {
+            $lt: new Date(thirtyDays)} 
+        }
+    }, 
+    {
+        $merge: {
+            into: "inactivenotices",
+            on: "_id",
+            whenMatched: "replace",
+            whenNotMatched: "insert"
+        }
+    }
+    ]);
+
+    res.status(200).json({
+      message: 'Operation is successful',
+    });
+}
+
+
 module.exports = {
   getAllNotices: controllerWrapper(getAllNotices),
   getNoticesByCategory: controllerWrapper(getNoticesByCategory),
@@ -122,4 +153,5 @@ module.exports = {
   getNoticeById: controllerWrapper(getNoticeById),
   removeNotice: controllerWrapper(removeNotice),
   updateNotice: controllerWrapper(updateNotice),
+  checkIsActive: controllerWrapper(checkIsActive)
 };

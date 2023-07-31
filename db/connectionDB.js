@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const { DB_HOST } = process.env;
 
 const connectionDB = async () => {
-    mongoose.connect(DB_HOST);
+    await mongoose.connect(DB_HOST);
 };
 
 module.exports = connectionDB;
