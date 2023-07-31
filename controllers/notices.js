@@ -122,7 +122,7 @@ const updateNotice = async (req, res) => {
 const checkIsActive = async (req, res) => {
   
   const today = new Date();
-  const thirtyDays = today.getTime() - (10*24*60*60*1000);
+  const thirtyDays = today.getTime() - (30*24*60*60*1000);
 
   await Notice.aggregate([
     { $match: 
@@ -140,9 +140,11 @@ const checkIsActive = async (req, res) => {
     }
     ]);
 
-    res.status(200).json({
-      message: 'Operation is successful',
-    });
+  await Notice.deleteMany({ createdAt: {
+    $lt: new Date(thirtyDays)} 
+});
+
+
 }
 
 
