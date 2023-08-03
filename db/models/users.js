@@ -3,7 +3,8 @@ const Joi = require("joi");
 
 const handleMongooseError = require('../../utils/handleMongooseError');
 
-const emailRegex = /@([\w-]+\.)+[\w-]{2,4}$/
+const emailRegex = /@([\w-]+\.)+[\w-]{2,6}$/
+
 
 const userSchema = new Schema({
     email: {
@@ -67,10 +68,15 @@ const loginSchema = Joi.object({
     password: Joi.string().min(8).required(),
 });
 
+const emailSchema = Joi.object({
+    email: Joi.string().pattern(emailRegex).required(),
+})
+
 const User = model("user", userSchema);
 
 module.exports = {
     User,
     registerSchema,
     loginSchema,
+    emailSchema,
 };

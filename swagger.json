@@ -5,7 +5,7 @@
     "description": "Web platform where vendors can come together to sell their products or services to customers.\n\nThis is Marketplace YarmarOK Server based on the OpenAPI 3.0 specification\n\nSome useful links:\n- [The YarmarokMarketplace repository](https://github.com/YarmarokMarketplace/marketplace)",
     "contact": {
       "name": "API developers",
-      "email": "estasjuk@gmail.com"
+      "email": "yarmarokmarketplace@gmail.com"
     },
     "version": "1.0.0"
   },
@@ -35,9 +35,87 @@
     {
       "name": "Categories",
       "description": "Categories endpoints"
+    },
+    {
+      "name": "Authorization",
+      "description": "User Authorization endpoints"
     }
   ],
   "paths": {
+    "/auth/signup": {
+      "post": {
+        "summary": "Add new user",
+        "tags": [
+          "Authorization"
+        ],
+        "description": "Add new user to the Database",
+        "operationId": "signup",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistrationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistrationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "409": {
+            "description": "Email already in use"
+          }
+        }
+      }
+    },
+    "/auth/verify": {
+      "get": {
+        "summary": "Add new user",
+        "tags": [
+          "Authorization"
+        ],
+        "description": "Verify user email",
+        "operationId": "verifyEmail",
+        "parameters": [
+          {
+            "name": "verificationToken",
+            "in": "params",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Backend-generated unique verificationToken"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerificationResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not"
+          }
+        }
+      }
+    },
     "/notices": {
       "get": {
         "summary": "Get all notices",
@@ -304,8 +382,7 @@
             "description": "Notice not found"
           }
         }
-      }
-    },
+      },
       "get": {
         "summary": "Find the notice by ID",
         "tags": [
@@ -340,7 +417,8 @@
             "description": "Bad request"
           }
         }
-      },
+      }
+    },
     "/main": {
       "get": {
         "summary": "Get all categories",
@@ -368,10 +446,54 @@
           }
         }
       }
-      }
-    },
+    }
+  },
   "components": {
     "schemas": {
+      "RegistrationRequest": {
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "user email",
+            "example": "user@gmail.com",
+            "pattern": "/@([\\w-]+\\.)+[\\w-]{2,6}$/"
+          },
+          "password": {
+            "type": "string",
+            "description": "user password",
+            "example": "Ghj__567mlk"
+          }
+        }
+      },
+      "RegistrationResponse": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "user email",
+            "example": "user@gmail.com"
+          }
+        }
+      },
+      "VerificationResponse": {
+        "type": "object",
+        "properties": {
+          "verificationToken": {
+            "type": "string",
+            "description": "Backend-generated unique verificationToken",
+            "example": "tzSJIeFAuK1lBvn1PmsqE"
+          },
+          "message": {
+            "type": "string",
+            "example": "Verification is successful"
+          }
+        }
+      },
       "ListOfNoticesResponse": {
         "type": "object",
         "properties": {
@@ -638,4 +760,4 @@
       }
     }
   }
-  }
+}

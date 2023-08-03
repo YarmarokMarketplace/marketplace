@@ -9,9 +9,6 @@ const { BASE_URL } = process.env;
 
 const signup = async (req, res) => {
     const { email, password } = req.body;
-    if (!email || !password) {
-        throw new HttpError(400, "Email and password are required");
-    };
 
     const user = await User.findOne({ email });
     if (user) {
@@ -65,9 +62,9 @@ const signup = async (req, res) => {
             email: newUser.email,
         }
     },);
-  };
+};
 
-  const verifyEmail = async(req, res)=> {
+const verifyEmail = async(req, res)=> {
     const {verificationToken} = req.params;
     const user = await User.findOne({verificationToken});
     if(!user){
@@ -75,14 +72,63 @@ const signup = async (req, res) => {
     }
     await User.findByIdAndUpdate(user._id, {verify: true, verificationToken: ""});
 
+    res.render('verificationPage');
+}
+
+const resendVerifyEmail = async (req, res) => {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+        throw new HttpError(401, "Email not found");
+    }
+    if (user.verify) {
+        throw new HttpError(400, "Verification has already been passed");
+    }
+
+    const verifyEmail = {
+        to: email,
+        subject: "Підтвердження реєстрації на маркетплейсі Yarmarok",
+        html: `<div style = 
+        "width: 640px;
+        padding: 8px;">
+        <img style="margin-bottom: 40px;"
+        src="https://yarmarok-bucket.s3.eu-central-1.amazonaws.com/logo/logo.png"
+        width="240"
+        height="36"
+        />
+        <p style=
+        "font-family: 'Roboto', sans-serif;
+        font-weight: 500;
+        font-size: 14px;
+        line-height: 1.14;
+        letter-spacing: 0.02em;
+        color: black;
+        ">
+        Для підтвердження реєстраційних даних перейдіть, будь ласка, за посиланням:</p>
+        <a style="
+        font-family: 'Roboto', sans-serif;
+        font-weight: 700;
+        font-size: 20px;
+        line-height: 1.14;
+        letter-spacing: 0.02em;
+        "
+        target="_blank" href="${BASE_URL}/api/auth/verify/${user.verificationToken}">Підтвердити</a>
+        </div>
+        `
+    };
+
+    await sendEmail(verifyEmail);
+
     res.status(200).json({
         status: 'success',
         code: 200,
-        message: "Verification is successful"
+        message: "Verification email sent"
     })
-}
+};
 
-  module.exports = {
+module.exports = {
     signup: controllerWrapper(signup),
     verifyEmail: controllerWrapper(verifyEmail),
-  };
+    resendVerifyEmail: controllerWrapper(resendVerifyEmail),
+};
