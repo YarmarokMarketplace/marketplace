@@ -1,4 +1,4 @@
-const { Notice } = require("../db/models/notices");
+const { Notice, InactiveNotice } = require("../db/models/notices");
 const HttpError = require("../helpers/httpError");
 const controllerWrapper = require("../utils/controllerWrapper");
 
@@ -124,6 +124,12 @@ const checkIsActive = async (req, res) => {
   const today = new Date();
   const thirtyDays = today.getTime() - (30*24*60*60*1000);
 
+  await Notice.updateMany({ createdAt: {
+    $lt: new Date(thirtyDays)} 
+}, { active: false })
+
+await InactiveNotice.updateMany({active: false})
+  
   await Notice.aggregate([
     { $match: 
         { createdAt: {
