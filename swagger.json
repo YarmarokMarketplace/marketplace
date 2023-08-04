@@ -201,6 +201,16 @@
               "description": "Type of filtering.",
               "example": "100-199"
             }
+          },
+          {
+            "name": "location",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Type of filtering.",
+              "example": "Kyiv"
+            }
           }
         ],
         "responses": {
