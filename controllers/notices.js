@@ -32,10 +32,10 @@ const getAllNotices = async (req, res) => {
 
 const getNoticesByCategory = async (req, res) => {
 
-  const { page = 1, limit = 9, goodtype, priceRange, sort} = req.query;
+  const { page = 1, limit = 9, goodtype, priceRange, sort, location} = req.query;
   const { category } = req.params;
   const skip = (page - 1) * limit;
-  const query = { category, goodtype, priceRange };
+  const query = { category, goodtype, priceRange, location };
 
   const result = await Notice.find(buildFilterObject(query))
   .limit(limit * 1)
