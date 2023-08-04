@@ -37,6 +37,10 @@ const getNoticesByCategory = async (req, res) => {
   const skip = (page - 1) * limit;
   const query = { category, goodtype, priceRange };
 
+  const maxPriceNotice = await Notice.find({}).sort({"price" : -1}).limit(1)
+
+  const maxPriceInCategory = maxPriceNotice[0].price;
+
   const result = await Notice.find(buildFilterObject(query))
   .limit(limit * 1)
   .skip(skip)
@@ -54,6 +58,7 @@ const getNoticesByCategory = async (req, res) => {
       totalPages,
       page: Number(page),
       limit: Number(limit),
+      maxPriceInCategory,
       result,
   });
 };

@@ -396,7 +396,11 @@
                   "type": "integer",
                   "example": 6
                 },
-                "notices": {
+                "maxPriceInCategory": {
+                  "type": "integer",
+                  "example": 84450
+                },
+                "result": {
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/AddNoticeResponse"
