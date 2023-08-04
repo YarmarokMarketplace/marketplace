@@ -5,6 +5,7 @@ const controllerWrapper = require('../utils/controllerWrapper');
 const { User } = require('../db/models/users');
 const HttpError = require('../helpers/httpError');
 const sendEmail = require('../helpers/sendEmail');
+
 const { BASE_URL } = process.env;
 
 const signup = async (req, res) => {
@@ -21,7 +22,7 @@ const signup = async (req, res) => {
 
     const newUser = await User.create({ ...req.body, password: hashPassword, avatarURL, verificationToken });
 
-    const verifyEmail = {
+    const verificationEmail = {
         to: email,
         subject: "Підтвердження реєстрації на маркетплейсі Yarmarok",
         html: `<div style = 
@@ -53,13 +54,15 @@ const signup = async (req, res) => {
         `
     };
 
-    await sendEmail(verifyEmail);
+    await sendEmail(verificationEmail);
 
     res.status(201).json({
         status: 'success',
         code: 201,
         user: {
             email: newUser.email,
+            name: newUser.name,
+            lastname: newUser.lastname,
         }
     },);
 };
@@ -80,13 +83,13 @@ const resendVerifyEmail = async (req, res) => {
 
     const user = await User.findOne({ email });
     if (!user) {
-        throw new HttpError(401, "Email not found");
+        throw new HttpError(404, "Email not found");
     }
     if (user.verify) {
         throw new HttpError(400, "Verification has already been passed");
     }
 
-    const verifyEmail = {
+    const verificationEmail = {
         to: email,
         subject: "Підтвердження реєстрації на маркетплейсі Yarmarok",
         html: `<div style = 
@@ -118,7 +121,7 @@ const resendVerifyEmail = async (req, res) => {
         `
     };
 
-    await sendEmail(verifyEmail);
+    await sendEmail(verificationEmail);
 
     res.status(200).json({
         status: 'success',

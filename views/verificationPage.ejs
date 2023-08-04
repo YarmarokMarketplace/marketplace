@@ -7,10 +7,34 @@
     <title>Verification</title>
   </head>
   <body>
-    <h2>Ваша електронна пошта підтверджена!</h2>
-    <h4>Для переходу на головну сторінку натисніть посилання:</h4>
-    <a href="https://yarmarok.netlify.app/">
-        Головна сторінка
-      </a>
+    <h2 style="
+        font-family: 'Roboto', sans-serif;
+        font-weight: 700;
+        font-size: 14px;
+        line-height: 1.14;
+        letter-spacing: 0.02em;
+      ">Ваша електронна пошта підтверджена!</h2>
+    <h4 style="
+    font-family: 'Roboto', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.14;
+    letter-spacing: 0.02em;
+    ">Перехід на головну через 
+    <span id="time" style="color: blue;
+      font-family: 'Roboto', sans-serif;
+      font-weight: 700;
+      font-size: 14px;">5</span> секунд...</h4>
+    <script type="text/JavaScript">
+        function redirectTimeOut(s) {
+                document.getElementById("time").innerHTML = s;
+                if (s > 0) {
+                        setTimeout("redirectTimeOut(" + (--s) + ");", 1000);
+                } else {
+                        window.location.href = 'https://yarmarok.netlify.app/'; // куда надо перейти
+                }
+        }
+        redirectTimeOut(5); 
+    </script>
   </body>
 </html>

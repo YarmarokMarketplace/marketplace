@@ -21,11 +21,13 @@
   ],
   "consumes": [
     "application/json",
-    "multipart/form-data"
+    "multipart/form-data",
+    "text/html"
   ],
   "produces": [
     "application/json",
-    "multipart/form-data"
+    "multipart/form-data",
+    "text/html"
   ],
   "tags": [
     {
@@ -80,9 +82,9 @@
         }
       }
     },
-    "/auth/verify": {
+    "/auth/verify/{verificationToken}": {
       "get": {
-        "summary": "Add new user",
+        "summary": "Verify user",
         "tags": [
           "Authorization"
         ],
@@ -103,15 +105,55 @@
           "200": {
             "description": "Successful operation",
             "content": {
-              "application/json": {
+              "text/html": {
                 "schema": {
-                  "$ref": "#/components/schemas/VerificationResponse"
+                  "example": "Ваша електронна пошта підтверджена! Перехід на головну через 5 секунд...",
+                  "description": "returns HTML page with automated redirecting to the Homepage after 5 second"
                 }
               }
             }
           },
           "404": {
-            "description": "User not"
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/auth/verify": {
+      "post": {
+        "summary": "Resend the verification email",
+        "tags": [
+          "Authorization"
+        ],
+        "description": "Resend the verification email if the previous letter was not gotten",
+        "operationId": "resendVerifyEmail",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResendVerifyEmailRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "String",
+                  "example": "Verification email is sent"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Verification has already been passed"
+          },
+          "404": {
+            "description": "User not found"
           }
         }
       }
@@ -454,7 +496,9 @@
         "type": "object",
         "required": [
           "email",
-          "password"
+          "password",
+          "name",
+          "lastname"
         ],
         "properties": {
           "email": {
@@ -467,6 +511,11 @@
             "type": "string",
             "description": "user password",
             "example": "Ghj__567mlk"
+          },
+          "name": {
+            "type": "string",
+            "description": "user name",
+            "example": "Olga"
           }
         }
       },
@@ -477,20 +526,30 @@
             "type": "string",
             "description": "user email",
             "example": "user@gmail.com"
+          },
+          "name": {
+            "type": "string",
+            "description": "user name",
+            "example": "Olga"
+          },
+          "lastname": {
+            "type": "string",
+            "description": "user lastname",
+            "example": "Ivanenko"
           }
         }
       },
-      "VerificationResponse": {
+      "ResendVerifyEmailRequest": {
         "type": "object",
+        "required": [
+          "email"
+        ],
         "properties": {
-          "verificationToken": {
+          "email": {
             "type": "string",
-            "description": "Backend-generated unique verificationToken",
-            "example": "tzSJIeFAuK1lBvn1PmsqE"
-          },
-          "message": {
-            "type": "string",
-            "example": "Verification is successful"
+            "description": "user email",
+            "example": "user@gmail.com",
+            "pattern": "/@([\\w-]+\\.)+[\\w-]{2,6}$/"
           }
         }
       },
