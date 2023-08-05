@@ -88,9 +88,11 @@ const toggleActiveSchema = Joi.object({
 
 
 const Notice = model("notice", noticeSchema);
+const InactiveNotice = model("inactivenotice", noticeSchema)
 
 module.exports = {
   Notice,
+  InactiveNotice,
   addNoticeSchema,
   updateNoticeSchema,
   toggleActiveSchema

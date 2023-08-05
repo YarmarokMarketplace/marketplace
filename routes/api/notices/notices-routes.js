@@ -16,6 +16,6 @@ router.post('/', upload.array('photos', 6), validateBody(addNoticeSchema), addNo
 router.patch('/:id', isValidId, validateBody(updateNoticeSchema), upload.array('photos', 6), updateNotice);
 router.delete('/notice/:id', isValidId, removeNotice);
 router.get('/notice/:id', isValidId, getNoticeById);
-router.patch('/notice/:id/favorite', isValidId, validateBody(toggleActiveSchema), toggleActive);
+router.patch('/notice/:id/active', isValidId, validateBody(toggleActiveSchema), toggleActive);
 
 module.exports = router;

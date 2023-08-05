@@ -1,4 +1,4 @@
-const { Notice } = require("../db/models/notices");
+const { Notice, InactiveNotice } = require("../db/models/notices");
 const HttpError = require("../helpers/httpError");
 const controllerWrapper = require("../utils/controllerWrapper");
 
@@ -116,13 +116,57 @@ const updateNotice = async (req, res) => {
 };
 
 const toggleActive = async (req, res) => {
-  const {id} = req.params;
+  const { id } = req.params;
+  const { active } = req.body;
+  let result = {};
 
-  const result = await Notice.findByIdAndUpdate(id, req.body, { new: true });
+  if (active === false) {
+    result = await Notice.findByIdAndUpdate(id, req.body, { new: true });
+  
+    if (!result) {
+      throw HttpError.NotFoundError("Notice not found");
+    }
 
-  if (!result) {
-    throw HttpError.NotFoundError("Notice not found");
+    await Notice.aggregate([
+      { $match: 
+          { active: false },
+      }, 
+      {
+          $merge: {
+              into: "inactivenotices",
+              on: "_id",
+              whenMatched: "replace",
+              whenNotMatched: "insert"
+          }
+      }
+      ]);
+
+      await Notice.findByIdAndDelete(id);
+  } else {
+    result = await InactiveNotice.findByIdAndUpdate(id, req.body, { new: true });
+  
+    if (!result) {
+      throw HttpError.NotFoundError("Notice not found");
+    }
+
+    await InactiveNotice.aggregate([
+      { $match: 
+          { active: true},
+      }, 
+      {
+          $merge: {
+              into: "notices",
+              on: "_id",
+              whenMatched: "replace",
+              whenNotMatched: "insert"
+          }
+      }
+      ]);
+
+      await InactiveNotice.findByIdAndDelete(id);
   }
+  
+
   res.status(200).json({
     data: {
       message: "Status is changed",
