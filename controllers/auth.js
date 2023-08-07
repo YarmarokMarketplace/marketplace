@@ -5,6 +5,7 @@ const controllerWrapper = require('../utils/controllerWrapper');
 const { User } = require('../db/models/users');
 const HttpError = require('../helpers/httpError');
 const sendEmail = require('../helpers/sendEmail');
+const emailVerificationHtml = require('../utils/verificationEmail');
 
 const { BASE_URL } = process.env;
 
@@ -25,30 +26,7 @@ const signup = async (req, res) => {
     const verificationEmail = {
         to: email,
         subject: "Підтвердження реєстрації на маркетплейсі Yarmarok",
-        html: `<div style = 
-        "width: 640px;
-        padding: 8px;">
-        <img style="margin-bottom: 40px;"
-        src="https://yarmarok-bucket.s3.eu-central-1.amazonaws.com/logo/logo.png"
-        width="240"
-        height="36"
-        />
-        <p style=
-        "font-family: 'Roboto', sans-serif;
-        font-weight: 500;
-        font-size: 14px;
-        line-height: 1.14;
-        letter-spacing: 0.02em;
-        color: black;
-        ">
-        Для підтвердження реєстраційних даних перейдіть, будь ласка, за посиланням:</p>
-        <a style="
-        font-family: 'Roboto', sans-serif;
-        font-weight: 700;
-        font-size: 20px;
-        line-height: 1.14;
-        letter-spacing: 0.02em;
-        "
+        html: `${emailVerificationHtml}
         target="_blank" href="${BASE_URL}/api/auth/verify/${verificationToken}">Підтвердити</a>
         </div>
         `
@@ -92,30 +70,7 @@ const resendVerifyEmail = async (req, res) => {
     const verificationEmail = {
         to: email,
         subject: "Підтвердження реєстрації на маркетплейсі Yarmarok",
-        html: `<div style = 
-        "width: 640px;
-        padding: 8px;">
-        <img style="margin-bottom: 40px;"
-        src="https://yarmarok-bucket.s3.eu-central-1.amazonaws.com/logo/logo.png"
-        width="240"
-        height="36"
-        />
-        <p style=
-        "font-family: 'Roboto', sans-serif;
-        font-weight: 500;
-        font-size: 14px;
-        line-height: 1.14;
-        letter-spacing: 0.02em;
-        color: black;
-        ">
-        Для підтвердження реєстраційних даних перейдіть, будь ласка, за посиланням:</p>
-        <a style="
-        font-family: 'Roboto', sans-serif;
-        font-weight: 700;
-        font-size: 20px;
-        line-height: 1.14;
-        letter-spacing: 0.02em;
-        "
+        html: `${emailVerificationHtml}
         target="_blank" href="${BASE_URL}/api/auth/verify/${user.verificationToken}">Підтвердити</a>
         </div>
         `
