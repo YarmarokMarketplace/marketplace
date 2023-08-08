@@ -1,4 +1,5 @@
 const buildFilterObject = (params) => { 
+  
     const { category, goodtype, priceRange, location } = params;
     let minPrice = 0;
     let maxPrice = 0;
@@ -33,8 +34,9 @@ const buildFilterObject = (params) => {
     if (goodtype && priceRange && !location) { 
         return { $and: 
             [{ category }, 
-            { goodtype }, 
-            { $and: [ { price: { $gte: minPrice, $lte: maxPrice } }]}
+            { goodtype },
+            { $and: [ { price: { $gte: minPrice, $lte: maxPrice }}]},
+            {active: true},
             ] 
         }
     }

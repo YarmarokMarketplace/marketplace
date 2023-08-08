@@ -1,9 +1,11 @@
-const { Notice } = require("../db/models/notices");
+const { Notice, InactiveNotice } = require("../db/models/notices");
 const HttpError = require("../helpers/httpError");
 const controllerWrapper = require("../utils/controllerWrapper");
 
 const buildFilterObject = require("../utils/filterObject");
 const buildSortObject = require("../utils/sortObject");
+
+
 
 const getAllNotices = async (req, res) => {
   const { page = 1, limit = 9 } = req.query;
@@ -36,6 +38,8 @@ const getNoticesByCategory = async (req, res) => {
   const { category } = req.params;
   const skip = (page - 1) * limit;
   const query = { category, goodtype, priceRange, location };
+  const maxPriceNotice = await Notice.find({}).sort({"price" : -1}).limit(1)
+  const maxPriceInCategory = maxPriceNotice[0].price;
 
   const result = await Notice.find(buildFilterObject(query))
   .limit(limit * 1)
@@ -54,6 +58,7 @@ const getNoticesByCategory = async (req, res) => {
       totalPages,
       page: Number(page),
       limit: Number(limit),
+      maxPriceInCategory,
       result,
   });
 };
@@ -106,7 +111,7 @@ const updateNotice = async (req, res) => {
   const result = await Notice.findByIdAndUpdate(id, data, { new: true });
   
   if (!result) {
-    throw new HttpError(404, 'Project not found');
+    throw new HttpError(404, 'Notice not found');
   }
   res.status(201).json({
     status: 'success',
@@ -115,6 +120,97 @@ const updateNotice = async (req, res) => {
    });
 };
 
+const toggleActive = async (req, res) => {
+  const { id } = req.params;
+  const { active } = req.body;
+  let result = {};
+
+  if (active === false) {
+    result = await Notice.findByIdAndUpdate(id, req.body, { new: true });
+  
+    if (!result) {
+      throw HttpError.NotFoundError("Notice not found");
+    }
+
+    await Notice.aggregate([
+      { $match: 
+          { active: false },
+      }, 
+      {
+          $merge: {
+              into: "inactivenotices",
+              on: "_id",
+              whenMatched: "replace",
+              whenNotMatched: "insert"
+          }
+      }
+      ]);
+
+      await Notice.findByIdAndDelete(id);
+  } else {
+    result = await InactiveNotice.findByIdAndUpdate(id, req.body, { new: true });
+  
+    if (!result) {
+      throw HttpError.NotFoundError("Notice not found");
+    }
+
+    await InactiveNotice.aggregate([
+      { $match: 
+          { active: true},
+      }, 
+      {
+          $merge: {
+              into: "notices",
+              on: "_id",
+              whenMatched: "replace",
+              whenNotMatched: "insert"
+          }
+      }
+      ]);
+
+      await InactiveNotice.findByIdAndDelete(id);
+  }
+  
+
+  res.status(200).json({
+    data: {
+      message: "Status is changed",
+      result,
+    }});
+}
+
+const checkIsActive = async (req, res) => {
+  
+  const today = new Date();
+  const thirtyDays = today.getTime() - (30*24*60*60*1000);
+
+  await Notice.updateMany({ createdAt: {
+    $lt: new Date(thirtyDays)} 
+}, { active: false })
+
+await InactiveNotice.updateMany({active: false})
+  
+  await Notice.aggregate([
+    { $match: 
+        { createdAt: {
+            $lt: new Date(thirtyDays)} 
+        }
+    }, 
+    {
+        $merge: {
+            into: "inactivenotices",
+            on: "_id",
+            whenMatched: "replace",
+            whenNotMatched: "insert"
+        }
+    }
+    ]);
+
+  await Notice.deleteMany({ createdAt: {
+    $lt: new Date(thirtyDays)} 
+  });
+}
+
 module.exports = {
   getAllNotices: controllerWrapper(getAllNotices),
   getNoticesByCategory: controllerWrapper(getNoticesByCategory),
@@ -122,4 +218,6 @@ module.exports = {
   getNoticeById: controllerWrapper(getNoticeById),
   removeNotice: controllerWrapper(removeNotice),
   updateNotice: controllerWrapper(updateNotice),
+  toggleActive: controllerWrapper(toggleActive),
+  checkIsActive: controllerWrapper(checkIsActive),
 };
