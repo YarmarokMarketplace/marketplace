@@ -5,7 +5,7 @@ const validateBody = require('../../../utils/validateBody');
 const upload = require('../../../utils/upload');
 const isValidId = require('../../../middlewares/isValidId');
 
-const { addNotice, getNoticesByCategory, getAllNotices, updateNotice, removeNotice, getNoticeById } = require('../../../controllers/notices');
+const { addNotice, getNoticesByCategory, getAllNotices, updateNotice, removeNotice, getNoticeById} = require('../../../controllers/notices');
 const { addNoticeSchema, updateNoticeSchema} = require('../../../db/models/notices');
 
 const router = express.Router();
@@ -16,5 +16,6 @@ router.post('/', upload.array('photos', 6), validateBody(addNoticeSchema), addNo
 router.patch('/:id', isValidId, validateBody(updateNoticeSchema), upload.array('photos', 6), updateNotice);
 router.delete('/notice/:id', isValidId, removeNotice);
 router.get('/notice/:id', isValidId, getNoticeById);
+// router.get('/status/active', checkIsActive);
 
 module.exports = router;

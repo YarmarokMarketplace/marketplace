@@ -9,6 +9,7 @@ const path = require("path");
 
 const noticeRouter = require("./routes/api/notices/notices-routes");
 const mainRouter = require("./routes/api/main/main-routes");
+const { job } = require('./utils/cronJob');
 
 const app = express();
 const router = express.Router();
@@ -50,6 +51,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use("/api/main", mainRouter);
 app.use("/api/notices", noticeRouter);
 
+job.start();
 
 app.use((req, res) => {
   res.status(404).json({ message: "Not found" });
