@@ -110,7 +110,7 @@ const updateNotice = async (req, res) => {
   const result = await Notice.findByIdAndUpdate(id, data, { new: true });
   
   if (!result) {
-    throw new HttpError(404, 'Project not found');
+    throw new HttpError(404, 'Notice not found');
   }
   res.status(201).json({
     status: 'success',
@@ -118,6 +118,65 @@ const updateNotice = async (req, res) => {
     result,
    });
 };
+
+const toggleActive = async (req, res) => {
+  const { id } = req.params;
+  const { active } = req.body;
+  let result = {};
+
+  if (active === false) {
+    result = await Notice.findByIdAndUpdate(id, req.body, { new: true });
+  
+    if (!result) {
+      throw HttpError.NotFoundError("Notice not found");
+    }
+
+    await Notice.aggregate([
+      { $match: 
+          { active: false },
+      }, 
+      {
+          $merge: {
+              into: "inactivenotices",
+              on: "_id",
+              whenMatched: "replace",
+              whenNotMatched: "insert"
+          }
+      }
+      ]);
+
+      await Notice.findByIdAndDelete(id);
+  } else {
+    result = await InactiveNotice.findByIdAndUpdate(id, req.body, { new: true });
+  
+    if (!result) {
+      throw HttpError.NotFoundError("Notice not found");
+    }
+
+    await InactiveNotice.aggregate([
+      { $match: 
+          { active: true},
+      }, 
+      {
+          $merge: {
+              into: "notices",
+              on: "_id",
+              whenMatched: "replace",
+              whenNotMatched: "insert"
+          }
+      }
+      ]);
+
+      await InactiveNotice.findByIdAndDelete(id);
+  }
+  
+
+  res.status(200).json({
+    data: {
+      message: "Status is changed",
+      result,
+    }});
+}
 
 const checkIsActive = async (req, res) => {
   
@@ -148,11 +207,8 @@ await InactiveNotice.updateMany({active: false})
 
   await Notice.deleteMany({ createdAt: {
     $lt: new Date(thirtyDays)} 
-});
-
-
+  });
 }
-
 
 module.exports = {
   getAllNotices: controllerWrapper(getAllNotices),
@@ -161,5 +217,6 @@ module.exports = {
   getNoticeById: controllerWrapper(getNoticeById),
   removeNotice: controllerWrapper(removeNotice),
   updateNotice: controllerWrapper(updateNotice),
-  checkIsActive: controllerWrapper(checkIsActive)
+  toggleActive: controllerWrapper(toggleActive),
+  checkIsActive: controllerWrapper(checkIsActive),
 };

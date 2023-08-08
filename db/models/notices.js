@@ -83,6 +83,10 @@ const updateNoticeSchema = Joi.object({
   comments: Joi.string(),
 });
 
+const toggleActiveSchema = Joi.object({
+  active: Joi.boolean().required(),
+});
+
 
 const Notice = model("notice", noticeSchema);
 const InactiveNotice = model("inactivenotice", noticeSchema);
@@ -92,4 +96,5 @@ module.exports = {
   InactiveNotice,
   addNoticeSchema,
   updateNoticeSchema,
+  toggleActiveSchema
 };
