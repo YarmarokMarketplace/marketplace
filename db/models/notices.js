@@ -46,6 +46,7 @@ const noticeSchema = new Schema(
 
 noticeSchema.post("save", handleMongooseError);
 
+
 const addNoticeSchema = Joi.object({
   category: Joi.string(),
   goodtype: Joi.string(),
@@ -88,7 +89,7 @@ const toggleActiveSchema = Joi.object({
 
 
 const Notice = model("notice", noticeSchema);
-const InactiveNotice = model("inactivenotice", noticeSchema)
+const InactiveNotice = model("inactivenotice", noticeSchema);
 
 module.exports = {
   Notice,
