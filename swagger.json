@@ -158,6 +158,99 @@
         }
       }
     },
+    "/auth/login": {
+      "post": {
+        "summary": "Login user",
+        "tags": [
+          "Authorization"
+        ],
+        "description": "Logs user into the system",
+        "operationId": "login",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Not authorized"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "summary": "Logout user",
+        "tags": [
+          "Authorization"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "description": "Logs out current logged in user session",
+        "operationId": "logout",
+        "responses": {
+          "200": {
+            "description": "Logout success"
+          },
+          "401": {
+            "description": "Not authorized"
+          }
+        }
+      }
+    },
+    "/auth/current": {
+      "get": {
+        "summary": "Get current user",
+        "security": [{ "Bearer": [] }],
+        "tags": [
+          "Authorization"
+        ],
+        "description": "Refresh auth information of authorized user",
+        "operationId": "getCurrent",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCurrentUserResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
     "/notices": {
       "get": {
         "summary": "Get all notices",
@@ -620,6 +713,76 @@
           }
         }
       },
+      "LoginRequest": {
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "user email",
+            "example": "user@gmail.com",
+            "pattern": "/@([\\w-]+\\.)+[\\w-]{2,6}$/"
+          },
+          "password": {
+            "type": "string",
+            "description": "user password",
+            "example": "Ghj__567mlk"
+          }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "user name",
+                "example": "Olena"
+              },
+              "email": {
+                "type": "string",
+                "description": "user email",
+                "example": "estasjuk@gmail.com"
+              },
+              "name": {
+                "type": "string",
+                "description": "user name",
+                "example": "Olena"
+              }
+            }
+          },
+          "accessToken": {
+            "type": "string",
+            "description": "Backend-generated unique identifier",
+            "example": "GHR45GciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.jjF34QI6IjY0NWRlMTIzNTVlNWM4MDM0ODQ0Y2Q0MCIsImlhdCI6MTY4Mzg3NzgyNywiZXhwIjoxNjgzOTQyNjI3fQ.Cl7kfx9Tm-125ffgMKQGOzR9WhTH_dYET1B75hFjZyk"
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "Backend-generated unique identifier",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0NjBlZDFlMjAzOWY0YmY0ZmNiMGYzNSIsImlhdCI6MTY4NDYxNjAzMiwiZXhwIjoxNjg3MjA4MDMyfQ.TNCLb9OScTwrcLVg2txPk_K4_pESZ93SCjuUpDog4Kw"
+          }
+        }
+      },
+      "GetCurrentUserResponse": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The username of the current user",
+            "example": "Olena"
+          },
+          "email": {
+            "type": "string",
+            "description": "The email of the current user",
+            "example": "Olena@gmail.com"
+          }
+        }
+      },
       "ListOfNoticesResponse": {
         "type": "object",
         "properties": {
@@ -895,6 +1058,13 @@
             "description": "List of notices found by request"
           }
         }
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
       }
     }
   }

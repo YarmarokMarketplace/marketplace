@@ -117,6 +117,7 @@ const login = async (req, res) => {
         user: {
             id: user._id,
             email: user.email,
+            name: user.name,
         }
     });
 };
@@ -132,7 +133,7 @@ const logout = async(req, res)=> {
 const getCurrent = (req, res) => {
     const {name, email} = req.user;
 
-    res.json({
+    res.status(200).json({
         name,
         email,
     })
