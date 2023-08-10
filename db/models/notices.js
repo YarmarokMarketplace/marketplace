@@ -36,11 +36,16 @@ const noticeSchema = new Schema(
       type: Number,
       required: true,
     },
+    active: {
+      type: Boolean,
+      default: true,
+    }
   },
   { versionKey: false, timestamps: true }
 );
 
 noticeSchema.post("save", handleMongooseError);
+
 
 const addNoticeSchema = Joi.object({
   category: Joi.string(),
@@ -78,11 +83,18 @@ const updateNoticeSchema = Joi.object({
   comments: Joi.string(),
 });
 
+const toggleActiveSchema = Joi.object({
+  active: Joi.boolean().required(),
+});
+
 
 const Notice = model("notice", noticeSchema);
+const InactiveNotice = model("inactivenotice", noticeSchema);
 
 module.exports = {
   Notice,
+  InactiveNotice,
   addNoticeSchema,
   updateNoticeSchema,
+  toggleActiveSchema
 };

@@ -321,6 +321,16 @@
               "description": "Type of filtering.",
               "example": "100-199"
             }
+          },
+          {
+            "name": "location",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Type of filtering.",
+              "example": "Kyiv"
+            }
           }
         ],
         "responses": {
@@ -461,6 +471,63 @@
         }
       }
     },
+    "/notices/notice/{id}/active": {
+      "patch": {
+        "summary": "activate and deactivate notice",
+        "tags": [
+          "Notices"
+        ],
+        "description": "Update 'active' status in the database and move the notice to the appropriate collection",
+        "operationId": "toggleActive",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "example": "6490564f8f85c705511c5de2",
+            "schema": {
+              "type": "string",
+              "description": "Backend-generated unique identifier"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "active": {
+                    "type": "boolean",
+                    "description": "Status to be changed",
+                    "example": false
+                  } 
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Status is changed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddNoticeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "404": {
+            "description": "Notice not found"
+          }
+        }
+      }
+    },
     "/main": {
       "get": {
         "summary": "Get all categories",
@@ -577,7 +644,11 @@
                   "type": "integer",
                   "example": 6
                 },
-                "notices": {
+                "maxPriceInCategory": {
+                  "type": "integer",
+                  "example": 84450
+                },
+                "result": {
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/AddNoticeResponse"
@@ -761,9 +832,17 @@
             "type": "string",
             "example": "Kyiv"
           },
+          "goodtype": {
+            "type": "string",
+            "enum": ["new", "used"]
+          },
           "price": {
             "type": "integer",
             "example": 2500
+          },
+          "active": {
+            "type": "boolean",
+            "example": false
           },
           "createdAt": {
             "type": "string",
