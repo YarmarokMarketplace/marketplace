@@ -9,6 +9,8 @@ const path = require("path");
 
 const noticeRouter = require("./routes/api/notices/notices-routes");
 const mainRouter = require("./routes/api/main/main-routes");
+const authRouter = require("./routes/api/auth/auth-routes")
+
 const { job } = require('./utils/cronJob');
 
 const app = express();
@@ -50,6 +52,7 @@ app.use(express.json());
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use("/api/main", mainRouter);
 app.use("/api/notices", noticeRouter);
+app.use("/api/auth", authRouter);
 
 job.start();
 

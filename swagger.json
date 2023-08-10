@@ -5,7 +5,7 @@
     "description": "Web platform where vendors can come together to sell their products or services to customers.\n\nThis is Marketplace YarmarOK Server based on the OpenAPI 3.0 specification\n\nSome useful links:\n- [The YarmarokMarketplace repository](https://github.com/YarmarokMarketplace/marketplace)",
     "contact": {
       "name": "API developers",
-      "email": "estasjuk@gmail.com"
+      "email": "yarmarokmarketplace@gmail.com"
     },
     "version": "1.0.0"
   },
@@ -21,11 +21,13 @@
   ],
   "consumes": [
     "application/json",
-    "multipart/form-data"
+    "multipart/form-data",
+    "text/html"
   ],
   "produces": [
     "application/json",
-    "multipart/form-data"
+    "multipart/form-data",
+    "text/html"
   ],
   "tags": [
     {
@@ -35,9 +37,127 @@
     {
       "name": "Categories",
       "description": "Categories endpoints"
+    },
+    {
+      "name": "Authorization",
+      "description": "User Authorization endpoints"
     }
   ],
   "paths": {
+    "/auth/signup": {
+      "post": {
+        "summary": "Add new user",
+        "tags": [
+          "Authorization"
+        ],
+        "description": "Add new user to the Database",
+        "operationId": "signup",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistrationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistrationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "409": {
+            "description": "Email already in use"
+          }
+        }
+      }
+    },
+    "/auth/verify/{verificationToken}": {
+      "get": {
+        "summary": "Verify user",
+        "tags": [
+          "Authorization"
+        ],
+        "description": "Verify user email",
+        "operationId": "verifyEmail",
+        "parameters": [
+          {
+            "name": "verificationToken",
+            "in": "params",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Backend-generated unique verificationToken"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "example": "Ваша електронна пошта підтверджена! Перехід на головну через 5 секунд...",
+                  "description": "returns HTML page with automated redirecting to the Homepage after 5 second"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/auth/verify": {
+      "post": {
+        "summary": "Resend the verification email",
+        "tags": [
+          "Authorization"
+        ],
+        "description": "Resend the verification email if the previous letter was not gotten",
+        "operationId": "resendVerifyEmail",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResendVerifyEmailRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "String",
+                  "example": "Verification email is sent"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Verification has already been passed"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
     "/notices": {
       "get": {
         "summary": "Get all notices",
@@ -435,10 +555,71 @@
           }
         }
       }
-      }
-    },
+    }
+  },
   "components": {
     "schemas": {
+      "RegistrationRequest": {
+        "type": "object",
+        "required": [
+          "email",
+          "password",
+          "name",
+          "lastname"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "user email",
+            "example": "user@gmail.com",
+            "pattern": "/@([\\w-]+\\.)+[\\w-]{2,6}$/"
+          },
+          "password": {
+            "type": "string",
+            "description": "user password",
+            "example": "Ghj__567mlk"
+          },
+          "name": {
+            "type": "string",
+            "description": "user name",
+            "example": "Olga"
+          }
+        }
+      },
+      "RegistrationResponse": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "user email",
+            "example": "user@gmail.com"
+          },
+          "name": {
+            "type": "string",
+            "description": "user name",
+            "example": "Olga"
+          },
+          "lastname": {
+            "type": "string",
+            "description": "user lastname",
+            "example": "Ivanenko"
+          }
+        }
+      },
+      "ResendVerifyEmailRequest": {
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "user email",
+            "example": "user@gmail.com",
+            "pattern": "/@([\\w-]+\\.)+[\\w-]{2,6}$/"
+          }
+        }
+      },
       "ListOfNoticesResponse": {
         "type": "object",
         "properties": {
@@ -717,4 +898,4 @@
       }
     }
   }
-  }
+}
