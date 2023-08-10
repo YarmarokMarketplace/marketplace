@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const jwt = require("jsonwebtoken");
 const { nanoid }= require('nanoid');
 const gravatar = require('gravatar');
 const controllerWrapper = require('../utils/controllerWrapper');
@@ -7,7 +8,7 @@ const HttpError = require('../helpers/httpError');
 const sendEmail = require('../helpers/sendEmail');
 const emailVerificationHtml = require('../utils/verificationEmail');
 
-const { BASE_URL } = process.env;
+const { BASE_URL, ACCESS_SECRET_KEY, REFRESH_SECRET_KEY } = process.env;
 
 const signup = async (req, res) => {
     const { email, password } = req.body;
@@ -85,8 +86,63 @@ const resendVerifyEmail = async (req, res) => {
     })
 };
 
+const login = async (req, res) => {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+        throw new HttpError(401, "Email or password is wrong");
+    };
+
+    if (!user.verify) { 
+        throw new HttpError(400, "Email is not verified");
+    }
+
+    const passwordCompare = await bcrypt.compare(password, user.password);
+    if (!passwordCompare) {
+        throw new HttpError(401, "Email or password is wrong");
+    }
+    const payload = {
+        id: user._id,
+    };
+
+    const accessToken = jwt.sign(payload, ACCESS_SECRET_KEY, { expiresIn: "15m" });
+    const refreshToken = jwt.sign(payload, REFRESH_SECRET_KEY, {expiresIn: "7d"});
+    await User.findOneAndUpdate({ _id: payload.id }, { $set: { accessToken, refreshToken } });
+
+    res.status(200).json({
+        status: 'success',
+        code: 200,
+        accessToken,
+        refreshToken,
+        user: {
+            id: user._id,
+            email: user.email,
+        }
+    });
+};
+
+const logout = async(req, res)=> {
+    const { _id } = req.user;
+    await User.findByIdAndUpdate(_id, {accessToken: "", refreshToken: ""});
+    res.status(200).json({
+        message: "Logout success"
+    })
+};
+
+const getCurrent = (req, res) => {
+    const {name, email} = req.user;
+
+    res.json({
+        name,
+        email,
+    })
+}
+
 module.exports = {
     signup: controllerWrapper(signup),
     verifyEmail: controllerWrapper(verifyEmail),
     resendVerifyEmail: controllerWrapper(resendVerifyEmail),
+    login: controllerWrapper(login),
+    logout: controllerWrapper(logout),
+    getCurrent: controllerWrapper(getCurrent),
 };
