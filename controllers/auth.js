@@ -105,7 +105,7 @@ const login = async (req, res) => {
         id: user._id,
     };
 
-    const accessToken = jwt.sign(payload, ACCESS_SECRET_KEY, { expiresIn: "15m" });
+    const accessToken = jwt.sign(payload, ACCESS_SECRET_KEY, { expiresIn: "15s" });
     const refreshToken = jwt.sign(payload, REFRESH_SECRET_KEY, {expiresIn: "7d"});
     await User.findOneAndUpdate({ _id: payload.id }, { $set: { accessToken, refreshToken } });
 
