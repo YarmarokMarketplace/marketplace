@@ -122,6 +122,32 @@ const login = async (req, res) => {
     });
 };
 
+const refresh = async(req, res)=> {
+    const { refreshToken: token } = req.body;
+    try {
+        const { id } = jwt.verify(token, REFRESH_SECRET_KEY);
+        const isExist = await User.findOne({refreshToken: token});
+        if(!isExist) {
+            throw new HttpError(403, "Access token is invalid");
+        }
+
+        const payload = {
+            id,
+        }
+    
+        const accessToken = jwt.sign(payload, ACCESS_SECRET_KEY, {expiresIn: "15s"});
+        const refreshToken = jwt.sign(payload, REFRESH_SECRET_KEY, {expiresIn: "7d"});
+
+        res.json({
+            accessToken,
+            refreshToken,
+        })
+    }
+    catch(error) {
+        throw new HttpError(403, error.message);
+    }
+}
+
 const logout = async(req, res)=> {
     const { _id } = req.user;
     await User.findByIdAndUpdate(_id, {accessToken: "", refreshToken: ""});
@@ -144,6 +170,7 @@ module.exports = {
     verifyEmail: controllerWrapper(verifyEmail),
     resendVerifyEmail: controllerWrapper(resendVerifyEmail),
     login: controllerWrapper(login),
+    refresh: controllerWrapper(refresh),
     logout: controllerWrapper(logout),
     getCurrent: controllerWrapper(getCurrent),
 };
