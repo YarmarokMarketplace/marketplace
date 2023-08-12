@@ -128,7 +128,7 @@ const refresh = async(req, res)=> {
         const { id } = jwt.verify(token, REFRESH_SECRET_KEY);
         const isExist = await User.findOne({refreshToken: token});
         if(!isExist) {
-            throw new HttpError(403, "Access token is invalid");
+            throw new HttpError(403, "Refresh token is invalid");
         }
 
         const payload = {
