@@ -1,4 +1,5 @@
 const { Notice, InactiveNotice } = require("../db/models/notices");
+const { Category } = require("../db/models/categories");
 const HttpError = require("../helpers/httpError");
 const controllerWrapper = require("../utils/controllerWrapper");
 
@@ -39,6 +40,12 @@ const getNoticesByCategory = async (req, res) => {
   const skip = (page - 1) * limit;
   const query = { category, goodtype, priceRange, location };
 
+  const name = category;
+  const cat = await Category.find({name});
+
+  const isGoodType = cat[0].isGoodType;
+  console.log(isGoodType);
+
   const result = await Notice.find(buildFilterObject(query))
   .limit(limit * 1)
   .skip(skip)
@@ -55,6 +62,7 @@ const getNoticesByCategory = async (req, res) => {
   const totalPages = Math.ceil(totalResult / limit);
 
   res.status(200).json({
+      isGoodType,
       totalResult,
       totalPages,
       page: Number(page),

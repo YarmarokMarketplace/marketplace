@@ -36,6 +36,14 @@ const noticeSchema = new Schema(
       type: Number,
       required: true,
     },
+    contactName: {
+      type: String,
+      required: true,
+    },
+    contactNumber: {
+      type: String,
+      required: true,
+    },
     active: {
       type: Boolean,
       default: true,

@@ -11,6 +11,14 @@ const categorySchema = new Schema(
               "electronics", "spare-parts-for-transport", "fashion-and-style", "realty", "exchange",
           "repair", "work", "animals", "goods-to-win", "hobbies-recreation-sports"],
     },
+    photo: {
+      type: String,
+      required: true,
+    },
+    isGoodType: {
+      type: Boolean,
+      required: true,
+    }
   },
   { versionKey: false, timestamps: true }
 );
