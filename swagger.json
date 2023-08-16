@@ -628,6 +628,10 @@
             "items": {
               "type": "object",
               "properties": {
+                "isGoodType": {
+                  "type": "boolean",
+                  "example": true
+                },
                 "totalResults": {
                   "type": "integer",
                   "example": 8
