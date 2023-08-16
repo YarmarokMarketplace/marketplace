@@ -40,12 +40,6 @@ const getNoticesByCategory = async (req, res) => {
   const skip = (page - 1) * limit;
   const query = { category, goodtype, priceRange, location };
 
-  const name = category;
-  const cat = await Category.find({name});
-
-  const isGoodType = cat[0].isGoodType;
-  console.log(isGoodType);
-
   const result = await Notice.find(buildFilterObject(query))
   .limit(limit * 1)
   .skip(skip)
@@ -54,6 +48,12 @@ const getNoticesByCategory = async (req, res) => {
     if (result.length === 0) {
       throw HttpError.NotFoundError("Notices not found");
     };
+
+  const name = category;
+  const cat = await Category.find({name});
+
+  const isGoodType = cat[0].isGoodType;
+
 
   const maxPriceNotice = await Notice.find({category}).sort({"price" : -1}).limit(1)
   const maxPriceInCategory = maxPriceNotice[0].price;
@@ -73,7 +73,11 @@ const getNoticesByCategory = async (req, res) => {
 };
 
 const addNotice = async (req, res) => {
-  const uploaded = req.files.map(reqfile => reqfile.location);
+  let uploaded = [];
+  if (req.files) {
+    uploaded = req.files.map(reqfile => reqfile.location);
+  }
+  
   const result = await Notice.create({...req.body, photos: uploaded});
 
   res.status(201).json({
