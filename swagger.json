@@ -1118,6 +1118,16 @@
                     "Товари для перемоги",
                     "Хобі, відпочинок та спорт"
                   ]
+                },
+                "isGoodType": {
+                  "type": "boolean",
+                  "description": "Show does category have goodtype 'new' or 'used'",
+                  "example": "true"
+                },
+                "photo": {
+                  "type": "string",
+                  "description": "link on category photo",
+                  "example": "https://yarmarok-bucket.s3.eu-central-1.amazonaws.com/categories-photo/children's-world.png"
                 }
               }
             },
