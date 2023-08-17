@@ -78,6 +78,9 @@
           },
           "409": {
             "description": "Email already in use"
+          },
+          "429": {
+            "description": "Looks like you are a bot, please try again in 24 hours"
           }
         }
       }
@@ -195,6 +198,9 @@
           },
           "404": {
             "description": "User not found"
+          },
+          "429": {
+            "description": "Too many requests, please try again in 24 hours"
           }
         }
       }
