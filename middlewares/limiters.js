@@ -9,7 +9,10 @@ const slowLimiter = rateLimit({
 	message: {
 		status: 429,
 		errorMessage: "Too many requests, please try again in 1 minute"
-	   },
+	},
+	handler: function(req, res ) {
+        res.status(this.statusCode).json(this.message);
+    },
 });
 
 const longLimiter = rateLimit({
@@ -21,7 +24,8 @@ const longLimiter = rateLimit({
 	message: {
 		status: 429,
 		errorMessage: "Too many requests, please try again in 24 hours"
-	   },
+	},
+	
 });
 
 module.exports = {
