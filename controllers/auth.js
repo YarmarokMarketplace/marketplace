@@ -98,7 +98,7 @@ const forgotPassword = async (req, res) => {
         id: user._id,
     };
 
-    const resetToken = jwt.sign(payload, RESET_PASSWORD_SECRET_KEY, { expiresIn: "24h" });
+    const resetToken = jwt.sign(payload, RESET_PASSWORD_SECRET_KEY, { expiresIn: 24*60*60 });
 
     const resetPasswordEmail = {
         to: email,
