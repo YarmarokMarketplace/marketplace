@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const jwt = require("jsonwebtoken");
 const { nanoid }= require('nanoid');
 const gravatar = require('gravatar');
 const controllerWrapper = require('../utils/controllerWrapper');
@@ -6,8 +7,9 @@ const { User } = require('../db/models/users');
 const HttpError = require('../helpers/httpError');
 const sendEmail = require('../helpers/sendEmail');
 const emailVerificationHtml = require('../utils/verificationEmail');
+const resetPasswordHtml = require('../utils/resetPasswordEmail');
 
-const { BASE_URL } = process.env;
+const { BASE_URL, RESET_PASSWORD_SECRET_KEY } = process.env;
 
 const signup = async (req, res) => {
     const { email, password } = req.body;
@@ -85,8 +87,65 @@ const resendVerifyEmail = async (req, res) => {
     })
 };
 
+const forgotPassword = async (req, res) => {
+    const { email } = req.body;
+    const user = await User.findOne({email});
+    if(!user){
+        throw new HttpError(404, "User not found")
+    }
+
+    const payload = {
+        id: user._id,
+    };
+
+    const resetToken = jwt.sign(payload, RESET_PASSWORD_SECRET_KEY, { expiresIn: "1h" });
+    console.log(resetToken);
+
+    const resetPasswordEmail = {
+        to: email,
+        subject: "Зміна паролю для входу на маркетплейс Yarmarok",
+        html: `${resetPasswordHtml}
+        target="_blank" href="${BASE_URL}/api/auth/forgot-password/${user._id}/${resetToken}">Змінити пароль</a>
+        </div>
+        `
+    };
+
+    await sendEmail(resetPasswordEmail);
+
+    res.status(200).json({
+        status: 'success',
+        code: 200,
+        message: "Reset password email sent"
+    })
+
+
+};
+
+const resetPassword = async (req, res) => {
+    const {id, resetToken} = req.params;
+    const {password} = req.body;
+
+    jwt.verify(resetToken, RESET_PASSWORD_SECRET_KEY);
+        
+    const isExist = await User.findById(id);
+    if(!isExist) {
+        throw new HttpError(403, "Reset token is invalid");
+    }
+    const hashPassword = await bcrypt.hash(password, 10);
+    await User.findByIdAndUpdate({_id: id},{ password: hashPassword });
+
+    res.status(200).json({
+        status: 'success',
+        code: 200,
+        message: "Reset password is succesful"
+    })
+}
+
+
 module.exports = {
     signup: controllerWrapper(signup),
     verifyEmail: controllerWrapper(verifyEmail),
     resendVerifyEmail: controllerWrapper(resendVerifyEmail),
+    forgotPassword: controllerWrapper(forgotPassword),
+    resetPassword: controllerWrapper(resetPassword),
 };
