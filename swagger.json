@@ -1123,7 +1123,7 @@
           },
           "owner": {
             "type": "string",
-            "description": "the user unique id who created this notice",
+            "description": "the unique identifier of the user who created this notice",
             "example": "GGHJlhkj668__hjkhjkhh$%"
           }
         }
