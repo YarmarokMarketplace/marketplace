@@ -628,6 +628,10 @@
             "items": {
               "type": "object",
               "properties": {
+                "isGoodType": {
+                  "type": "boolean",
+                  "example": true
+                },
                 "totalResults": {
                   "type": "integer",
                   "example": 8
@@ -775,7 +779,15 @@
             ],
             "example": "new"
           },
-          "photo": {
+          "contactName": {
+            "type": "string",
+            "exapmle": "Olga"
+          },
+          "contactNumber": {
+            "type": "string",
+            "exapmle": "380961111111"
+          },
+          "photos": {
             "type": "string",
             "format": "binary"
           }
@@ -889,6 +901,16 @@
                     "Товари для перемоги",
                     "Хобі, відпочинок та спорт"
                   ]
+                },
+                "photo": {
+                  "type": "string",
+                  "description": "photo url",
+                  "example": "https://yarmarok-bucket.s3.eu-central-1.amazonaws.com/categories-photo/auto.png"
+                },
+                "isGoodType": {
+                  "type": "boolean",
+                  "description": "describe does category have gootype 'new' or 'used'",
+                  "example": true
                 }
               }
             },
