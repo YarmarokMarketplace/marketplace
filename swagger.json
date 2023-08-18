@@ -349,6 +349,11 @@
         "tags": [
           "Notices"
         ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
         "description": "Add new notice",
         "operationId": "addNotice",
         "requestBody": {
@@ -496,6 +501,11 @@
         "tags": [
           "Notices"
         ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
         "description": "Update notice information in the database",
         "operationId": "updateNotice",
         "parameters": [
@@ -544,6 +554,11 @@
       "delete": {
         "tags": [
           "Notices"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
         ],
         "summary": "Delete the notice",
         "description": "Delete the notice from the database",
@@ -613,6 +628,11 @@
         "summary": "activate and deactivate notice",
         "tags": [
           "Notices"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
         ],
         "description": "Update 'active' status in the database and move the notice to the appropriate collection",
         "operationId": "toggleActive",
@@ -1100,6 +1120,11 @@
             "type": "string",
             "description": "the update time of notice (backend-generated)",
             "example": "2023-05-15T10:51:30.531Z"
+          },
+          "owner": {
+            "type": "string",
+            "description": "the user unique id who created this notice",
+            "example": "GGHJlhkj668__hjkhjkhh$%"
           }
         }
       },
