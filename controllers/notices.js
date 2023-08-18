@@ -1,4 +1,5 @@
 const { Notice, InactiveNotice } = require("../db/models/notices");
+const { Category } = require("../db/models/categories");
 const HttpError = require("../helpers/httpError");
 const controllerWrapper = require("../utils/controllerWrapper");
 
@@ -48,6 +49,12 @@ const getNoticesByCategory = async (req, res) => {
       throw HttpError.NotFoundError("Notices not found");
     };
 
+  const name = category;
+  const cat = await Category.find({name});
+
+  const isGoodType = cat[0].isGoodType;
+
+
   const maxPriceNotice = await Notice.find({category}).sort({"price" : -1}).limit(1)
   const maxPriceInCategory = maxPriceNotice[0].price;
 
@@ -55,6 +62,7 @@ const getNoticesByCategory = async (req, res) => {
   const totalPages = Math.ceil(totalResult / limit);
 
   res.status(200).json({
+      isGoodType,
       totalResult,
       totalPages,
       page: Number(page),
@@ -65,7 +73,11 @@ const getNoticesByCategory = async (req, res) => {
 };
 
 const addNotice = async (req, res) => {
-  const uploaded = req.files.map(reqfile => reqfile.location);
+  let uploaded = [];
+  if (req.files) {
+    uploaded = req.files.map(reqfile => reqfile.location);
+  }
+  
   const result = await Notice.create({...req.body, photos: uploaded});
 
   res.status(201).json({

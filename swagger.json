@@ -863,6 +863,10 @@
             "items": {
               "type": "object",
               "properties": {
+                "isGoodType": {
+                  "type": "boolean",
+                  "example": true
+                },
                 "totalResults": {
                   "type": "integer",
                   "example": 8
@@ -1010,7 +1014,15 @@
             ],
             "example": "new"
           },
-          "photo": {
+          "contactName": {
+            "type": "string",
+            "exapmle": "Olga"
+          },
+          "contactNumber": {
+            "type": "string",
+            "exapmle": "380961111111"
+          },
+          "photos": {
             "type": "string",
             "format": "binary"
           }
