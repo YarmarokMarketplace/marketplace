@@ -98,8 +98,7 @@ const forgotPassword = async (req, res) => {
         id: user._id,
     };
 
-    const resetToken = jwt.sign(payload, RESET_PASSWORD_SECRET_KEY, { expiresIn: "1h" });
-    console.log(resetToken);
+    const resetToken = jwt.sign(payload, RESET_PASSWORD_SECRET_KEY, { expiresIn: "24h" });
 
     const resetPasswordEmail = {
         to: email,
@@ -125,12 +124,12 @@ const resetPassword = async (req, res) => {
     const {id, resetToken} = req.params;
     const {password} = req.body;
 
-    jwt.verify(resetToken, RESET_PASSWORD_SECRET_KEY);
-        
-    const isExist = await User.findById(id);
-    if(!isExist) {
-        throw new HttpError(403, "Reset token is invalid");
-    }
+    jwt.verify(resetToken, RESET_PASSWORD_SECRET_KEY, function(err, decoded) {
+        if (err) {
+            throw new HttpError(403, "Reset token is expired")
+        }
+      });
+
     const hashPassword = await bcrypt.hash(password, 10);
     await User.findByIdAndUpdate({_id: id},{ password: hashPassword });
 

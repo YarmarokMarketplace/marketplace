@@ -51,10 +51,6 @@ const userSchema = new Schema({
         default: '',
         required: [true, 'Verify token is required'],
     },
-    resetToken: {
-        type: String,
-        default: '',
-    }
 },
 { versionKey: false, timestamps: true }
 );
