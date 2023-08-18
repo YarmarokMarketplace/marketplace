@@ -47,6 +47,10 @@ const noticeSchema = new Schema(
     active: {
       type: Boolean,
       default: true,
+    },
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: 'user',
     }
   },
   { versionKey: false, timestamps: true }
