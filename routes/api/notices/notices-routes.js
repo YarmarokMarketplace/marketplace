@@ -4,6 +4,7 @@ const express = require('express');
 const validateBody = require('../../../utils/validateBody');
 const upload = require('../../../utils/upload');
 const isValidId = require('../../../middlewares/isValidId');
+const authenticate = require('../../../middlewares/authenticate');
 
 const { addNotice, getNoticesByCategory, getAllNotices, updateNotice, removeNotice, getNoticeById, toggleActive } = require('../../../controllers/notices');
 const { addNoticeSchema, updateNoticeSchema, toggleActiveSchema} = require('../../../db/models/notices');
