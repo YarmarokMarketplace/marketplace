@@ -104,7 +104,7 @@ const removeNotice = async (req, res) => {
   if (!result) {
     throw HttpError.NotFoundError("Notice not found");
   }
-  res.status(204).json({
+  res.status(200).json({
     data: {
       message: "Notice deleted",
     }});
