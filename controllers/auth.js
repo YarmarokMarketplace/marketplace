@@ -8,7 +8,7 @@ const HttpError = require('../helpers/httpError');
 const sendEmail = require('../helpers/sendEmail');
 const emailVerificationHtml = require('../utils/verificationEmail');
 
-const { BASE_URL, ACCESS_SECRET_KEY, REFRESH_SECRET_KEY } = process.env;
+const { BASE_URL, FRONTEND_URL, ACCESS_SECRET_KEY, REFRESH_SECRET_KEY } = process.env;
 
 const signup = async (req, res) => {
     const { email, password } = req.body;
@@ -45,6 +45,32 @@ const signup = async (req, res) => {
         }
     },);
 };
+
+const googleAuth = async(req, res)=> {
+    const {_id: id} = req.user;
+    const payload = {
+        id,
+    }
+
+    const accessToken = jwt.sign(payload, ACCESS_SECRET_KEY, {expiresIn: "15s"});
+    const refreshToken = jwt.sign(payload, REFRESH_SECRET_KEY, {expiresIn: "7d"});
+    await User.findByIdAndUpdate(id, {accessToken, refreshToken});
+
+    res.redirect(`${FRONTEND_URL}?accessToken=${accessToken}&refreshToken=${refreshToken}`)
+}
+
+const facebookAuth = async(req, res)=> {
+    const {_id: id} = req.user;
+    const payload = {
+        id,
+    }
+
+    const accessToken = jwt.sign(payload, ACCESS_SECRET_KEY, {expiresIn: "15s"});
+    const refreshToken = jwt.sign(payload, REFRESH_SECRET_KEY, {expiresIn: "7d"});
+    await User.findByIdAndUpdate(id, {accessToken, refreshToken});
+
+    res.redirect(`${FRONTEND_URL}?accessToken=${accessToken}&refreshToken=${refreshToken}`)
+}
 
 const verifyEmail = async(req, res)=> {
     const {verificationToken} = req.params;
@@ -173,4 +199,6 @@ module.exports = {
     refresh: controllerWrapper(refresh),
     logout: controllerWrapper(logout),
     getCurrent: controllerWrapper(getCurrent),
+    googleAuth: controllerWrapper(googleAuth),
+    facebookAuth: controllerWrapper(facebookAuth),
 };
