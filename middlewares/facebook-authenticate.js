@@ -16,7 +16,6 @@ const facebookParams = {
 
 const facebookCallback = async(accessToken, refreshToken, profile, done) => {
     try {
-        console.log(profile);
         const {email, displayName} = profile;
         const user = await User.findOne({email});
         if(user) {
