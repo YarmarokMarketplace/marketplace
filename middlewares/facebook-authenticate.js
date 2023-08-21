@@ -11,7 +11,7 @@ const facebookParams = {
     clientID: FACEBOOK_APP_ID,
     clientSecret: FACEBOOK_APP_SECRET,
     callbackURL: `${BASE_URL}/api/auth/facebook/callback`,
-    passReqToCallback: true,
+    //passReqToCallback: true,
 };
 
 const facebookCallback = async(accessToken, refreshToken, profile, done) => {
