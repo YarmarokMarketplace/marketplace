@@ -160,7 +160,7 @@
     },
     "/auth/forgot-password": {
       "post": {
-        "summary": "Send forgot-password email",
+        "summary": "Send forgot-password email to the user",
         "tags": [
           "Authorization"
         ],
