@@ -11,10 +11,10 @@ const { slowLimiter, longLimiter, createAccountLimiter } = require ('../../../mi
 
 const router = express.Router();
 
-router.get("/google", googlePassport.authenticate("google", {scope: ["email", "profile"]}));
+router.get("/google", googlePassport.authenticate("google", {scope: ["email profile"]}));
 router.get("/google/callback", googlePassport.authenticate("google", {session: false}), googleAuth)
 
-router.get("/facebook", facebookPassport.authenticate("facebook", {scope: ["email", "profile"]}));
+router.get("/facebook", facebookPassport.authenticate("facebook", {scope: "email"}));
 router.get("/facebook/callback", facebookPassport.authenticate("facebook", {session: false}), facebookAuth)
 
 router.post('/signup', createAccountLimiter, validateBody(registerSchema), signup);

@@ -23,7 +23,7 @@ const googleCallback = async(req, accessToken, refreshToken, profile, done) => {
         }
         const password = await bcrypt.hash(nanoid(), 10);
         const newUser = await User.create({email, password, name: displayName});
-        done(null, newUser);
+        return done(null, newUser);
     }
     catch(error) {
         done(error, false);

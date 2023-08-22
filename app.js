@@ -6,6 +6,8 @@ const cors = require("cors");
 const swaggerUi = require("swagger-ui-express");
 const swaggerDocument = require("./swagger.json");
 const path = require("path");
+const passport = require("passport");
+const expressSession = require('express-session');
 
 const noticeRouter = require("./routes/api/notices/notices-routes");
 const mainRouter = require("./routes/api/main/main-routes");
@@ -48,6 +50,23 @@ app.use(
 
 app.use(express.static("public"));
 app.use(express.json());
+
+// app.use(expressSession({
+//   secret: 'jayantpatilapp',
+//   resave: true,
+//   saveUninitialized: true
+// }));
+
+// passport.serializeUser((user, done)=>{
+//   done(null, user);
+// })
+
+// passport.deserializeUser((user, done)=>{
+//   done(null, user);
+// })
+
+// app.use(passport.initialize());
+// app.use(passport.session());
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use("/api/main", mainRouter);
