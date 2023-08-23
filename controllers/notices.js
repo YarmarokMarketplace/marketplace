@@ -74,11 +74,12 @@ const getNoticesByCategory = async (req, res) => {
 
 const addNotice = async (req, res) => {
   let uploaded = [];
+  const { _id: owner } = req.user;
   if (req.files) {
     uploaded = req.files.map(reqfile => reqfile.location);
   }
   
-  const result = await Notice.create({...req.body, photos: uploaded});
+  const result = await Notice.create({...req.body, photos: uploaded, owner});
 
   res.status(201).json({
     result,
