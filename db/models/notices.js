@@ -36,9 +36,21 @@ const noticeSchema = new Schema(
       type: Number,
       required: true,
     },
+    contactName: {
+      type: String,
+      required: true,
+    },
+    contactNumber: {
+      type: String,
+      required: true,
+    },
     active: {
       type: Boolean,
       default: true,
+    },
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: 'user',
     }
   },
   { versionKey: false, timestamps: true }
@@ -48,7 +60,9 @@ noticeSchema.post("save", handleMongooseError);
 
 
 const addNoticeSchema = Joi.object({
-  category: Joi.string(),
+  category: Joi.string().required().messages({
+    "any.required": `"category" is required`,
+    }),
   goodtype: Joi.string(),
   title: Joi.string()
     .required().messages({
@@ -65,22 +79,34 @@ const addNoticeSchema = Joi.object({
     "any.required": "Enter good's location",
     })
   ,
-  price: Joi.string()
-    .messages({
-    "any.required": "Enter good's price and currency",
+  price: Joi.number()
+    .required().messages({
+    "any.required": "Enter good's price",
     })
   ,
+  photos: Joi.array(),
+  contactName: Joi.string()
+  .required().messages({
+  "any.required": "Enter the contact name",
+  })
+,
+  contactNumber: Joi.string()
+  .required().messages({
+  "any.required": "Enter the contact number",
+}),
 });
 
 const updateNoticeSchema = Joi.object({
   category: Joi.string(),
   goodtype: Joi.string(),
   title: Joi.string(),
-  photos: Joi.string(),
+  photos: Joi.array(),
   description: Joi.string(),
   location: Joi.string(),
-  price: Joi.string(),
+  price: Joi.number(),
   comments: Joi.string(),
+  contactName: Joi.string(),
+  contactNumber: Joi.string(),
 });
 
 const toggleActiveSchema = Joi.object({

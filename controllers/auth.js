@@ -9,7 +9,7 @@ const sendEmail = require('../helpers/sendEmail');
 const emailVerificationHtml = require('../utils/verificationEmail');
 const resetPasswordHtml = require('../utils/resetPasswordEmail');
 
-const { BASE_URL, RESET_PASSWORD_SECRET_KEY } = process.env;
+const { BASE_URL, ACCESS_SECRET_KEY, REFRESH_SECRET_KEY, RESET_PASSWORD_SECRET_KEY } = process.env;
 
 const signup = async (req, res) => {
     const { email, password } = req.body;
@@ -116,8 +116,6 @@ const forgotPassword = async (req, res) => {
         code: 200,
         message: "Reset password email sent"
     })
-
-
 };
 
 const resetPassword = async (req, res) => {
@@ -138,8 +136,86 @@ const resetPassword = async (req, res) => {
         code: 200,
         message: "Reset password is succesful"
     })
-}
+};
+  
+  const login = async (req, res) => {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+        throw new HttpError(401, "Email or password is wrong");
+    };
 
+    if (!user.verify) { 
+        throw new HttpError(400, "Email is not verified");
+    }
+
+    const passwordCompare = await bcrypt.compare(password, user.password);
+    if (!passwordCompare) {
+        throw new HttpError(401, "Email or password is wrong");
+    }
+    const payload = {
+        id: user._id,
+    };
+
+    const accessToken = jwt.sign(payload, ACCESS_SECRET_KEY, { expiresIn: "5m" });
+    const refreshToken = jwt.sign(payload, REFRESH_SECRET_KEY, {expiresIn: "7d"});
+    await User.findOneAndUpdate({ _id: payload.id }, { $set: { accessToken, refreshToken } });
+
+    res.status(200).json({
+        status: 'success',
+        code: 200,
+        accessToken,
+        refreshToken,
+        user: {
+            id: user._id,
+            email: user.email,
+            name: user.name,
+        }
+    });
+};
+
+const refresh = async(req, res)=> {
+    const { refreshToken: token } = req.body;
+    try {
+        const { id } = jwt.verify(token, REFRESH_SECRET_KEY);
+        const isExist = await User.findOne({refreshToken: token});
+        if(!isExist) {
+            throw new HttpError(403, "Refresh token is invalid");
+        }
+
+        const payload = {
+            id,
+        }
+    
+        const accessToken = jwt.sign(payload, ACCESS_SECRET_KEY, {expiresIn: "15s"});
+        const refreshToken = jwt.sign(payload, REFRESH_SECRET_KEY, {expiresIn: "7d"});
+
+        res.json({
+            accessToken,
+            refreshToken,
+        })
+    }
+    catch(error) {
+        throw new HttpError(403, error.message);
+    }
+};
+
+const logout = async(req, res)=> {
+    const { _id } = req.user;
+    await User.findByIdAndUpdate(_id, {accessToken: "", refreshToken: ""});
+    res.status(200).json({
+        message: "Logout success"
+    })
+};
+
+const getCurrent = (req, res) => {
+    const {name, email} = req.user;
+
+    res.status(200).json({
+        name,
+        email,
+    })
+}
 
 module.exports = {
     signup: controllerWrapper(signup),
@@ -147,4 +223,8 @@ module.exports = {
     resendVerifyEmail: controllerWrapper(resendVerifyEmail),
     forgotPassword: controllerWrapper(forgotPassword),
     resetPassword: controllerWrapper(resetPassword),
+    login: controllerWrapper(login),
+    refresh: controllerWrapper(refresh),
+    logout: controllerWrapper(logout),
+    getCurrent: controllerWrapper(getCurrent),
 };
