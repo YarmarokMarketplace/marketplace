@@ -51,22 +51,22 @@ app.use(
 app.use(express.static("public"));
 app.use(express.json());
 
-// app.use(expressSession({
-//   secret: 'jayantpatilapp',
-//   resave: true,
-//   saveUninitialized: true
-// }));
+app.use(expressSession({
+  secret: 'jayantpatilapp',
+  resave: true,
+  saveUninitialized: true
+}));
 
-// passport.serializeUser((user, done)=>{
-//   done(null, user);
-// })
+passport.serializeUser((user, done)=>{
+  done(null, user);
+})
 
-// passport.deserializeUser((user, done)=>{
-//   done(null, user);
-// })
+passport.deserializeUser((user, done)=>{
+  done(null, user);
+})
 
-// app.use(passport.initialize());
-// app.use(passport.session());
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use("/api/main", mainRouter);
