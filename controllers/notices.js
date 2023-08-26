@@ -191,7 +191,7 @@ const toggleActive = async (req, res) => {
       message: "Status is changed",
       result,
     }});
-}
+};
 
 const checkIsActive = async (req, res) => {
   
@@ -223,7 +223,32 @@ await InactiveNotice.updateMany({active: false})
   await Notice.deleteMany({ createdAt: {
     $lt: new Date(thirtyDays)} 
   });
-}
+};
+
+const getAllUserNotices = async (req, res) => {
+  const { _id: owner } = req.user;
+  const { page = 1, limit = 9 } = req.query;
+  const skip = (page - 1) * limit;
+  const notices = await Notice.find({ owner }, "", {
+    skip,
+    limit,
+  }).populate("owner", "email").sort({ createdAt: -1 });
+
+  if (notices.length === 0) {
+    throw HttpError.NotFoundError('This user has not any notices');
+  };
+
+  const totalResult = notices.length;
+  const totalPages = Math.ceil(totalResult / limit);
+
+  res.status(200).json({
+    totalResult,
+    totalPages,
+    page: Number(page),
+    limit: Number(limit),
+    notices,
+  });
+};
 
 module.exports = {
   getAllNotices: controllerWrapper(getAllNotices),
@@ -234,4 +259,5 @@ module.exports = {
   updateNotice: controllerWrapper(updateNotice),
   toggleActive: controllerWrapper(toggleActive),
   checkIsActive: controllerWrapper(checkIsActive),
+  getAllUserNotices: controllerWrapper(getAllUserNotices),
 };
