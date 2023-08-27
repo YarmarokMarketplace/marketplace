@@ -227,7 +227,7 @@ await InactiveNotice.updateMany({active: false})
 
 const getAllUserNotices = async (req, res) => {
   const { _id: owner } = req.user;
-  const { page = 1, limit = 9 } = req.query;
+  const { page = 1, limit = 3 } = req.query;
   const skip = (page - 1) * limit;
   const notices = await Notice.find({ owner }, "", {
     skip,
