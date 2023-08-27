@@ -74,11 +74,12 @@ const getNoticesByCategory = async (req, res) => {
 
 const addNotice = async (req, res) => {
   let uploaded = [];
+  const { _id: owner } = req.user;
   if (req.files) {
     uploaded = req.files.map(reqfile => reqfile.location);
   }
   
-  const result = await Notice.create({...req.body, photos: uploaded});
+  const result = await Notice.create({...req.body, photos: uploaded, owner});
 
   res.status(201).json({
     result,
@@ -104,7 +105,7 @@ const removeNotice = async (req, res) => {
   if (!result) {
     throw HttpError.NotFoundError("Notice not found");
   }
-  res.status(204).json({
+  res.status(200).json({
     data: {
       message: "Notice deleted",
     }});

@@ -60,7 +60,9 @@ noticeSchema.post("save", handleMongooseError);
 
 
 const addNoticeSchema = Joi.object({
-  category: Joi.string().required(),
+  category: Joi.string().required().messages({
+    "any.required": `"category" is required`,
+    }),
   goodtype: Joi.string(),
   title: Joi.string()
     .required().messages({
@@ -79,18 +81,18 @@ const addNoticeSchema = Joi.object({
   ,
   price: Joi.number()
     .required().messages({
-    "any.required": "Enter good's price and currency",
+    "any.required": "Enter good's price",
     })
   ,
   photos: Joi.array(),
   contactName: Joi.string()
   .required().messages({
-  "any.required": "Enter good's price and currency",
+  "any.required": "Enter the contact name",
   })
 ,
   contactNumber: Joi.string()
   .required().messages({
-  "any.required": "Enter good's price and currency",
+  "any.required": "Enter the contact number",
 }),
 });
 

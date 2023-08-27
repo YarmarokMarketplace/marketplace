@@ -41,6 +41,10 @@
     {
       "name": "Authorization",
       "description": "User Authorization endpoints"
+    },
+    {
+      "name": "User",
+      "description": "User endpoints"
     }
   ],
   "paths": {
@@ -154,6 +158,98 @@
           },
           "400": {
             "description": "Verification has already been passed"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+     "/auth/forgot-password": {
+      "post": {
+        "summary": "Send forgot-password email to the user",
+        "tags": [
+          "Authorization"
+        ],
+        "description": "Send the email with link for resetting password",
+        "operationId": "forgotPassword",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForgotPasswordRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "String",
+                  "example": "Reset password email sent"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/auth/reset-password/{id}/{resetToken}": {
+      "post": {
+        "summary": "Reset password",
+        "tags": [
+          "Authorization"
+        ],
+        "description": "Write new password to the Database",
+        "operationId": "resetPassword",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "params",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Backend-generated unique user id from the DB"
+            }
+          },
+          {
+            "name": "resetToken",
+            "in": "params",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Backend-generated unique resetToken"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "String",
+                  "example": "Reset password email sent"
+                }
+              }
+            }
           },
           "404": {
             "description": "User not found"
@@ -289,6 +385,9 @@
           "400": {
             "description": "Bad request"
           },
+          "401": {
+            "description": "Not authorized"
+          },
           "404": {
             "description": "User not found"
           }
@@ -313,6 +412,43 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/user/{id}": {
+      "delete": {
+        "summary": "Delete user",
+        "security": [{ "Bearer": [] }],
+        "tags": [
+          "User"
+        ],
+        "description": "Delete user account from the Database",
+        "operationId": "removeUser",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of user that needs to be deleted",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Delete the user with the specified ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deleted"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Not authorized"
+          },
+          "404": {
+            "description": "Notice not found"
           }
         }
       }
@@ -371,6 +507,11 @@
         "tags": [
           "Notices"
         ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
         "description": "Add new notice",
         "operationId": "addNotice",
         "requestBody": {
@@ -396,6 +537,9 @@
           },
           "400": {
             "description": "Bad request"
+          },
+          "401": {
+            "description": "Not authorized"
           },
           "409": {
             "description": "Email already in use"
@@ -518,6 +662,11 @@
         "tags": [
           "Notices"
         ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
         "description": "Update notice information in the database",
         "operationId": "updateNotice",
         "parameters": [
@@ -556,6 +705,9 @@
           "400": {
             "description": "Bad request"
           },
+          "401": {
+            "description": "Not authorized"
+          },
           "404": {
             "description": "Notice not found"
           }
@@ -566,6 +718,11 @@
       "delete": {
         "tags": [
           "Notices"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
         ],
         "summary": "Delete the notice",
         "description": "Delete the notice from the database",
@@ -583,11 +740,14 @@
           }
         ],
         "responses": {
-          "204": {
-            "description": "Successful operation"
+          "200": {
+            "description": "Notice deleted"
           },
           "400": {
             "description": "Bad request"
+          },
+          "401": {
+            "description": "Not authorized"
           },
           "404": {
             "description": "Notice not found"
@@ -636,6 +796,11 @@
         "tags": [
           "Notices"
         ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
         "description": "Update 'active' status in the database and move the notice to the appropriate collection",
         "operationId": "toggleActive",
         "parameters": [
@@ -680,6 +845,9 @@
           },
           "400": {
             "description": "Bad request"
+          },
+          "401": {
+            "description": "Not authorized"
           },
           "404": {
             "description": "Notice not found"
@@ -776,6 +944,33 @@
             "description": "user email",
             "example": "user@gmail.com",
             "pattern": "/@([\\w-]+\\.)+[\\w-]{2,6}$/"
+          }
+        }
+      },
+       "ForgotPasswordRequest": {
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "user email",
+            "example": "user@gmail.com",
+            "pattern": "/@([\\w-]+\\.)+[\\w-]{2,6}$/"
+          }
+        }
+      },
+      "ResetPasswordRequest": {
+        "type": "object",
+        "required": [
+          "password"
+        ],
+        "properties": {
+          "password": {
+            "type": "string",
+            "description": "new password",
+            "example": "fhdjhfjshh_123"
           }
         }
       },
@@ -1122,6 +1317,11 @@
             "type": "string",
             "description": "the update time of notice (backend-generated)",
             "example": "2023-05-15T10:51:30.531Z"
+          },
+          "owner": {
+            "type": "string",
+            "description": "the unique identifier of the user who created this notice",
+            "example": "GGHJlhkj668__hjkhjkhh$%"
           }
         }
       },
