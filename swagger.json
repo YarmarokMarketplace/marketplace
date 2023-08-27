@@ -394,6 +394,28 @@
         }
       }
     },
+    "/auth/google/callback": {
+      "get": {
+        "summary": "Permit user to authorize via Google account",
+        "tags": [
+          "Authorization"
+        ],
+        "description": "Redirect user to the main page after google authorization",
+        "operationId": "googleAuth",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "description": "returns HTML page with automated redirecting to the Homepage after google auth"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/user/{id}": {
       "delete": {
         "summary": "Delete user",
