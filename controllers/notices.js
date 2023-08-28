@@ -226,16 +226,28 @@ await InactiveNotice.updateMany({active: false})
 
 const getFavoriteUserNotices = async (req, res) => {
   const { _id: userId } = req.user;
+  const { page = 1, limit = 3 } = req.query;
+  const skip = (page - 1) * limit;
 
-  const user = await User.findById(userId).populate("favorite").sort({ createdAt: -1 });
+  const user = await User.findById(userId, "", {
+    skip,
+    limit,
+  }).populate("favorite").sort({ createdAt: -1 });
 
   const result = user.favorite;
 
   if (result.length === 0) {
-    throw HttpError.NotFoundError(`There any notices for this user`);
-  }
+    throw HttpError.NotFoundError('There any notices for this user');
+  };
+
+  const totalResult = result.length;
+  const totalPages = Math.ceil(totalResult / limit);
 
   res.status(200).json({
+    totalResult,
+    totalPages,
+    page: Number(page),
+    limit: Number(limit),
     result,
   });
 };
