@@ -1,11 +1,10 @@
 const { Notice, InactiveNotice } = require("../db/models/notices");
 const { Category } = require("../db/models/categories");
+const { User } = require("../db/models/users");
 const HttpError = require("../helpers/httpError");
 const controllerWrapper = require("../utils/controllerWrapper");
-
 const buildFilterObject = require("../utils/filterObject");
 const buildSortObject = require("../utils/sortObject");
-
 
 
 const getAllNotices = async (req, res) => {
@@ -191,7 +190,7 @@ const toggleActive = async (req, res) => {
       message: "Status is changed",
       result,
     }});
-}
+};
 
 const checkIsActive = async (req, res) => {
   
@@ -223,7 +222,23 @@ await InactiveNotice.updateMany({active: false})
   await Notice.deleteMany({ createdAt: {
     $lt: new Date(thirtyDays)} 
   });
-}
+};
+
+const getFavoriteUserNotices = async (req, res) => {
+  const { _id: userId } = req.user;
+
+  const user = await User.findById(userId).populate("favorite").sort({ createdAt: -1 });
+
+  const result = user.favorite;
+
+  if (result.length === 0) {
+    throw HttpError.NotFoundError(`There any notices for this user`);
+  }
+
+  res.status(200).json({
+    result,
+  });
+};
 
 module.exports = {
   getAllNotices: controllerWrapper(getAllNotices),
@@ -234,4 +249,5 @@ module.exports = {
   updateNotice: controllerWrapper(updateNotice),
   toggleActive: controllerWrapper(toggleActive),
   checkIsActive: controllerWrapper(checkIsActive),
+  getFavoriteUserNotices: controllerWrapper(getFavoriteUserNotices),
 };
