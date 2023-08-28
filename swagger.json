@@ -855,6 +855,43 @@
         }
       }
     },
+    "/notices/favorites/{id}": {
+      "delete": {
+        "summary": "Delete the notice from favorites",
+        "tags": [
+          "Notices"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "description": "Delete the notice from favorites by it's unique identifier",
+        "operationId": "removeNoticeFromFavorite",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Remove the notice by id to favorites"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notice removed"
+          },
+          "401": {
+            "description": "Not authorized"
+          },
+          "404": {
+            "description": "'User not found' or 'Notice not found'"
+          }
+        }
+      }
+    },
     "/main": {
       "get": {
         "summary": "Get all categories",

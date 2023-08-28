@@ -1,11 +1,11 @@
 const { Notice, InactiveNotice } = require("../db/models/notices");
 const { Category } = require("../db/models/categories");
+const { User } = require("../db/models/users");
 const HttpError = require("../helpers/httpError");
 const controllerWrapper = require("../utils/controllerWrapper");
 
 const buildFilterObject = require("../utils/filterObject");
 const buildSortObject = require("../utils/sortObject");
-
 
 
 const getAllNotices = async (req, res) => {
@@ -191,7 +191,7 @@ const toggleActive = async (req, res) => {
       message: "Status is changed",
       result,
     }});
-}
+};
 
 const checkIsActive = async (req, res) => {
   
@@ -223,7 +223,31 @@ await InactiveNotice.updateMany({active: false})
   await Notice.deleteMany({ createdAt: {
     $lt: new Date(thirtyDays)} 
   });
-}
+};
+
+const removeNoticeFromFavorite = async (req, res) => {
+  const { _id: userId } = req.user;
+  const { id: noticeId } = req.params;
+
+  const user = await User.findById(userId);
+  if (!user) {
+    throw HttpError.NotFoundError("User not found");
+  }
+
+  const result = await User.findByIdAndUpdate(
+    userId,
+    { $pull: { favorite: noticeId } },
+    { new: true }
+  );
+
+  if (!result) {
+    throw HttpError.NotFoundError("Notice not found");
+  }
+
+  res.status(200).json({
+    message: "Notice removed",
+  });
+};
 
 module.exports = {
   getAllNotices: controllerWrapper(getAllNotices),
@@ -234,4 +258,5 @@ module.exports = {
   updateNotice: controllerWrapper(updateNotice),
   toggleActive: controllerWrapper(toggleActive),
   checkIsActive: controllerWrapper(checkIsActive),
+  removeNoticeFromFavorite: controllerWrapper(removeNoticeFromFavorite),
 };
