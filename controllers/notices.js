@@ -1,12 +1,11 @@
 const { Notice, InactiveNotice } = require("../db/models/notices");
+const { User } = require("../db/models/users");
 const { Category } = require("../db/models/categories");
 const HttpError = require("../helpers/httpError");
 const controllerWrapper = require("../utils/controllerWrapper");
 
 const buildFilterObject = require("../utils/filterObject");
 const buildSortObject = require("../utils/sortObject");
-
-
 
 const getAllNotices = async (req, res) => {
   const { page = 1, limit = 9 } = req.query;
@@ -191,7 +190,7 @@ const toggleActive = async (req, res) => {
       message: "Status is changed",
       result,
     }});
-}
+};
 
 const checkIsActive = async (req, res) => {
   
@@ -223,7 +222,37 @@ await InactiveNotice.updateMany({active: false})
   await Notice.deleteMany({ createdAt: {
     $lt: new Date(thirtyDays)} 
   });
-}
+};
+
+const addNoticeToFavorite = async (req, res) => {
+  const { _id: userId } = req.user;
+  const { id: noticeId } = req.params;
+
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw HttpError.NotFoundError("User not found");
+  }
+
+  const result = await User.findByIdAndUpdate(userId, {
+    $addToSet: { favorite: noticeId },
+  });
+
+  if (!result) {
+    throw HttpError.NotFoundError(`Notice with ${noticeId} not found`);
+  }
+
+  res.status(200).json({
+    user: {
+      _id: result._id,
+      name: result.name,
+      lastname: result.lastname,
+      phone: result.phone,
+      email: result.email,
+      favorite: result.favorite,
+    },
+  });
+};
 
 module.exports = {
   getAllNotices: controllerWrapper(getAllNotices),
@@ -234,4 +263,5 @@ module.exports = {
   updateNotice: controllerWrapper(updateNotice),
   toggleActive: controllerWrapper(toggleActive),
   checkIsActive: controllerWrapper(checkIsActive),
+  addNoticeToFavorite: controllerWrapper(addNoticeToFavorite),
 };

@@ -165,7 +165,7 @@
         }
       }
     },
-     "/auth/forgot-password": {
+    "/auth/forgot-password": {
       "post": {
         "summary": "Send forgot-password email to the user",
         "tags": [
@@ -855,6 +855,50 @@
         }
       }
     },
+    "/notices/favorites/{id}": {
+      "post": {
+        "summary": "Add the notice to favorites",
+        "tags": [
+          "Notices"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "description": "Add the notice to favorites by it's unique identifier",
+        "operationId": "addNoticeToFavorite",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Add the notice by id to favorites"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succesful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddNoticeToFavoriteResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authorized"
+          },
+          "404": {
+            "description": "'User not found' or 'Notice with {id} not found'"
+          }
+        }
+      }
+    },
     "/main": {
       "get": {
         "summary": "Get all categories",
@@ -947,7 +991,7 @@
           }
         }
       },
-       "ForgotPasswordRequest": {
+      "ForgotPasswordRequest": {
         "type": "object",
         "required": [
           "email"
@@ -1322,6 +1366,44 @@
             "type": "string",
             "description": "the unique identifier of the user who created this notice",
             "example": "GGHJlhkj668__hjkhjkhh$%"
+          }
+        }
+      },
+      "AddNoticeToFavoriteResponse": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Backend-generated unique user id",
+            "example": "GGHJlhkj668__hjkhjkhh$%"
+          },
+          "email": {
+            "type": "string",
+            "description": "user email",
+            "example": "user@gmail.com"
+          },
+          "name": {
+            "type": "string",
+            "description": "user name",
+            "example": "Olga"
+          },
+          "lastname": {
+            "type": "string",
+            "description": "user lastname",
+            "example": "Ivanenko"
+          },
+          "phone": {
+            "type": "string",
+            "description": "user phone",
+            "example": "380961112233"
+          },
+          "favorite": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "notice id",
+              "example": "64b692c16cc5fc5f234a39d7"
+            }
           }
         }
       },
