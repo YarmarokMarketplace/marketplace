@@ -23,7 +23,7 @@ const authenticate = async (req, res, next) => {
         next()
     }
     catch {
-        next(new HttpError(401))
+        next(new HttpError(401, "Not authorized"))
     }
 }
 
