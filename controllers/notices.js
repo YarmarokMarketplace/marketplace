@@ -244,10 +244,6 @@ const removeNoticeFromFavorite = async (req, res) => {
     { new: true }
   );
 
-  // if (!result) {
-  //   throw HttpError.NotFoundError("Notice not found");
-  // }
-
   res.status(200).json({
     message: "Notice removed",
   });
