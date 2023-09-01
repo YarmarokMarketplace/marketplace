@@ -238,7 +238,7 @@ const getAllUserNotices = async (req, res) => {
     throw HttpError.NotFoundError('This user has not any notices');
   };
 
-  const totalResult = notices.length;
+  const totalResult = await Notice.countDocuments({ owner });
   const totalPages = Math.ceil(totalResult / limit);
 
   res.status(200).json({
