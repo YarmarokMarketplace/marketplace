@@ -451,6 +451,58 @@
             "description": "Notice not found"
           }
         }
+      },
+      "patch": {
+        "summary": "Update user data",
+        "security": [{ "Bearer": [] }],
+        "tags": [
+          "User"
+        ],
+        "description": "Update user info in the personal cabinet",
+        "operationId": "updateUserData",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of user that needs to be updated",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Update the user with the specified ID"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateUserResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Not authorized"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
       }
     },
     "/notices": {
@@ -1585,6 +1637,65 @@
               }
             },
             "description": "List of notices found by request"
+          }
+        }
+      },
+      "UpdateUserRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Olena"
+          },
+          "lastname": {
+            "type": "string",
+            "example": "Ivanova"
+          },
+          "patronymic": {
+            "type": "string",
+            "example": "Ivanivna"
+          },
+          "phone": {
+            "type": "string",
+            "example": "380961112233"
+          },
+          "avatarURL": {
+            "type": "string",
+            "example": "https://yarmarok-bucket.s3.amazonaws.com/1-kisb82VT8IOXQ3RbXa9.jpg"
+          }
+        }
+      },
+      "UpdateUserResponse": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Backend-generated unique identifier",
+            "example": "GGHJlhkj668__hjkhjkhh$%"
+          },
+          "email": {
+            "type": "string",
+            "example": "estasjuk@gmail.com"
+          },
+          "name": {
+            "type": "string",
+            "example": "Olena"
+          },
+          "lastname": {
+            "type": "string",
+            "example": "Ivanova"
+          },
+          "patronymic": {
+            "type": "string",
+            "example": "Ivanivna"
+          },
+          "phone": {
+            "type": "string",
+            "example": "380961112233"
+          },
+          "avatarURL": {
+            "type": "string",
+            "example": "https://yarmarok-bucket.s3.amazonaws.com/1-kisb82VT8IOXQ3RbXa9.jpg"
           }
         }
       }
