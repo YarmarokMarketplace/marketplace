@@ -887,7 +887,7 @@
             "description": "Not authorized"
           },
           "404": {
-            "description": "'User not found' or 'Notice not found'"
+            "description": "'User not found' or 'Notice not found in favorite notices' or '${id} invalid format'"
           }
         }
       }

@@ -18,6 +18,6 @@ router.patch('/:id', authenticate, isValidId, validateBody(updateNoticeSchema), 
 router.delete('/notice/:id', authenticate, isValidId, removeNotice);
 router.get('/notice/:id', isValidId, getNoticeById);
 router.patch('/notice/:id/active', authenticate, isValidId, validateBody(toggleActiveSchema), toggleActive);
-router.delete('/favorites/:id', authenticate, removeNoticeFromFavorite);
+router.delete('/favorites/:id', authenticate, isValidId, removeNoticeFromFavorite);
 
 module.exports = router;

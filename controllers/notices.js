@@ -233,6 +233,10 @@ const removeNoticeFromFavorite = async (req, res) => {
   if (!user) {
     throw HttpError.NotFoundError("User not found");
   }
+  
+  if (!user.favorite.includes(noticeId)) {
+    throw HttpError.NotFoundError("Notice not found in favorite notices");
+  }
 
   const result = await User.findByIdAndUpdate(
     userId,
@@ -240,9 +244,9 @@ const removeNoticeFromFavorite = async (req, res) => {
     { new: true }
   );
 
-  if (!result) {
-    throw HttpError.NotFoundError("Notice not found");
-  }
+  // if (!result) {
+  //   throw HttpError.NotFoundError("Notice not found");
+  // }
 
   res.status(200).json({
     message: "Notice removed",
