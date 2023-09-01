@@ -1,11 +1,12 @@
 const { Notice, InactiveNotice } = require("../db/models/notices");
 const { User } = require("../db/models/users");
 const { Category } = require("../db/models/categories");
+const { User } = require("../db/models/users");
 const HttpError = require("../helpers/httpError");
 const controllerWrapper = require("../utils/controllerWrapper");
-
 const buildFilterObject = require("../utils/filterObject");
 const buildSortObject = require("../utils/sortObject");
+
 
 const getAllNotices = async (req, res) => {
   const { page = 1, limit = 9 } = req.query;
@@ -224,6 +225,34 @@ await InactiveNotice.updateMany({active: false})
   });
 };
 
+const getFavoriteUserNotices = async (req, res) => {
+  const { _id: userId } = req.user;
+  const { page = 1, limit = 3 } = req.query;
+  const skip = (page - 1) * limit;
+
+  const user = await User.findById(userId, "", {
+    skip,
+    limit,
+  }).populate("favorite").sort({ createdAt: -1 });
+
+  const result = user.favorite;
+
+  if (result.length === 0) {
+    throw HttpError.NotFoundError('There any notices for this user');
+  };
+
+  const totalResult = result.length;
+  const totalPages = Math.ceil(totalResult / limit);
+
+  res.status(200).json({
+    totalResult,
+    totalPages,
+    page: Number(page),
+    limit: Number(limit),
+    result,
+  });
+};
+
 const addNoticeToFavorite = async (req, res) => {
   const { _id: userId } = req.user;
   const { id: noticeId } = req.params;
@@ -263,5 +292,6 @@ module.exports = {
   updateNotice: controllerWrapper(updateNotice),
   toggleActive: controllerWrapper(toggleActive),
   checkIsActive: controllerWrapper(checkIsActive),
+  getFavoriteUserNotices: controllerWrapper(getFavoriteUserNotices),
   addNoticeToFavorite: controllerWrapper(addNoticeToFavorite),
 };
