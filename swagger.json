@@ -165,7 +165,7 @@
         }
       }
     },
-     "/auth/forgot-password": {
+    "/auth/forgot-password": {
       "post": {
         "summary": "Send forgot-password email to the user",
         "tags": [
@@ -855,9 +855,9 @@
         }
       }
     },
-    "/notices/user/favorites": {
-      "get": {
-        "summary": "Get user favorite notices",
+    "/notices/favorites/{id}": {
+      "post": {
+        "summary": "Add the notice to favorites",
         "tags": [
           "Notices"
         ],
@@ -866,24 +866,70 @@
             "Bearer": []
           }
         ],
-        "description": "Find the favorites notices owned by user",
-        "operationId": "getFavoriteUserNotices",
+        "description": "Add the notice to favorites by it's unique identifier",
+        "operationId": "addNoticeToFavorite",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Add the notice by id to favorites"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Successful operation",
+            "description": "Succesful operation",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListOfUserNoticesResponse"
+                  "$ref": "#/components/schemas/AddNoticeToFavoriteResponse"
                 }
               }
             }
           },
-          "400": {
-            "description": "Bad request"
+          "401": {
+            "description": "Not authorized"
           },
           "404": {
-            "description": "Notices not found"
+            "description": "'User not found' or 'Notice with {id} not found'"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete the notice from favorites",
+        "tags": [
+          "Notices"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "description": "Delete the notice from favorites by it's unique identifier",
+        "operationId": "removeNoticeFromFavorite",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Remove the notice by id to favorites"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notice removed"
+          },
+          "401": {
+            "description": "Not authorized"
+          },
+          "404": {
+            "description": "'User not found' or 'Notice not found in favorite notices' or '${id} invalid format'"
           }
         }
       }
