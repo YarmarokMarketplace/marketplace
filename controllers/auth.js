@@ -150,8 +150,8 @@ const resetPassword = async (req, res) => {
         message: "Reset password is succesful"
     })
 };
-  
-  const login = async (req, res) => {
+
+const login = async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
     if (!user) {
@@ -170,8 +170,8 @@ const resetPassword = async (req, res) => {
         id: user._id,
     };
 
-    const accessToken = jwt.sign(payload, ACCESS_SECRET_KEY, { expiresIn: "5m" });
-    const refreshToken = jwt.sign(payload, REFRESH_SECRET_KEY, {expiresIn: "7d"});
+    const accessToken = jwt.sign(payload, ACCESS_SECRET_KEY, { expiresIn: 300 });
+    const refreshToken = jwt.sign(payload, REFRESH_SECRET_KEY, {expiresIn: 604800});
     await User.findOneAndUpdate({ _id: payload.id }, { $set: { accessToken, refreshToken } });
 
     res.status(200).json({
@@ -200,8 +200,8 @@ const refresh = async(req, res)=> {
             id,
         }
     
-        const accessToken = jwt.sign(payload, ACCESS_SECRET_KEY, {expiresIn: "5m"});
-        const refreshToken = jwt.sign(payload, REFRESH_SECRET_KEY, {expiresIn: "7d"});
+        const accessToken = jwt.sign(payload, ACCESS_SECRET_KEY, {expiresIn: 300});
+        const refreshToken = jwt.sign(payload, REFRESH_SECRET_KEY, {expiresIn: 604800});
         await User.findOneAndUpdate({ _id: payload.id }, { $set: { accessToken, refreshToken } });
 
         res.json({
