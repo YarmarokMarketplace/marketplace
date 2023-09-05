@@ -165,7 +165,7 @@
         }
       }
     },
-     "/auth/forgot-password": {
+    "/auth/forgot-password": {
       "post": {
         "summary": "Send forgot-password email to the user",
         "tags": [
@@ -855,7 +855,79 @@
         }
       }
     },
+    "/notices/user/notices": {
+      "get": {
+        "summary": "Get all user notices",
+        "tags": [
+          "Notices"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "description": "Find all existing notices created by specific user",
+        "operationId": "getAllUserNotices",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListOfUserNoticesResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "This user has not any notices"
+          }
+        }
+      }
+    }, 
     "/notices/favorites/{id}": {
+      "post": {
+        "summary": "Add the notice to favorites",
+        "tags": [
+          "Notices"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "description": "Add the notice to favorites by it's unique identifier",
+        "operationId": "addNoticeToFavorite",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Add the notice by id to favorites"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succesful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddNoticeToFavoriteResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authorized"
+          },
+          "404": {
+            "description": "'User not found' or 'Notice with {id} not found'"
+          }
+        }
+      },
       "delete": {
         "summary": "Delete the notice from favorites",
         "tags": [
@@ -984,7 +1056,7 @@
           }
         }
       },
-       "ForgotPasswordRequest": {
+      "ForgotPasswordRequest": {
         "type": "object",
         "required": [
           "email"
@@ -1345,6 +1417,21 @@
             "type": "boolean",
             "example": false
           },
+          "owner": {
+            "type": "object",
+            "properties": {
+              "_id": {
+                "type": "string",
+                "example": "64ea254f910ee531cf282d3e",
+                "description": "Backend-generated unique user id"
+              },
+              "email": {
+                "type": "string",
+                "example": "estasjuk@gmail.com",
+                "description": "user email"
+              }
+            }
+          },
           "createdAt": {
             "type": "string",
             "description": "the creation time of notice (backend-generated)",
@@ -1354,11 +1441,274 @@
             "type": "string",
             "description": "the update time of notice (backend-generated)",
             "example": "2023-05-15T10:51:30.531Z"
+          }
+        }
+      },
+      "ListOfUserNoticesResponse": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "totalResults": {
+                  "type": "integer",
+                  "example": 8
+                },
+                "totalPages": {
+                  "type": "integer",
+                  "example": 2
+                },
+                "page": {
+                  "type": "integer",
+                  "example": 1
+                },
+                "limit": {
+                  "type": "integer",
+                  "example": 6
+                },
+                "result": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserNoticeResponse"
+                  }
+                }
+              }
+            },
+            "description": "List of user notices"
+          }
+        }
+      },
+      "UserNoticeResponse": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Backend-generated unique identifier",
+            "example": "GGHJlhkj668__hjkhjkhh$%"
+          },
+          "category": {
+            "type": "string",
+            "description": "notice's category",
+            "enum": [
+              "auto",
+              "business-and-services",
+              "for-free",
+              "children's-world",
+              "home-and-garden",
+              "help",
+              "electricity",
+              "spare-parts-for-transport",
+              "fashion-and-style",
+              "realty",
+              "exchange",
+              "repair",
+              "work",
+              "animals",
+              "goods-to-win",
+              "hobbies-recreation-sports"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "description": "the title of user notice",
+            "example": "The chair for sale"
+          },
+          "description": {
+            "type": "string",
+            "example": "Very good chair for your home"
+          },
+          "photos": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "notice image url",
+              "example": "https://yarmarok-bucket.s3.amazonaws.com/BSqREaubo3hWhDvb6lNZ3_2.jpg"
+            }
+          },
+          "location": {
+            "type": "string",
+            "example": "Kyiv"
+          },
+          "goodtype": {
+            "type": "string",
+            "enum": ["new", "used"]
+          },
+          "price": {
+            "type": "integer",
+            "example": 2500
+          },
+          "active": {
+            "type": "boolean",
+            "example": false
+          },
+          "contactName": {
+            "type": "string",
+            "exapmle": "Olena"
+          },
+          "contactNumber": {
+            "type": "string",
+            "exapmle": "380961112233"
           },
           "owner": {
+            "type": "object",
+            "properties": {
+              "_id": {
+                "type": "string",
+                "example": "64ea254f910ee531cf282d3e",
+                "description": "Backend-generated unique user id"
+              },
+              "email": {
+                "type": "string",
+                "example": "estasjuk@gmail.com",
+                "description": "user email"
+              }
+            }
+          },
+          "createdAt": {
             "type": "string",
-            "description": "the unique identifier of the user who created this notice",
+            "description": "the creation time of notice (backend-generated)",
+            "example": "2023-05-15T10:51:30.531Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "the update time of notice (backend-generated)",
+            "example": "2023-05-15T10:51:30.531Z"
+          }
+        }
+      },
+      "ListOfUserNoticesResponse": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "totalResults": {
+                  "type": "integer",
+                  "example": 8
+                },
+                "totalPages": {
+                  "type": "integer",
+                  "example": 2
+                },
+                "page": {
+                  "type": "integer",
+                  "example": 1
+                },
+                "limit": {
+                  "type": "integer",
+                  "example": 6
+                },
+                "result": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserNoticeResponse"
+                  }
+                }
+              }
+            },
+            "description": "List of user notices"
+          }
+        }
+      },
+      "UserNoticeResponse": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Backend-generated unique identifier",
             "example": "GGHJlhkj668__hjkhjkhh$%"
+          },
+          "category": {
+            "type": "string",
+            "description": "notice's category",
+            "enum": [
+              "auto",
+              "business-and-services",
+              "for-free",
+              "children's-world",
+              "home-and-garden",
+              "help",
+              "electricity",
+              "spare-parts-for-transport",
+              "fashion-and-style",
+              "realty",
+              "exchange",
+              "repair",
+              "work",
+              "animals",
+              "goods-to-win",
+              "hobbies-recreation-sports"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "description": "the title of user notice",
+            "example": "The chair for sale"
+          },
+          "description": {
+            "type": "string",
+            "example": "Very good chair for your home"
+          },
+          "photos": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "notice image url",
+              "example": "https://yarmarok-bucket.s3.amazonaws.com/BSqREaubo3hWhDvb6lNZ3_2.jpg"
+            }
+          },
+          "location": {
+            "type": "string",
+            "example": "Kyiv"
+          },
+          "goodtype": {
+            "type": "string",
+            "enum": ["new", "used"]
+          },
+          "price": {
+            "type": "integer",
+            "example": 2500
+          },
+          "active": {
+            "type": "boolean",
+            "example": false
+          },
+          "contactName": {
+            "type": "string",
+            "exapmle": "Olena"
+          },
+          "contactNumber": {
+            "type": "string",
+            "exapmle": "380961112233"
+          },
+          "owner": {
+            "type": "object",
+            "properties": {
+              "_id": {
+                "type": "string",
+                "example": "64ea254f910ee531cf282d3e",
+                "description": "Backend-generated unique user id"
+              },
+              "email": {
+                "type": "string",
+                "example": "estasjuk@gmail.com",
+                "description": "user email"
+              }
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "the creation time of notice (backend-generated)",
+            "example": "2023-05-15T10:51:30.531Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "the update time of notice (backend-generated)",
+            "example": "2023-05-15T10:51:30.531Z"
           }
         }
       },

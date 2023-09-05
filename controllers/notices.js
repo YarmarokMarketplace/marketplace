@@ -1,9 +1,9 @@
 const { Notice, InactiveNotice } = require("../db/models/notices");
+const { User } = require("../db/models/users");
 const { Category } = require("../db/models/categories");
 const { User } = require("../db/models/users");
 const HttpError = require("../helpers/httpError");
 const controllerWrapper = require("../utils/controllerWrapper");
-
 const buildFilterObject = require("../utils/filterObject");
 const buildSortObject = require("../utils/sortObject");
 
@@ -225,6 +225,88 @@ await InactiveNotice.updateMany({active: false})
   });
 };
 
+const getAllUserNotices = async (req, res) => {
+  const { _id: owner } = req.user;
+  const { page = 1, limit = 3 } = req.query;
+  const skip = (page - 1) * limit;
+  const notices = await Notice.find({ owner }, "", {
+    skip,
+    limit,
+  }).populate("owner", "email").sort({ createdAt: -1 });
+
+  if (notices.length === 0) {
+    throw HttpError.NotFoundError('This user has not any notices');
+  };
+
+  const totalResult = await Notice.countDocuments({ owner });
+  const totalPages = Math.ceil(totalResult / limit);
+
+  res.status(200).json({
+    totalResult,
+    totalPages,
+    page: Number(page),
+    limit: Number(limit),
+    notices,
+   });
+};
+
+const getFavoriteUserNotices = async (req, res) => {
+  const { _id: userId } = req.user;
+  const { page = 1, limit = 3 } = req.query;
+  const skip = (page - 1) * limit;
+
+  const user = await User.findById(userId, "", {
+    skip,
+    limit,
+  }).populate("favorite").sort({ createdAt: -1 });
+
+  const result = user.favorite;
+
+  if (result.length === 0) {
+    throw HttpError.NotFoundError('There any notices for this user');
+  };
+
+  const totalResult = result.length;
+  const totalPages = Math.ceil(totalResult / limit);
+  
+   res.status(200).json({
+    totalResult,
+    totalPages,
+    page: Number(page),
+    limit: Number(limit),
+    result,
+   });
+};
+
+const addNoticeToFavorite = async (req, res) => {
+  const { _id: userId } = req.user;
+  const { id: noticeId } = req.params;
+
+  const user = await User.findById(userId);
+  if (!user) {
+    throw HttpError.NotFoundError("User not found");
+  }
+
+  const result = await User.findByIdAndUpdate(userId, {
+    $addToSet: { favorite: noticeId },
+  });
+
+  if (!result) {
+    throw HttpError.NotFoundError(`Notice with ${noticeId} not found`);
+  }
+
+  res.status(200).json({
+    user: {
+      _id: result._id,
+      name: result.name,
+      lastname: result.lastname,
+      phone: result.phone,
+      email: result.email,
+      favorite: result.favorite,
+    },
+  });
+};
+
 const removeNoticeFromFavorite = async (req, res) => {
   const { _id: userId } = req.user;
   const { id: noticeId } = req.params;
@@ -259,4 +341,7 @@ module.exports = {
   toggleActive: controllerWrapper(toggleActive),
   checkIsActive: controllerWrapper(checkIsActive),
   removeNoticeFromFavorite: controllerWrapper(removeNoticeFromFavorite),
+  getAllUserNotices: controllerWrapper(getAllUserNotices),
+  getFavoriteUserNotices: controllerWrapper(getFavoriteUserNotices),
+  addNoticeToFavorite: controllerWrapper(addNoticeToFavorite),
 };
