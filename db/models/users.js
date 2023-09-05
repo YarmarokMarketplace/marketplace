@@ -75,7 +75,7 @@ const emailSchema = Joi.object({
 });
 
 const updateSchema = Joi.object({
-    name: Joi.string().required(),
+    name: Joi.string(),
     lastname: Joi.string(),
     patronymic: Joi.string(),
     avatarURL: Joi.string(),
