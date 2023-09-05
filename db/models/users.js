@@ -12,7 +12,6 @@ const userSchema = new Schema({
         unique: true,
         required: [true, "Email is required"],
     },
-    facebookId: String,
     password: {
         type: String,
         minlength: 8,
@@ -27,6 +26,10 @@ const userSchema = new Schema({
         required: [true, "Name is required"],
     },
     lastname: {
+        type: String,
+        default: "",
+    },
+    patronymic: {
         type: String,
         default: "",
     },
@@ -69,7 +72,16 @@ const loginSchema = Joi.object({
 
 const emailSchema = Joi.object({
     email: Joi.string().pattern(emailRegex).required(),
-})
+});
+
+const updateSchema = Joi.object({
+    name: Joi.string(),
+    lastname: Joi.string(),
+    patronymic: Joi.string(),
+    avatarURL: Joi.string(),
+    phone: Joi.string(),
+
+});
 
 const User = model("user", userSchema);
 
@@ -78,4 +90,5 @@ module.exports = {
     registerSchema,
     loginSchema,
     emailSchema,
+    updateSchema,
 };
