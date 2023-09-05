@@ -224,6 +224,31 @@ await InactiveNotice.updateMany({active: false})
   });
 };
 
+const getAllUserNotices = async (req, res) => {
+  const { _id: owner } = req.user;
+  const { page = 1, limit = 3 } = req.query;
+  const skip = (page - 1) * limit;
+  const notices = await Notice.find({ owner }, "", {
+    skip,
+    limit,
+  }).populate("owner", "email").sort({ createdAt: -1 });
+
+  if (notices.length === 0) {
+    throw HttpError.NotFoundError('This user has not any notices');
+  };
+
+  const totalResult = await Notice.countDocuments({ owner });
+  const totalPages = Math.ceil(totalResult / limit);
+
+  res.status(200).json({
+    totalResult,
+    totalPages,
+    page: Number(page),
+    limit: Number(limit),
+    notices,
+   });
+};
+
 const getFavoriteUserNotices = async (req, res) => {
   const { _id: userId } = req.user;
   const { page = 1, limit = 3 } = req.query;
@@ -242,14 +267,14 @@ const getFavoriteUserNotices = async (req, res) => {
 
   const totalResult = result.length;
   const totalPages = Math.ceil(totalResult / limit);
-
-  res.status(200).json({
+  
+   res.status(200).json({
     totalResult,
     totalPages,
     page: Number(page),
     limit: Number(limit),
     result,
-  });
+   });
 };
 
 const addNoticeToFavorite = async (req, res) => {
@@ -291,6 +316,7 @@ module.exports = {
   updateNotice: controllerWrapper(updateNotice),
   toggleActive: controllerWrapper(toggleActive),
   checkIsActive: controllerWrapper(checkIsActive),
+  getAllUserNotices: controllerWrapper(getAllUserNotices),
   getFavoriteUserNotices: controllerWrapper(getFavoriteUserNotices),
   addNoticeToFavorite: controllerWrapper(addNoticeToFavorite),
 };
