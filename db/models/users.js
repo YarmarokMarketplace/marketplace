@@ -12,6 +12,7 @@ const userSchema = new Schema({
         unique: true,
         required: [true, "Email is required"],
     },
+    facebookId: String,
     password: {
         type: String,
         minlength: 8,
@@ -19,7 +20,6 @@ const userSchema = new Schema({
     },
     avatarURL: {
         type: String,
-        required: true,
     },
     favorite: [{ type: Schema.Types.ObjectId, ref: "notice" }],
     name: {
@@ -49,7 +49,6 @@ const userSchema = new Schema({
     verificationToken: {
         type: String,
         default: '',
-        required: [true, 'Verify token is required'],
     },
 },
 { versionKey: false, timestamps: true }
