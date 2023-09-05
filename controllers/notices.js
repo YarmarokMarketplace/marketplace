@@ -1,6 +1,7 @@
 const { Notice, InactiveNotice } = require("../db/models/notices");
 const { User } = require("../db/models/users");
 const { Category } = require("../db/models/categories");
+const { User } = require("../db/models/users");
 const HttpError = require("../helpers/httpError");
 const controllerWrapper = require("../utils/controllerWrapper");
 const buildFilterObject = require("../utils/filterObject");
@@ -282,7 +283,6 @@ const addNoticeToFavorite = async (req, res) => {
   const { id: noticeId } = req.params;
 
   const user = await User.findById(userId);
-
   if (!user) {
     throw HttpError.NotFoundError("User not found");
   }
@@ -307,6 +307,30 @@ const addNoticeToFavorite = async (req, res) => {
   });
 };
 
+const removeNoticeFromFavorite = async (req, res) => {
+  const { _id: userId } = req.user;
+  const { id: noticeId } = req.params;
+
+  const user = await User.findById(userId);
+  if (!user) {
+    throw HttpError.NotFoundError("User not found");
+  }
+  
+  if (!user.favorite.includes(noticeId)) {
+    throw HttpError.NotFoundError("Notice not found in favorite notices");
+  }
+
+  const result = await User.findByIdAndUpdate(
+    userId,
+    { $pull: { favorite: noticeId } },
+    { new: true }
+  );
+
+  res.status(200).json({
+    message: "Notice removed",
+  });
+};
+
 module.exports = {
   getAllNotices: controllerWrapper(getAllNotices),
   getNoticesByCategory: controllerWrapper(getNoticesByCategory),
@@ -316,6 +340,7 @@ module.exports = {
   updateNotice: controllerWrapper(updateNotice),
   toggleActive: controllerWrapper(toggleActive),
   checkIsActive: controllerWrapper(checkIsActive),
+  removeNoticeFromFavorite: controllerWrapper(removeNoticeFromFavorite),
   getAllUserNotices: controllerWrapper(getAllUserNotices),
   getFavoriteUserNotices: controllerWrapper(getFavoriteUserNotices),
   addNoticeToFavorite: controllerWrapper(addNoticeToFavorite),
