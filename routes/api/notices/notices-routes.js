@@ -6,7 +6,19 @@ const upload = require('../../../utils/upload');
 const isValidId = require('../../../middlewares/isValidId');
 const authenticate = require('../../../middlewares/authenticate');
 
-const { addNotice, getNoticesByCategory, getAllNotices, updateNotice, removeNotice, getNoticeById, toggleActive, getAllUserNotices, addNoticeToFavorite, getFavoriteUserNotices, removeNoticeFromFavorite } = require('../../../controllers/notices');
+const { addNotice, 
+        getNoticesByCategory, 
+        getAllNotices, 
+        updateNotice, 
+        removeNotice, 
+        getNoticeById, 
+        toggleActive, 
+        getAllUserNotices, 
+        addNoticeToFavorite, 
+        getFavoriteUserNotices, 
+        removeNoticeFromFavorite,
+        searchNoticesByKeywords,
+    } = require('../../../controllers/notices');
 const { addNoticeSchema, updateNoticeSchema, toggleActiveSchema} = require('../../../db/models/notices');
 
 const router = express.Router();
@@ -22,5 +34,6 @@ router.delete('/favorites/:id', authenticate, isValidId, removeNoticeFromFavorit
 router.get('/user/notices', authenticate, getAllUserNotices);
 router.get("/user/favorites", authenticate, getFavoriteUserNotices);
 router.post('/favorites/:id', authenticate, addNoticeToFavorite);
+router.get('/search/search-notice', searchNoticesByKeywords);
 
 module.exports = router;

@@ -1,5 +1,7 @@
 const { Schema, model } = require("mongoose");
 const Joi = require("joi");
+const { DB_HOST } = process.env;
+const mongoose = require("mongoose")
 
 const handleMongooseError = require("../../utils/handleMongooseError");
 
@@ -57,7 +59,6 @@ const noticeSchema = new Schema(
 );
 
 noticeSchema.post("save", handleMongooseError);
-
 
 const addNoticeSchema = Joi.object({
   category: Joi.string().required().messages({

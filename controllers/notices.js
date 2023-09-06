@@ -1,3 +1,4 @@
+const natural = require('natural');
 const { Notice, InactiveNotice } = require("../db/models/notices");
 const { User } = require("../db/models/users");
 const { Category } = require("../db/models/categories");
@@ -5,7 +6,6 @@ const HttpError = require("../helpers/httpError");
 const controllerWrapper = require("../utils/controllerWrapper");
 const buildFilterObject = require("../utils/filterObject");
 const buildSortObject = require("../utils/sortObject");
-
 
 const getAllNotices = async (req, res) => {
   const { page = 1, limit = 9 } = req.query;
@@ -330,6 +330,35 @@ const removeNoticeFromFavorite = async (req, res) => {
   });
 };
 
+const searchNoticesByKeywords = async (req, res) => {
+  const { page = 1, limit = 9, query = "" } = req.query;
+  const skip = (page - 1) * limit;
+  
+  if (!query) {
+    throw HttpError.BadRequest("The search query is empty");
+  }
+
+  const result = await Notice.find(
+    {$text: {$search: query}}, {score: {$meta: "textScore"}}, {skip, limit: Number(limit)}).sort({score:{$meta:"textScore"}}
+    );
+
+  if (result.length === 0) {
+    throw HttpError.NotFoundError("Notices not found");
+  }
+
+  const totalResult = await Notice.countDocuments({$text: {$search: query}}, {score: {$meta: "textScore"}}, '-createdAt -updatedAt', {skip, limit: Number(limit)}).sort({score:{$meta:"textScore"}});
+  const totalPages = Math.ceil(totalResult / limit);
+
+  res.status(200).json({
+    totalResult,
+    totalPages,
+    page: +page,
+    limit: +limit,
+    result,
+  });
+};
+
+
 module.exports = {
   getAllNotices: controllerWrapper(getAllNotices),
   getNoticesByCategory: controllerWrapper(getNoticesByCategory),
@@ -343,4 +372,5 @@ module.exports = {
   getAllUserNotices: controllerWrapper(getAllUserNotices),
   getFavoriteUserNotices: controllerWrapper(getFavoriteUserNotices),
   addNoticeToFavorite: controllerWrapper(addNoticeToFavorite),
+  searchNoticesByKeywords: controllerWrapper(searchNoticesByKeywords),
 };
