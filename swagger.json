@@ -1082,6 +1082,39 @@
               "description": "Number of articles per page.",
               "default": 6
             }
+          },
+          {
+            "name": "goodtype",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Type of filtering.",
+              "enum": [
+                "new",
+                "used"
+              ]
+            }
+          },
+          {
+            "name": "priceRange",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Type of filtering.",
+              "example": "100-199"
+            }
+          },
+          {
+            "name": "location",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Type of filtering.",
+              "example": "Kyiv"
+            }
           }
         ],
         "responses": {
@@ -1396,6 +1429,14 @@
           "photos": {
             "type": "string",
             "format": "binary"
+          },
+          "contactName": {
+            "type": "string",
+            "example": "Olena"
+          },
+          "contactNumber": {
+            "type": "string",
+            "example": "380961112233"
           }
         }
       },
@@ -1543,6 +1584,14 @@
                 "description": "user email"
               }
             }
+          },
+          "contactName": {
+            "type": "string",
+            "example": "Olena"
+          },
+          "contactNumber": {
+            "type": "string",
+            "example": "380961112233"
           },
           "createdAt": {
             "type": "string",
