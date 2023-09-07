@@ -48,7 +48,7 @@ const signup = async (req, res) => {
 };
 
 const googleAuth = async(req, res)=> {
-    const {_id: id} = req.user;
+    const {_id: id, email, name } = req.user;
     const payload = {
         id,
     }
@@ -57,7 +57,7 @@ const googleAuth = async(req, res)=> {
     const refreshToken = jwt.sign(payload, REFRESH_SECRET_KEY, {expiresIn: "7d"});
     await User.findByIdAndUpdate(id, {accessToken, refreshToken});
 
-    res.redirect(`${FRONTEND_URL}?accessToken=${accessToken}&refreshToken=${refreshToken}`)
+    res.redirect(`${FRONTEND_URL}?accessToken=${accessToken}&refreshToken=${refreshToken}&email=${email}&name=${name}`)
 }
 
 const verifyEmail = async(req, res)=> {
