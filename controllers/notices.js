@@ -331,22 +331,69 @@ const removeNoticeFromFavorite = async (req, res) => {
 };
 
 const searchNoticesByKeywords = async (req, res) => {
-  const { page = 1, limit = 9, query = "" } = req.query;
+  const { page = 1, limit = 9, keywords = "", goodtype, priceRange, sort, location } = req.query;
   const skip = (page - 1) * limit;
+  let minPrice = 0;
+  let maxPrice = 0;
   
-  if (!query) {
-    throw HttpError.BadRequest("The search query is empty");
+  if (!keywords) {
+    throw HttpError.BadRequest("The search keywords is empty");
   }
 
-  const result = await Notice.find(
-    {$text: {$search: query}}, {score: {$meta: "textScore"}}, {skip, limit: Number(limit)}).sort({score:{$meta:"textScore"}}
+  if (priceRange) {
+    const formattedPriceRange = priceRange.split("-");
+    minPrice = Number(formattedPriceRange[0]);
+    maxPrice = Number(formattedPriceRange[1]);
+  }
+  console.log(minPrice)
+  console.log(maxPrice)
+  let notices = await Notice.find(
+    {$text: {$search: keywords}}, {score: {$meta: "textScore"}}, {skip, limit: Number(limit)}).sort({score:{$meta:"textScore"}}
     );
+
 
   if (result.length === 0) {
     throw HttpError.NotFoundError("Notices not found");
   }
 
-  const totalResult = await Notice.countDocuments({$text: {$search: query}}, {score: {$meta: "textScore"}}, '-createdAt -updatedAt', {skip, limit: Number(limit)}).sort({score:{$meta:"textScore"}});
+  if (goodtype && priceRange && location) {
+    n1 = result.filter(notice => notice.goodtype === goodtype);
+    n2 = n1.filter(notice => notice.price <= maxPrice && notice.price >= minPrice);
+    notices = n2.filter(notice => notice.location === location)
+  }
+
+  if (goodtype && !priceRange && !location) {
+    notices = result.filter(notice => notice.goodtype === goodtype);
+  }
+
+  if (goodtype && priceRange && !location) {
+    n1 = result.filter(notice => notice.goodtype === goodtype);
+    notices = n1.filter(notice => notice.price <= maxPrice && notice.price >= minPrice);
+  }
+
+  if (!goodtype && !priceRange && location) {
+    notices = result.filter(notice => notice.location === location);
+  }
+
+  if (goodtype && !priceRange && location) {
+    n1 = result.filter(notice => notice.goodtype === goodtype);
+    notices = n1.filter(notice => notice.location === location);
+  }
+
+  if (!goodtype && priceRange && location) {
+    n1 = result.filter(notice => notice.location === location);
+    notices = n1.filter(notice => notice.price <= maxPrice && notice.price >= minPrice);
+  }
+
+  if (!goodtype && priceRange && !location) {
+    notices = result.filter(notice => notice.price <= maxPrice && notice.price >= minPrice);
+  }
+
+  if (!goodtype && !priceRange && !location) {
+    const totalResult = await Notice.countDocuments({$text: {$search: keywords}}, {score: {$meta: "textScore"}}, '-createdAt -updatedAt', {skip, limit: Number(limit)}).sort({score:{$meta:"textScore"}});
+  }
+
+  const totalResult = await Notice.countDocuments({$text: {$search: keywords}}, {score: {$meta: "textScore"}}, '-createdAt -updatedAt', {skip, limit: Number(limit)}).sort({score:{$meta:"textScore"}});
   const totalPages = Math.ceil(totalResult / limit);
 
   res.status(200).json({
