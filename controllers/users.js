@@ -47,7 +47,37 @@ const updateUserData = async (req, res) => {
     });
 };
 
+const sendPurchaseRequest = async (req, res) => {
+    const { _id: userId } = req.user;
+    const { id: noticeId } = req.params;
+  
+    const user = await User.findById(userId);
+    if (!user) {
+      throw HttpError.NotFoundError("User not found");
+    }
+  
+    const result = await User.findByIdAndUpdate(userId, {
+      $addToSet: { favorite: noticeId },
+    });
+  
+    if (!result) {
+      throw HttpError.NotFoundError(`Notice with ${noticeId} not found`);
+    }
+  
+    res.status(200).json({
+      user: {
+        _id: result._id,
+        name: result.name,
+        lastname: result.lastname,
+        phone: result.phone,
+        email: result.email,
+        favorite: result.favorite,
+      },
+    });
+  };
+
 module.exports = {
     removeUser: controllerWrapper(removeUser),
     updateUserData: controllerWrapper(updateUserData),
+    sendPurchaseRequest: controllerWrapper(sendPurchaseRequest),
 };
