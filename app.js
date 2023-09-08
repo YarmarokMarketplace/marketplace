@@ -13,6 +13,7 @@ const noticeRouter = require("./routes/api/notices/notices-routes");
 const mainRouter = require("./routes/api/main/main-routes");
 const authRouter = require("./routes/api/auth/auth-routes");
 const userRouter = require("./routes/api/user/user-routes");
+const orderRouter = require("./routes/api/order/orders-routes");
 
 const { job } = require('./utils/cronJob');
 
@@ -74,6 +75,7 @@ app.use("/api/main", mainRouter);
 app.use("/api/notices", noticeRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
+app.use("/api/orders", orderRouter);
 
 job.start();
 
