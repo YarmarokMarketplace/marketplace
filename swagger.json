@@ -1115,6 +1115,20 @@
               "description": "Type of filtering.",
               "example": "Kyiv"
             }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Type of sorting.",
+              "enum": [
+                "newest",
+                "cheapest",
+                "expensive"
+              ]
+            }
           }
         ],
         "responses": {

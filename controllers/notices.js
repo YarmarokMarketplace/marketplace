@@ -7,6 +7,7 @@ const controllerWrapper = require("../utils/controllerWrapper");
 const buildFilterObject = require("../utils/filterObject");
 const buildSortObject = require("../utils/sortObject");
 const buildFilterAfterSearchByKeywords = require("../utils/filterAfterSearchByKeywords");
+const buildSortObjectAfterSearchByKeywords = require("../utils/sortObjectAfterSearchByKeywords");
 
 const getAllNotices = async (req, res) => {
   const { page = 1, limit = 9 } = req.query;
@@ -332,7 +333,7 @@ const removeNoticeFromFavorite = async (req, res) => {
 };
 
 const searchNoticesByKeywords = async (req, res) => {
-  const { page = 1, limit = 9, keywords = "", goodtype, priceRange, location } = req.query;
+  const { page = 1, limit = 9, keywords = "", goodtype, priceRange, location, sort } = req.query;
   const skip = (page - 1) * limit;
   const query = { goodtype, priceRange, location };
   
@@ -350,12 +351,16 @@ const searchNoticesByKeywords = async (req, res) => {
     {$and: [{$text: {$search: keywords}}, buildFilterAfterSearchByKeywords(query)]}, {score: {$meta: "textScore"}}, {skip, limit: Number(limit)}).sort({score:{$meta:"textScore"}}
   );
 
-  const totalResult = await Notice.countDocuments(
+  if (sort) {
+    await buildSortObjectAfterSearchByKeywords(notices, sort)
+  }
+
+  let totalResult = await Notice.countDocuments(
     {$and: [{$text: {$search: keywords}}, buildFilterAfterSearchByKeywords(query)]}, {score: {$meta: "textScore"}}, 
     '-createdAt -updatedAt', 
     {skip, limit: Number(limit)})
-    .sort({score:{$meta:"textScore"}});
-  
+    .sort({score:{$meta:"textScore"}})
+
     const totalPages = Math.ceil(totalResult / limit);
 
   res.status(200).json({
