@@ -1054,7 +1054,7 @@
         "operationId": "searchNoticesByKeywords",
         "parameters": [
           {
-            "name": "query",
+            "name": "keywords",
             "in": "query",
             "required": true,
             "example": "дитячий велосипед",
