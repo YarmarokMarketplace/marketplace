@@ -183,6 +183,10 @@ const login = async (req, res) => {
             id: user._id,
             email: user.email,
             name: user.name,
+            lastname: user.lastname,
+            patronymic: user.patronymic,
+            avatarURL: user.avatarURL,
+            phone: user.phone,
         }
     });
 };
