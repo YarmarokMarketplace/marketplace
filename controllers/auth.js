@@ -227,15 +227,15 @@ const logout = async(req, res)=> {
 };
 
 const getCurrent = (req, res) => {
-    const {name, email} = req.user;
+    const {name, email, lastname, patronymic, avatarURL, phone} = req.user;
 
     res.status(200).json({
         name,
         email,
-        lastname: user.lastname,
-        patronymic: user.patronymic,
-        avatarURL: user.avatarURL,
-        phone: user.phone,
+        lastname,
+        patronymic,
+        avatarURL,
+        phone,
     })
 }
 
