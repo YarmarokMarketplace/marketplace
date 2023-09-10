@@ -232,6 +232,10 @@ const getCurrent = (req, res) => {
     res.status(200).json({
         name,
         email,
+        lastname: user.lastname,
+        patronymic: user.patronymic,
+        avatarURL: user.avatarURL,
+        phone: user.phone,
     })
 }
 
