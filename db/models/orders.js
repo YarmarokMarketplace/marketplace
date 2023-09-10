@@ -106,12 +106,12 @@ const orderSchema = new Schema(
     },
     typeOfDelivery: {
         type: String,
-        enun: ["new-post", "ukr-post", "other"],
+        enum: ["new-post", "ukr-post", "other"],
         required: true,
     },
     deliveryData: {
         type: Object,
-        enun: [newPostSchema, ukrPostSchema, otherSchema],
+        enum: [newPostSchema, ukrPostSchema, otherSchema],
         required: true,
     },
     comments: {
