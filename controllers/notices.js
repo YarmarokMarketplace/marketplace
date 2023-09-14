@@ -348,7 +348,10 @@ const searchNoticesByKeywords = async (req, res) => {
   }
   
   let notices = await Notice.find(
-    {$and: [{$text: {$search: keywords}}, buildFilterAfterSearchByKeywords(query)]}, {score: {$meta: "textScore"}}, {skip, limit: Number(limit)}).sort({score:{$meta:"textScore"}}
+    {$and: [
+      {$text: {$search: keywords}}, 
+      buildFilterAfterSearchByKeywords(query)]}, 
+      {score: {$meta: "textScore"}}, {skip, limit: Number(limit)}).sort({score:{$meta:"textScore"}}
   );
 
   if (sort) {
