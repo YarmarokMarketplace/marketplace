@@ -1020,39 +1020,11 @@
         }
       }
     },
-    "/main": {
-      "get": {
-        "summary": "Get all categories",
-        "tags": [
-          "Categories"
-        ],
-        "description": "Find all existing categories",
-        "operationId": "getAllCategories",
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListOfCategoriesResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "404": {
-            "description": "Categories not found"
-          }
-        }
-      }
-    },
-    "/orders": {
+    "/notices/{id}/order": {
       "post": {
         "summary": "Add new order",
         "tags": [
-          "Order"
+          "Notice"
         ],
         "security": [
           {
@@ -1090,6 +1062,34 @@
           },
           "404": {
             "description": "User not found"
+          }
+        }
+      }
+    },
+    "/main": {
+      "get": {
+        "summary": "Get all categories",
+        "tags": [
+          "Categories"
+        ],
+        "description": "Find all existing categories",
+        "operationId": "getAllCategories",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListOfCategoriesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "404": {
+            "description": "Categories not found"
           }
         }
       }
@@ -1917,6 +1917,11 @@
       "AddOrderResponse": {
         "type": "object",
         "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Backend-generated unique order identifier",
+            "example": "6505ff300a697ff593008414"
+          },
           "buyerName": {
             "type": "string",
             "example": "Olena"
@@ -1925,14 +1930,20 @@
             "type": "string",
             "example": "Ivanova"
           },
-          "typeOfDelivery": {
+          "deliveryType": {
             "type": "string",
             "enum": ["new-post", "ukr-post", "other"],
-            "example": "home-and-garden"
+            "example": "ukr-post"
           },
-          "buyerPhone": {
+          "owner": {
             "type": "string",
-            "example": "380961112233"
+            "description": "The identifier of creator of this order",
+            "example": "64fb44158a217ff792230717"
+          },
+          "product": {
+            "type": "string",
+            "description": "The identifier of notice of this order",
+            "example": "64fb44158a217ff792230717"
           },
           "deliveryData": {
             "type": "object",
@@ -2029,6 +2040,18 @@
                   }
                 }
               }
+          },
+          "buyerPhone": {
+            "type": "string",
+            "example": "380961112233"
+          },
+          "createdAt": {
+            "type": "date",
+            "example": "2023-09-16T19:17:04.611Z"
+          },
+          "updatedAt": {
+            "type": "date",
+            "example": "2023-09-16T19:17:04.611Z"
           }
         }
       }

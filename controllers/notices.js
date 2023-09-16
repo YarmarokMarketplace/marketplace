@@ -94,7 +94,7 @@ const getNoticeById = async (req, res) => {
   }
   res.status(201).json({
     data: notice,
-   });
+  });
 };
     
 const removeNotice = async (req, res) => {
