@@ -246,7 +246,7 @@ const getAllUserNotices = async (req, res) => {
     page: Number(page),
     limit: Number(limit),
     notices,
-   });
+  });
 };
 
 const getFavoriteUserNotices = async (req, res) => {
