@@ -45,7 +45,7 @@ app.use(logger(formatsLogger));
 app.use(
   cors({
     credentials: true,
-    origin: ["http://localhost:8080", /\.netlify\.app$/],
+    origin: ["http://localhost:8080", "https://yarmarok.netlify.app/", /\.netlify\.app$/],
   })
 );
 
