@@ -5,7 +5,8 @@ const HttpError = require("../helpers/httpError");
 const controllerWrapper = require("../utils/controllerWrapper");
 const buildFilterObject = require("../utils/filterObject");
 const buildSortObject = require("../utils/sortObject");
-
+const deactivationNotificationHtml = require("../utils/deactivationNotification");
+const sendEmail = require('../helpers/sendEmail');
 
 const getAllNotices = async (req, res) => {
   const { page = 1, limit = 9 } = req.query;
@@ -201,7 +202,7 @@ const checkIsActive = async (req, res) => {
     $lt: new Date(thirtyDays)} 
 }, { active: false })
 
-await InactiveNotice.updateMany({active: false})
+await InactiveNotice.updateMany({active: false});
   
   await Notice.aggregate([
     { $match: 
@@ -246,7 +247,7 @@ const getAllUserNotices = async (req, res) => {
     page: Number(page),
     limit: Number(limit),
     notices,
-   });
+  });
 };
 
 const getFavoriteUserNotices = async (req, res) => {
@@ -268,13 +269,13 @@ const getFavoriteUserNotices = async (req, res) => {
   const totalResult = result.length;
   const totalPages = Math.ceil(totalResult / limit);
   
-   res.status(200).json({
+  res.status(200).json({
     totalResult,
     totalPages,
     page: Number(page),
     limit: Number(limit),
     result,
-   });
+  });
 };
 
 const addNoticeToFavorite = async (req, res) => {
@@ -328,6 +329,43 @@ const removeNoticeFromFavorite = async (req, res) => {
   res.status(200).json({
     message: "Notice removed",
   });
+}; 
+
+const sendDeactivationLetter = async (req, res) => {
+  
+  const today = new Date();
+  const thirtyDays = today.getTime() - (9*24*60*60*1000);
+
+  const inactiveNotices = await InactiveNotice.find({ createdAt: {
+    $lt: new Date(thirtyDays)} 
+  }).populate("owner");
+
+  const noticesWithActiveUsers = inactiveNotices.filter(notice => notice.owner !== null)
+
+  for (i = 0; i <= noticesWithActiveUsers.length; i += 1) {
+    noticeTitle = noticesWithActiveUsers[i].title;
+    email = noticesWithActiveUsers[i].owner.email;
+    id = noticesWithActiveUsers[i]._id;
+    noticeCategory = noticesWithActiveUsers[i].category;
+
+    const deactivationEmail = {
+      to: email,
+      subject: "Сповіщення про деактивацію оголошення",
+      html: `${deactivationNotificationHtml}
+      Шановний користувачу! Повідомляємо про деактивацію вашого оголошення "${noticeTitle}"
+      Для повторної активації перейдіть, будь ласка, на сторінку оголошення за посиланням:</p>
+      <a style="
+      font-family: 'Roboto', sans-serif;
+      font-weight: 700;
+      font-size: 20px;
+      line-height: 1.14;
+      letter-spacing: 0.02em;
+      target="_blank" href="https://main--yarmarok-test.netlify.app/#/${noticeCategory}/${id}}"/>
+      </div>
+      `
+  };
+  await sendEmail(deactivationEmail);
+  }
 };
 
 module.exports = {
@@ -343,4 +381,5 @@ module.exports = {
   getAllUserNotices: controllerWrapper(getAllUserNotices),
   getFavoriteUserNotices: controllerWrapper(getFavoriteUserNotices),
   addNoticeToFavorite: controllerWrapper(addNoticeToFavorite),
+  sendDeactivationLetter: controllerWrapper(sendDeactivationLetter),
 };
