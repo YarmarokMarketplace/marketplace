@@ -186,7 +186,7 @@ const login = async (req, res) => {
             lastname: user.lastname,
             patronymic: user.patronymic,
             deliveryData: user.deliveryData,
-            deliveryType: user.deliveryType,
+            deliveryType: user.deliveryType,sz
             avatarURL: user.avatarURL,
             phone: user.phone,
         }
@@ -232,15 +232,15 @@ const getCurrent = (req, res) => {
     const {name, email, _id, lastname, patronymic, deliveryData, deliveryType, avatarURL, phone } = req.user;
 
     res.status(200).json({
-        _id,
-        email,
+        id: _id,
         name,
+        email,
         lastname,
         patronymic,
-        deliveryData,
-        deliveryType,
         avatarURL,
         phone,
+        deliveryData,
+        deliveryType,
     })
 }
 
