@@ -236,7 +236,7 @@ await InactiveNotice.updateMany({active: false});
       to: email,
       subject: "Сповіщення про деактивацію оголошення",
       html: `${deactivationNotificationHtml}
-      Шановний користувачу! Повідомляємо про деактивацію вашого оголошення "${noticeTitle}"
+      Шановний користувачу! Повідомляємо про деактивацію вашого оголошення "${noticeTitle}".
       Якщо Ви хочете активувати оголошення, перейдіть, будь ласка, на сторінку оголошення за посиланням:</p>
       <a style="
       font-family: 'Roboto', sans-serif;
