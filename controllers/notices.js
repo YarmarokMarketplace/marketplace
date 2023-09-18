@@ -334,15 +334,15 @@ const removeNoticeFromFavorite = async (req, res) => {
 const sendDeactivationLetter = async (req, res) => {
   
   const today = new Date();
-  const thirtyDays = today.getTime() - (9*24*60*60*1000);
-
-  const inactiveNotices = await InactiveNotice.find({ createdAt: {
-    $lt: new Date(thirtyDays)} 
+  //const formattedToday = today.toISOString().slice(0, 10);
+console.log(today.getDate().toString());
+  const inactiveNotices = await InactiveNotice.find({ updatedAt: {
+    $lte: new Date()} 
   }).populate("owner");
 
   const noticesWithActiveUsers = inactiveNotices.filter(notice => notice.owner !== null)
 
-  for (i = 0; i <= noticesWithActiveUsers.length; i += 1) {
+  for (i = 0; i < noticesWithActiveUsers.length; i += 1) {
     noticeTitle = noticesWithActiveUsers[i].title;
     email = noticesWithActiveUsers[i].owner.email;
     id = noticesWithActiveUsers[i]._id;
@@ -353,19 +353,24 @@ const sendDeactivationLetter = async (req, res) => {
       subject: "Сповіщення про деактивацію оголошення",
       html: `${deactivationNotificationHtml}
       Шановний користувачу! Повідомляємо про деактивацію вашого оголошення "${noticeTitle}"
-      Для повторної активації перейдіть, будь ласка, на сторінку оголошення за посиланням:</p>
+      Якщо Ви хочете активувати оголошення, перейдіть, будь ласка, на сторінку оголошення за посиланням:</p>
       <a style="
       font-family: 'Roboto', sans-serif;
       font-weight: 700;
       font-size: 20px;
       line-height: 1.14;
-      letter-spacing: 0.02em;
-      target="_blank" href="https://main--yarmarok-test.netlify.app/#/${noticeCategory}/${id}}"/>
+      letter-spacing: 0.02em;"
+      target="_blank" href="https://yarmarok.netlify.app/#/${noticeCategory}/${id}">Перейти до оголошення</a>
       </div>
       `
-  };
-  await sendEmail(deactivationEmail);
+    };
+
+    await sendEmail(deactivationEmail);
   }
+
+  res.status(200).json({
+    inactiveNotices,
+  });
 };
 
 module.exports = {
