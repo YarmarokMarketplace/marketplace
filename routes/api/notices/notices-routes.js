@@ -20,6 +20,7 @@ const { addNotice,
         searchNoticesByKeywords,
     } = require('../../../controllers/notices');
 const { addNoticeSchema, updateNoticeSchema, toggleActiveSchema} = require('../../../db/models/notices');
+const { createOrder } = require('../../../controllers/orders');
 
 const router = express.Router();
 
@@ -35,5 +36,6 @@ router.get('/user/notices', authenticate, getAllUserNotices);
 router.get("/user/favorites", authenticate, getFavoriteUserNotices);
 router.post('/favorites/:id', authenticate, addNoticeToFavorite);
 router.get('/search/search-notice', searchNoticesByKeywords);
+router.post('/:id/order', authenticate, isValidId, createOrder);
 
 module.exports = router;

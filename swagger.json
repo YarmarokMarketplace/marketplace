@@ -45,6 +45,10 @@
     {
       "name": "User",
       "description": "User endpoints"
+    },
+    {
+      "name": "Order",
+      "description": "Order endpoints"
     }
   ],
   "paths": {
@@ -1016,6 +1020,52 @@
         }
       }
     },
+    "/notices/{id}/order": {
+      "post": {
+        "summary": "Add new order",
+        "tags": [
+          "Notice"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "description": "Add new order",
+        "operationId": "addOrder",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddOrderRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddOrderResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Not authorized"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
     "/main": {
       "get": {
         "summary": "Get all categories",
@@ -1619,140 +1669,6 @@
           }
         }
       },
-      "ListOfUserNoticesResponse": {
-        "type": "object",
-        "properties": {
-          "result": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "totalResults": {
-                  "type": "integer",
-                  "example": 8
-                },
-                "totalPages": {
-                  "type": "integer",
-                  "example": 2
-                },
-                "page": {
-                  "type": "integer",
-                  "example": 1
-                },
-                "limit": {
-                  "type": "integer",
-                  "example": 6
-                },
-                "result": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/UserNoticeResponse"
-                  }
-                }
-              }
-            },
-            "description": "List of user notices"
-          }
-        }
-      },
-      "UserNoticeResponse": {
-        "type": "object",
-        "properties": {
-          "_id": {
-            "type": "string",
-            "description": "Backend-generated unique identifier",
-            "example": "GGHJlhkj668__hjkhjkhh$%"
-          },
-          "category": {
-            "type": "string",
-            "description": "notice's category",
-            "enum": [
-              "auto",
-              "business-and-services",
-              "for-free",
-              "children's-world",
-              "home-and-garden",
-              "help",
-              "electricity",
-              "spare-parts-for-transport",
-              "fashion-and-style",
-              "realty",
-              "exchange",
-              "repair",
-              "work",
-              "animals",
-              "goods-to-win",
-              "hobbies-recreation-sports"
-            ]
-          },
-          "title": {
-            "type": "string",
-            "description": "the title of user notice",
-            "example": "The chair for sale"
-          },
-          "description": {
-            "type": "string",
-            "example": "Very good chair for your home"
-          },
-          "photos": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "notice image url",
-              "example": "https://yarmarok-bucket.s3.amazonaws.com/BSqREaubo3hWhDvb6lNZ3_2.jpg"
-            }
-          },
-          "location": {
-            "type": "string",
-            "example": "Kyiv"
-          },
-          "goodtype": {
-            "type": "string",
-            "enum": ["new", "used"]
-          },
-          "price": {
-            "type": "integer",
-            "example": 2500
-          },
-          "active": {
-            "type": "boolean",
-            "example": false
-          },
-          "contactName": {
-            "type": "string",
-            "exapmle": "Olena"
-          },
-          "contactNumber": {
-            "type": "string",
-            "exapmle": "380961112233"
-          },
-          "owner": {
-            "type": "object",
-            "properties": {
-              "_id": {
-                "type": "string",
-                "example": "64ea254f910ee531cf282d3e",
-                "description": "Backend-generated unique user id"
-              },
-              "email": {
-                "type": "string",
-                "example": "estasjuk@gmail.com",
-                "description": "user email"
-              }
-            }
-          },
-          "createdAt": {
-            "type": "string",
-            "description": "the creation time of notice (backend-generated)",
-            "example": "2023-05-15T10:51:30.531Z"
-          },
-          "updatedAt": {
-            "type": "string",
-            "description": "the update time of notice (backend-generated)",
-            "example": "2023-05-15T10:51:30.531Z"
-          }
-        }
-      },
       "ListOfCategoriesResponse": {
         "type": "object",
         "properties": {
@@ -1861,14 +1777,280 @@
             "example": "https://yarmarok-bucket.s3.amazonaws.com/1-kisb82VT8IOXQ3RbXa9.jpg"
           }
         }
+      },
+      "AddOrderRequest": {
+        "type": "object",
+        "required": [
+          "buyerName",
+          "buyerLastname",
+          "buyerPhone",
+          "deliveryType",
+          "deliveryData"
+        ],
+        "properties": {
+          "buyerName": {
+            "type": "string",
+            "example": "Olena"
+          },
+          "buyerLastname": {
+            "type": "string",
+            "example": "Ivanova"
+          },
+          "deliveryType": {
+            "type": "string",
+            "enum": ["new-post", "ukr-post", "other"],
+            "example": "home-and-garden"
+          },
+          "buyerPhone": {
+            "type": "string",
+            "example": "380961112233"
+          },
+          "deliveryData": {
+            "type": "object",
+            "properties": {
+                "otherSchema": {
+                  "type": "object",
+                  "properties": {
+                    "typeOfOtherDelivery": {
+                      "type": "string",
+                      "example": "I would like to get parcel from 09:00 till 11:00"
+                    }
+                  }
+                },
+                "ukrPostSchema": {
+                  "type": "object",
+                  "properties": {
+                    "city": {
+                      "type": "string",
+                      "example": "Kyiv"
+                    },
+                    "index": {
+                      "type": "string",
+                      "example": "01001"
+                    },
+                    "street": {
+                      "type": "string",
+                      "example": "Soborna"
+                    },
+                    "house": {
+                      "type": "string",
+                      "example": "12"
+                    },
+                    "apartments": {
+                      "type": "string",
+                      "example": "25"
+                    }
+                  }
+                },
+                "newPostSchema": {
+                  "type": "object",
+                  "properties": {
+                    "typeOfNovaPostDelivery": {
+                      "type": "object",
+                      "properties": {
+                        "postOfficeSchema": {
+                          "type": "object",
+                          "properties": {
+                            "postOfficeNumber": {
+                              "type": "string",
+                              "example": "322"
+                            },
+                            "city": {
+                              "type": "string",
+                              "example": "Kyiv"
+                            }
+                          }
+                        },
+                        "addressSchema": {
+                          "type": "object",
+                          "properties": {
+                            "city": {
+                              "type": "string",
+                              "example": "Kyiv"
+                            },
+                            "street": {
+                              "type": "string",
+                              "example": "Soborna"
+                            },
+                            "house": {
+                              "type": "string",
+                              "example": "12"
+                            },
+                            "apartments": {
+                              "type": "string",
+                              "example": "132"
+                            }
+                          }
+                        },
+                        "postBoxSchema": {
+                          "type": "object",
+                          "properties": {
+                            "postBoxNumber": {
+                              "type": "string",
+                              "example": "322"
+                            },
+                            "city": {
+                              "type": "string",
+                              "example": "Kyiv"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+          }
+        }
+      },
+      "AddOrderResponse": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Backend-generated unique order identifier",
+            "example": "6505ff300a697ff593008414"
+          },
+          "buyerName": {
+            "type": "string",
+            "example": "Olena"
+          },
+          "buyerLastname": {
+            "type": "string",
+            "example": "Ivanova"
+          },
+          "deliveryType": {
+            "type": "string",
+            "enum": ["new-post", "ukr-post", "other"],
+            "example": "ukr-post"
+          },
+          "owner": {
+            "type": "string",
+            "description": "The identifier of creator of this order",
+            "example": "64fb44158a217ff792230717"
+          },
+          "product": {
+            "type": "string",
+            "description": "The identifier of notice of this order",
+            "example": "64fb44158a217ff792230717"
+          },
+          "deliveryData": {
+            "type": "object",
+            "properties": {
+                "otherSchema": {
+                  "type": "object",
+                  "properties": {
+                    "typeOfOtherDelivery": {
+                      "type": "string",
+                      "example": "I would like to get parcel from 09:00 till 11:00"
+                    }
+                  }
+                },
+                "ukrPostSchema": {
+                  "type": "object",
+                  "properties": {
+                    "city": {
+                      "type": "string",
+                      "example": "Kyiv"
+                    },
+                    "index": {
+                      "type": "string",
+                      "example": "01001"
+                    },
+                    "street": {
+                      "type": "string",
+                      "example": "Soborna"
+                    },
+                    "house": {
+                      "type": "string",
+                      "example": "12"
+                    },
+                    "apartments": {
+                      "type": "string",
+                      "example": "25"
+                    }
+                  }
+                },
+                "newPostSchema": {
+                  "type": "object",
+                  "properties": {
+                    "typeOfNovaPostDelivery": {
+                      "type": "object",
+                      "properties": {
+                        "postOfficeSchema": {
+                          "type": "object",
+                          "properties": {
+                            "postOfficeNumber": {
+                              "type": "string",
+                              "example": "322"
+                            },
+                            "city": {
+                              "type": "string",
+                              "example": "Kyiv"
+                            }
+                          }
+                        },
+                        "addressSchema": {
+                          "type": "object",
+                          "properties": {
+                            "city": {
+                              "type": "string",
+                              "example": "Kyiv"
+                            },
+                            "street": {
+                              "type": "string",
+                              "example": "Soborna"
+                            },
+                            "house": {
+                              "type": "string",
+                              "example": "12"
+                            },
+                            "apartments": {
+                              "type": "string",
+                              "example": "132"
+                            }
+                          }
+                        },
+                        "postBoxSchema": {
+                          "type": "object",
+                          "properties": {
+                            "postBoxNumber": {
+                              "type": "string",
+                              "example": "322"
+                            },
+                            "city": {
+                              "type": "string",
+                              "example": "Kyiv"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+          },
+          "buyerPhone": {
+            "type": "string",
+            "example": "380961112233"
+          },
+          "createdAt": {
+            "type": "date",
+            "example": "2023-09-16T19:17:04.611Z"
+          },
+          "updatedAt": {
+            "type": "date",
+            "example": "2023-09-16T19:17:04.611Z"
+          }
+        }
       }
-    },
-    "securitySchemes": {
+    }
+  },
+  "securitySchemes": {
       "Bearer": {
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT"
       }
-    }
   }
 }

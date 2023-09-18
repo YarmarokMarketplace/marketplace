@@ -53,6 +53,15 @@ const userSchema = new Schema({
         type: String,
         default: '',
     },
+    deliveryType: {
+        type: String,
+        enum: ["new-post", "ukr-post", "other", ""],
+        default: "",
+    },
+    deliveryData: {
+        type: Schema.Types.Mixed,
+        default: "",
+    }
 },
 { versionKey: false, timestamps: true }
 );

@@ -29,7 +29,7 @@ const signup = async (req, res) => {
         to: email,
         subject: "Підтвердження реєстрації на маркетплейсі Yarmarok",
         html: `${emailVerificationHtml}
-        target="_blank" href="${BASE_URL}/api/auth/verify/${verificationToken}">Підтвердити</a>
+        target="_blank" href="https://yarmarok.onrender.com/api/auth/verify/${verificationToken}">Підтвердити</a>
         </div>
         `
     };
@@ -48,7 +48,7 @@ const signup = async (req, res) => {
 };
 
 const googleAuth = async(req, res)=> {
-    const {_id: id} = req.user;
+    const {_id: id, email, name } = req.user;
     const payload = {
         id,
     }
@@ -57,7 +57,7 @@ const googleAuth = async(req, res)=> {
     const refreshToken = jwt.sign(payload, REFRESH_SECRET_KEY, {expiresIn: "7d"});
     await User.findByIdAndUpdate(id, {accessToken, refreshToken});
 
-    res.redirect(`${FRONTEND_URL}?accessToken=${accessToken}&refreshToken=${refreshToken}`)
+    res.redirect(`${FRONTEND_URL}?accessToken=${accessToken}&refreshToken=${refreshToken}&email=${email}&name=${name}`)
 }
 
 const verifyEmail = async(req, res)=> {
@@ -139,7 +139,7 @@ const resetPassword = async (req, res) => {
         if (err) {
             throw new HttpError(403, "Reset token is expired")
         }
-      });
+    });
 
     const hashPassword = await bcrypt.hash(password, 10);
     await User.findByIdAndUpdate({_id: id},{ password: hashPassword });
@@ -170,7 +170,7 @@ const login = async (req, res) => {
         id: user._id,
     };
 
-    const accessToken = jwt.sign(payload, ACCESS_SECRET_KEY, { expiresIn: 300 });
+    const accessToken = jwt.sign(payload, ACCESS_SECRET_KEY, { expiresIn: 300000 });
     const refreshToken = jwt.sign(payload, REFRESH_SECRET_KEY, {expiresIn: 604800});
     await User.findOneAndUpdate({ _id: payload.id }, { $set: { accessToken, refreshToken } });
 
@@ -183,6 +183,12 @@ const login = async (req, res) => {
             id: user._id,
             email: user.email,
             name: user.name,
+            lastname: user.lastname,
+            patronymic: user.patronymic,
+            deliveryData: user.deliveryData,
+            deliveryType: user.deliveryType,sz
+            avatarURL: user.avatarURL,
+            phone: user.phone,
         }
     });
 };
@@ -223,11 +229,18 @@ const logout = async(req, res)=> {
 };
 
 const getCurrent = (req, res) => {
-    const {name, email} = req.user;
+    const {name, email, _id, lastname, patronymic, deliveryData, deliveryType, avatarURL, phone } = req.user;
 
     res.status(200).json({
+        id: _id,
         name,
         email,
+        lastname,
+        patronymic,
+        avatarURL,
+        phone,
+        deliveryData,
+        deliveryType,
     })
 }
 
