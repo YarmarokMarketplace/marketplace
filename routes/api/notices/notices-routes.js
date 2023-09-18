@@ -6,13 +6,13 @@ const upload = require('../../../utils/upload');
 const isValidId = require('../../../middlewares/isValidId');
 const authenticate = require('../../../middlewares/authenticate');
 
-const { addNotice, getNoticesByCategory, getAllNotices, updateNotice, removeNotice, getNoticeById, toggleActive, getAllUserNotices, addNoticeToFavorite, getFavoriteUserNotices, removeNoticeFromFavorite, sendDeactivationLetter } = require('../../../controllers/notices');
+const { checkIsActive, addNotice, getNoticesByCategory, getAllNotices, updateNotice, removeNotice, getNoticeById, toggleActive, getAllUserNotices, addNoticeToFavorite, getFavoriteUserNotices, removeNoticeFromFavorite, sendDeactivationLetter } = require('../../../controllers/notices');
 const { addNoticeSchema, updateNoticeSchema, toggleActiveSchema} = require('../../../db/models/notices');
 
 const router = express.Router();
 
 router.get('/', getAllNotices);
-router.get('/inactive', sendDeactivationLetter);
+//router.get('/inactive', checkIsActive);
 router.get('/:category', getNoticesByCategory);
 router.post('/', authenticate, upload.array('photos', 6), validateBody(addNoticeSchema), addNotice);
 router.patch('/:id', authenticate, isValidId, validateBody(updateNoticeSchema), upload.array('photos', 6), updateNotice);
