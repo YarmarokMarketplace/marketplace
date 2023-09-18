@@ -13,6 +13,15 @@ const getAllCategories = async (req, res) => {
   });
 };
 
+const addCategory = async (req, res) => {
+  uploaded = req.file;
+  await Category.create({...req.body, photo: uploaded});
+  res.status(200).json({
+    message: "ok",
+  });
+}
+
 module.exports = {
   getAllCategories: controllerWrapper(getAllCategories),
+  addCategory: controllerWrapper(addCategory),
 };

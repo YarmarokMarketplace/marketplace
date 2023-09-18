@@ -1,3 +1,4 @@
+const natural = require('natural');
 const { Notice, InactiveNotice } = require("../db/models/notices");
 const { User } = require("../db/models/users");
 const { Category } = require("../db/models/categories");
@@ -5,7 +6,8 @@ const HttpError = require("../helpers/httpError");
 const controllerWrapper = require("../utils/controllerWrapper");
 const buildFilterObject = require("../utils/filterObject");
 const buildSortObject = require("../utils/sortObject");
-
+const buildFilterAfterSearchByKeywords = require("../utils/filterAfterSearchByKeywords");
+const buildSortObjectAfterSearchByKeywords = require("../utils/sortObjectAfterSearchByKeywords");
 
 const getAllNotices = async (req, res) => {
   const { page = 1, limit = 9 } = req.query;
@@ -330,6 +332,49 @@ const removeNoticeFromFavorite = async (req, res) => {
   });
 };
 
+const searchNoticesByKeywords = async (req, res) => {
+  const { page = 1, limit = 9, keywords = "", goodtype, priceRange, location, sort } = req.query;
+  const skip = (page - 1) * limit;
+  const query = { goodtype, priceRange, location };
+  
+  if (!keywords) {
+    throw HttpError.BadRequest("The search keywords is empty");
+  }
+
+  if (priceRange) {
+    const formattedPriceRange = priceRange.split("-");
+    minPrice = Number(formattedPriceRange[0]);
+    maxPrice = Number(formattedPriceRange[1]);
+  }
+  
+  let notices = await Notice.find(
+    {$and: [
+      {$text: {$search: keywords}}, 
+      buildFilterAfterSearchByKeywords(query)]}, 
+      {score: {$meta: "textScore"}}, {skip, limit: Number(limit)}).sort({score:{$meta:"textScore"}}
+  );
+
+  if (sort) {
+    await buildSortObjectAfterSearchByKeywords(notices, sort)
+  }
+
+  let totalResult = await Notice.countDocuments(
+    {$and: [{$text: {$search: keywords}}, buildFilterAfterSearchByKeywords(query)]}, {score: {$meta: "textScore"}}, 
+    '-createdAt -updatedAt', 
+    {skip, limit: Number(limit)})
+    .sort({score:{$meta:"textScore"}})
+
+    const totalPages = Math.ceil(totalResult / limit);
+
+  res.status(200).json({
+    totalResult,
+    totalPages,
+    page: +page,
+    limit: +limit,
+    notices,
+  });
+};
+
 module.exports = {
   getAllNotices: controllerWrapper(getAllNotices),
   getNoticesByCategory: controllerWrapper(getNoticesByCategory),
@@ -343,4 +388,5 @@ module.exports = {
   getAllUserNotices: controllerWrapper(getAllUserNotices),
   getFavoriteUserNotices: controllerWrapper(getFavoriteUserNotices),
   addNoticeToFavorite: controllerWrapper(addNoticeToFavorite),
+  searchNoticesByKeywords: controllerWrapper(searchNoticesByKeywords),
 };
