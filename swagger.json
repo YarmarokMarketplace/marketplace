@@ -1795,7 +1795,7 @@
           "buyerName",
           "buyerLastname",
           "buyerPhone",
-          "typeOfDelivery",
+          "deliveryType",
           "deliveryData"
         ],
         "properties": {
@@ -1807,7 +1807,7 @@
             "type": "string",
             "example": "Ivanova"
           },
-          "typeOfDelivery": {
+          "deliveryType": {
             "type": "string",
             "enum": ["new-post", "ukr-post", "other"],
             "example": "home-and-garden"
