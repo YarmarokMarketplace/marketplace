@@ -117,7 +117,7 @@ const forgotPassword = async (req, res) => {
         to: email,
         subject: "Зміна паролю для входу на маркетплейс Yarmarok",
         html: `${resetPasswordHtml}
-        target="_blank" href="${BASE_URL}/api/auth/reset-password/${user._id}/${resetToken}">Змінити пароль</a>
+        target="_blank" href="${BASE_URL}/#/api/auth/reset-password/${user._id}/${resetToken}">Змінити пароль</a>
         </div>
         `
     };
@@ -186,7 +186,7 @@ const login = async (req, res) => {
             lastname: user.lastname,
             patronymic: user.patronymic,
             deliveryData: user.deliveryData,
-            deliveryType: user.deliveryType,sz
+            deliveryType: user.deliveryType,
             avatarURL: user.avatarURL,
             phone: user.phone,
         }
