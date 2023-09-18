@@ -139,7 +139,7 @@ const resetPassword = async (req, res) => {
         if (err) {
             throw new HttpError(403, "Reset token is expired")
         }
-      });
+    });
 
     const hashPassword = await bcrypt.hash(password, 10);
     await User.findByIdAndUpdate({_id: id},{ password: hashPassword });
@@ -170,7 +170,7 @@ const login = async (req, res) => {
         id: user._id,
     };
 
-    const accessToken = jwt.sign(payload, ACCESS_SECRET_KEY, { expiresIn: 300 });
+    const accessToken = jwt.sign(payload, ACCESS_SECRET_KEY, { expiresIn: 300000 });
     const refreshToken = jwt.sign(payload, REFRESH_SECRET_KEY, {expiresIn: 604800});
     await User.findOneAndUpdate({ _id: payload.id }, { $set: { accessToken, refreshToken } });
 
@@ -185,6 +185,8 @@ const login = async (req, res) => {
             name: user.name,
             lastname: user.lastname,
             patronymic: user.patronymic,
+            deliveryData: user.deliveryData,
+            deliveryType: user.deliveryType,sz
             avatarURL: user.avatarURL,
             phone: user.phone,
         }
@@ -227,7 +229,7 @@ const logout = async(req, res)=> {
 };
 
 const getCurrent = (req, res) => {
-    const {_id, name, email, lastname, patronymic, avatarURL, phone} = req.user;
+    const {name, email, _id, lastname, patronymic, deliveryData, deliveryType, avatarURL, phone } = req.user;
 
     res.status(200).json({
         id: _id,
@@ -237,6 +239,8 @@ const getCurrent = (req, res) => {
         patronymic,
         avatarURL,
         phone,
+        deliveryData,
+        deliveryType,
     })
 }
 

@@ -14,7 +14,7 @@ const noticeSchema = new Schema(
     },
     goodtype: {
       type: String,
-          enum: ["new", "used"],
+      enum: ["new", "used"],
     },
     title: {
       type: String,

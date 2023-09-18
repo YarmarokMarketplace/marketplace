@@ -8,6 +8,7 @@ const authenticate = require('../../../middlewares/authenticate');
 
 const { addNotice, getNoticesByCategory, getAllNotices, updateNotice, removeNotice, getNoticeById, toggleActive, getAllUserNotices, addNoticeToFavorite, getFavoriteUserNotices, removeNoticeFromFavorite } = require('../../../controllers/notices');
 const { addNoticeSchema, updateNoticeSchema, toggleActiveSchema} = require('../../../db/models/notices');
+const { createOrder } = require('../../../controllers/orders');
 
 const router = express.Router();
 
@@ -22,5 +23,6 @@ router.delete('/favorites/:id', authenticate, isValidId, removeNoticeFromFavorit
 router.get('/user/notices', authenticate, getAllUserNotices);
 router.get("/user/favorites", authenticate, getFavoriteUserNotices);
 router.post('/favorites/:id', authenticate, addNoticeToFavorite);
+router.post('/:id/order', authenticate, isValidId, createOrder);
 
 module.exports = router;
