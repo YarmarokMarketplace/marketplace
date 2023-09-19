@@ -930,7 +930,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListOfUserNoticesResponse"
+                  "$ref": "#/components/schemas/ListOfNoticesResponse"
                 }
               }
             }
@@ -1016,6 +1016,39 @@
           },
           "404": {
             "description": "'User not found' or 'Notice not found in favorite notices' or '${id} invalid format'"
+          }
+        }
+      }
+    },
+    "/notices/favorites": {
+      "get": {
+        "summary": "Get all user favorite notices",
+        "tags": [
+          "Notices"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "description": "Find all existing favorites notices created by specific user",
+        "operationId": "getFavoriteUserNotices",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListOfNoticesResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authorized"
+          },
+          "404": {
+            "description": "There any notices for this user"
           }
         }
       }

@@ -270,13 +270,13 @@ const getFavoriteUserNotices = async (req, res) => {
   const totalResult = result.length;
   const totalPages = Math.ceil(totalResult / limit);
   
-   res.status(200).json({
+  res.status(200).json({
     totalResult,
     totalPages,
     page: Number(page),
     limit: Number(limit),
     result,
-   });
+  });
 };
 
 const addNoticeToFavorite = async (req, res) => {
