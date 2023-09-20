@@ -1,90 +1,90 @@
 const { Schema, model } = require("mongoose");
 const handleMongooseError = require("../../utils/handleMongooseError");
 
-// const postOfficeSchema = new Schema(
-//     {
-//     postOfficeNumber: {
-//         type: String,
-//         required: true
-//     },
-//     city: {
-//         type: String,
-//         required: true
-//     },
-// });
+const postOfficeSchema = new Schema(
+    {
+    postOfficeNumber: {
+        type: String,
+        required: true
+    },
+    city: {
+        type: String,
+        required: true
+    },
+});
 
-// const addressSchema = new Schema(
-//     {
-//     city: {
-//         type: String,
-//         required: true
-//     },
-//     street: {
-//         type: String,
-//         required: true
-//     },
-//     house: {
-//         type: String,
-//         required: true
-//     },
-//     appartments: {
-//         type: String,
-//         required: true
-//     },
-// });
+const addressSchema = new Schema(
+    {
+    city: {
+        type: String,
+        required: true
+    },
+    street: {
+        type: String,
+        required: true
+    },
+    house: {
+        type: String,
+        required: true
+    },
+    appartments: {
+        type: String,
+        required: true
+    },
+});
 
-// const postBoxSchema = new Schema(
-//     {
-//     postBoxNumber: {
-//         type: String,
-//         required: true
-//     },
-//     city: {
-//         type: String,
-//         required: true
-//     },
-// });
+const postBoxSchema = new Schema(
+    {
+    postBoxNumber: {
+        type: String,
+        required: true
+    },
+    city: {
+        type: String,
+        required: true
+    },
+});
 
-// const newPostSchema = new Schema(
-//     {
-//     typeOfNovaPostDelivery: {
-//         type: Object,
-//         enum: [postOfficeSchema, addressSchema, postBoxSchema],
-//         required: false
-//     },
-// });
+const newPostSchema = new Schema(
+    {
+    typeOfNovaPostDelivery: {
+        type: Object,
+        enum: [postOfficeSchema, addressSchema, postBoxSchema],
+        required: false
+    },
+});
 
-// const ukrPostSchema = new Schema(
-//     {
-//     city: {
-//         type: String,
-//         required: true
-//     },
-//     index: {
-//         type: String,
-//         required: true
-//     },
-//     street: {
-//         type: String,
-//         required: true
-//     },
-//     house: {
-//         type: String,
-//         required: true
-//     },
-//     appartments: {
-//         type: String,
-//         required: true
-//     },
-// });
+const ukrPostSchema = new Schema(
+    {
+    city: {
+        type: String,
+        required: true
+    },
+    index: {
+        type: String,
+        required: true
+    },
+    street: {
+        type: String,
+        required: true
+    },
+    house: {
+        type: String,
+        required: true
+    },
+    appartments: {
+        type: String,
+        required: true
+    },
+});
 
-// const otherSchema = new Schema(
-//     {
-//     typeOfOtherDelivery: {
-//         type: String,
-//         required: true,
-//     },
-// });
+const otherSchema = new Schema(
+    {
+    typeOfOtherDelivery: {
+        type: String,
+        required: true,
+    },
+});
 
 const NewPost = model('NewPost', new Schema({ name: String }));
 const UkrPost = model('UkrPost', new Schema({
@@ -154,7 +154,12 @@ const orderSchema = new Schema(
     product: {
         type: Schema.Types.ObjectId,
         ref: 'notice',
-    }
+    },
+    status: {
+        type: String,
+        enum: ["await-confirm", "await-delivery", "cancelled", "received", "not-received"],
+        default: "await-confirm",
+    },
 },
 { versionKey: false, timestamps: true });
 

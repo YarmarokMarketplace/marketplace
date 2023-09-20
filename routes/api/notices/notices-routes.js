@@ -18,13 +18,15 @@ const { addNotice,
         getFavoriteUserNotices, 
         removeNoticeFromFavorite,
         searchNoticesByKeywords,
+        checkIsActive,
     } = require('../../../controllers/notices');
 const { addNoticeSchema, updateNoticeSchema, toggleActiveSchema} = require('../../../db/models/notices');
 const { createOrder } = require('../../../controllers/orders');
 
 const router = express.Router();
 
-router.get('/', getAllNotices);
+//router.get('/', getAllNotices);
+router.get('/', checkIsActive);
 router.get('/:category', getNoticesByCategory);
 router.post('/', authenticate, upload.array('photos', 6), validateBody(addNoticeSchema), addNotice);
 router.patch('/:id', authenticate, isValidId, validateBody(updateNoticeSchema), upload.array('photos', 6), updateNotice);
