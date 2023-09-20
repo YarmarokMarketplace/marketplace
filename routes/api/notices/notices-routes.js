@@ -33,7 +33,7 @@ router.get('/notice/:id', isValidId, getNoticeById);
 router.patch('/notice/:id/active', authenticate, isValidId, validateBody(toggleActiveSchema), toggleActive);
 router.delete('/favorites/:id', authenticate, isValidId, removeNoticeFromFavorite);
 router.get('/user/notices', authenticate, getAllUserNotices);
-router.get("/user/favorites", authenticate, getFavoriteUserNotices);
+router.get('/user/favorites', authenticate, getFavoriteUserNotices);
 router.post('/favorites/:id', authenticate, addNoticeToFavorite);
 router.get('/search/search-notice', searchNoticesByKeywords);
 router.post('/:id/order', authenticate, isValidId, createOrder);
