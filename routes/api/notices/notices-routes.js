@@ -6,8 +6,21 @@ const upload = require('../../../utils/upload');
 const isValidId = require('../../../middlewares/isValidId');
 const authenticate = require('../../../middlewares/authenticate');
 
-const { checkIsActive, addNotice, getNoticesByCategory, getAllNotices, updateNotice, removeNotice, getNoticeById, toggleActive, getAllUserNotices, addNoticeToFavorite, getFavoriteUserNotices, removeNoticeFromFavorite, sendDeactivationLetter } = require('../../../controllers/notices');
+const { addNotice, 
+        getNoticesByCategory, 
+        getAllNotices, 
+        updateNotice, 
+        removeNotice, 
+        getNoticeById, 
+        toggleActive, 
+        getAllUserNotices, 
+        addNoticeToFavorite, 
+        getFavoriteUserNotices, 
+        removeNoticeFromFavorite,
+        searchNoticesByKeywords,
+    } = require('../../../controllers/notices');
 const { addNoticeSchema, updateNoticeSchema, toggleActiveSchema} = require('../../../db/models/notices');
+const { createOrder } = require('../../../controllers/orders');
 
 const router = express.Router();
 
@@ -21,8 +34,11 @@ router.get('/notice/:id', isValidId, getNoticeById);
 router.patch('/notice/:id/active', authenticate, isValidId, validateBody(toggleActiveSchema), toggleActive);
 router.delete('/favorites/:id', authenticate, isValidId, removeNoticeFromFavorite);
 router.get('/user/notices', authenticate, getAllUserNotices);
-router.get("/user/favorites", authenticate, getFavoriteUserNotices);
+router.get('/user/favorites', authenticate, getFavoriteUserNotices);
 router.post('/favorites/:id', authenticate, addNoticeToFavorite);
+router.get('/search/search-notice', searchNoticesByKeywords);
+router.post('/:id/order', authenticate, isValidId, createOrder);
+
 
 
 module.exports = router;

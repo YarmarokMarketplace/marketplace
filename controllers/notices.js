@@ -1,3 +1,4 @@
+const natural = require('natural');
 const { Notice, InactiveNotice } = require("../db/models/notices");
 const { User } = require("../db/models/users");
 const { Category } = require("../db/models/categories");
@@ -7,6 +8,8 @@ const buildFilterObject = require("../utils/filterObject");
 const buildSortObject = require("../utils/sortObject");
 const deactivationNotificationHtml = require("../utils/deactivationNotification");
 const sendEmail = require('../helpers/sendEmail');
+const buildFilterAfterSearchByKeywords = require("../utils/filterAfterSearchByKeywords");
+const buildSortObjectAfterSearchByKeywords = require("../utils/sortObjectAfterSearchByKeywords");
 
 const getAllNotices = async (req, res) => {
   const { page = 1, limit = 9 } = req.query;
@@ -286,22 +289,26 @@ const getAllUserNotices = async (req, res) => {
 };
 
 const getFavoriteUserNotices = async (req, res) => {
-  const { _id: userId } = req.user;
+  const { _id } = req.user;
   const { page = 1, limit = 3 } = req.query;
   const skip = (page - 1) * limit;
 
-  const user = await User.findById(userId, "", {
-    skip,
-    limit,
-  }).populate("favorite").sort({ createdAt: -1 });
-
-  const result = user.favorite;
-
-  if (result.length === 0) {
+  const result = await User.findById({_id}, 
+    "-_id -email -password -avatarURL -name -lastname -patronymic -phone -accessToken -refreshToken -verify -verificationToken -deliveryType -deliveryData -createdAt -updatedAt")
+    .populate({
+    path: 'favorite',
+    options: {
+      skip,
+      limit: Number(limit)
+    },
+  })
+  
+  if (result.favorite.length === 0) {
     throw HttpError.NotFoundError('There any notices for this user');
   };
 
-  const totalResult = result.length;
+  const user = await User.findById({_id});
+  const totalResult = user.favorite.length; 
   const totalPages = Math.ceil(totalResult / limit);
   
   res.status(200).json({
@@ -323,8 +330,8 @@ const addNoticeToFavorite = async (req, res) => {
   }
 
   const result = await User.findByIdAndUpdate(userId, {
-    $addToSet: { favorite: noticeId },
-  });
+    $addToSet: { favorite: noticeId }, 
+  }, { new: true });
 
   if (!result) {
     throw HttpError.NotFoundError(`Notice with ${noticeId} not found`);
@@ -363,6 +370,50 @@ const removeNoticeFromFavorite = async (req, res) => {
 
   res.status(200).json({
     message: "Notice removed",
+    favorite: result.favorite
+  });
+};
+
+const searchNoticesByKeywords = async (req, res) => {
+  const { page = 1, limit = 9, keywords = "", goodtype, priceRange, location, sort } = req.query;
+  const skip = (page - 1) * limit;
+  const query = { goodtype, priceRange, location };
+  
+  if (!keywords) {
+    throw HttpError.BadRequest("The search keywords is empty");
+  }
+
+  if (priceRange) {
+    const formattedPriceRange = priceRange.split("-");
+    minPrice = Number(formattedPriceRange[0]);
+    maxPrice = Number(formattedPriceRange[1]);
+  }
+  
+  let notices = await Notice.find(
+    {$and: [
+      {$text: {$search: keywords}}, 
+      buildFilterAfterSearchByKeywords(query)]}, 
+      {score: {$meta: "textScore"}}, {skip, limit: Number(limit)}).sort({score:{$meta:"textScore"}}
+  );
+
+  if (sort) {
+    await buildSortObjectAfterSearchByKeywords(notices, sort)
+  }
+
+  let totalResult = await Notice.countDocuments(
+    {$and: [{$text: {$search: keywords}}, buildFilterAfterSearchByKeywords(query)]}, {score: {$meta: "textScore"}}, 
+    '-createdAt -updatedAt', 
+    {skip, limit: Number(limit)})
+    .sort({score:{$meta:"textScore"}})
+
+    const totalPages = Math.ceil(totalResult / limit);
+
+  res.status(200).json({
+    totalResult,
+    totalPages,
+    page: +page,
+    limit: +limit,
+    notices,
   });
 }; 
 
@@ -404,4 +455,5 @@ module.exports = {
   addNoticeToFavorite: controllerWrapper(addNoticeToFavorite),
   //sendDeactivationLetter: controllerWrapper(sendDeactivationLetter),
   removeFromInactive: controllerWrapper(removeFromInactive),
+  searchNoticesByKeywords: controllerWrapper(searchNoticesByKeywords),
 };
