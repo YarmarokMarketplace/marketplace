@@ -38,4 +38,5 @@ router.post('/favorites/:id', authenticate, addNoticeToFavorite);
 router.get('/search/search-notice', searchNoticesByKeywords);
 router.post('/:id/order', authenticate, isValidId, createOrder);
 
+
 module.exports = router;

@@ -333,7 +333,7 @@ const removeNoticeFromFavorite = async (req, res) => {
 
   res.status(200).json({
     message: "Notice removed",
-    favorite: user.favorite,
+    favorite: result.favorite
   });
 };
 
