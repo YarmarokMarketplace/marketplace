@@ -252,22 +252,26 @@ const getAllUserNotices = async (req, res) => {
 };
 
 const getFavoriteUserNotices = async (req, res) => {
-  const { _id: userId } = req.user;
+  const { _id } = req.user;
   const { page = 1, limit = 3 } = req.query;
   const skip = (page - 1) * limit;
 
-  const user = await User.findById(userId, "", {
-    skip,
-    limit,
-  }).populate("favorite").sort({ createdAt: -1 });
-
-  const result = user.favorite;
-
-  if (result.length === 0) {
+  const result = await User.findById({_id}, 
+    "-_id -email -password -avatarURL -name -lastname -patronymic -phone -accessToken -refreshToken -verify -verificationToken -deliveryType -deliveryData -createdAt -updatedAt")
+    .populate({
+    path: 'favorite',
+    options: {
+      skip,
+      limit: Number(limit)
+    },
+  })
+  
+  if (result.favorite.length === 0) {
     throw HttpError.NotFoundError('There any notices for this user');
   };
 
-  const totalResult = result.length;
+  const user = await User.findById({_id});
+  const totalResult = user.favorite.length; 
   const totalPages = Math.ceil(totalResult / limit);
   
   res.status(200).json({
@@ -289,8 +293,8 @@ const addNoticeToFavorite = async (req, res) => {
   }
 
   const result = await User.findByIdAndUpdate(userId, {
-    $addToSet: { favorite: noticeId },
-  });
+    $addToSet: { favorite: noticeId }, 
+  }, { new: true });
 
   if (!result) {
     throw HttpError.NotFoundError(`Notice with ${noticeId} not found`);
@@ -329,6 +333,7 @@ const removeNoticeFromFavorite = async (req, res) => {
 
   res.status(200).json({
     message: "Notice removed",
+    favorite: user.favorite,
   });
 };
 
