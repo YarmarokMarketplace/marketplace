@@ -6,6 +6,8 @@ const HttpError = require("../helpers/httpError");
 const controllerWrapper = require("../utils/controllerWrapper");
 const buildFilterObject = require("../utils/filterObject");
 const buildSortObject = require("../utils/sortObject");
+const deactivationNotificationHtml = require("../utils/deactivationNotification");
+const sendEmail = require('../helpers/sendEmail');
 const buildFilterAfterSearchByKeywords = require("../utils/filterAfterSearchByKeywords");
 const buildSortObjectAfterSearchByKeywords = require("../utils/sortObjectAfterSearchByKeywords");
 
@@ -16,7 +18,7 @@ const getAllNotices = async (req, res) => {
   const result = await Notice.find({}, "", {
     skip,
     limit: Number(limit),
-  }).sort({ createdAt: -1 });
+  }).populate("owner", "email").sort({ createdAt: -1 });
 
   if (result.length === 0) {
     throw HttpError.NotFoundError("Notices not found");
@@ -98,7 +100,7 @@ const getNoticeById = async (req, res) => {
     data: notice,
   });
 };
-    
+
 const removeNotice = async (req, res) => {
   const { id } = req.params;
 
@@ -132,7 +134,7 @@ const updateNotice = async (req, res) => {
     status: 'success',
     code: 201,
     result,
-   });
+  });
 };
 
 const toggleActive = async (req, res) => {
@@ -203,7 +205,7 @@ const checkIsActive = async (req, res) => {
     $lt: new Date(thirtyDays)} 
 }, { active: false })
 
-await InactiveNotice.updateMany({active: false})
+await InactiveNotice.updateMany({active: false});
   
   await Notice.aggregate([
     { $match: 
@@ -221,9 +223,44 @@ await InactiveNotice.updateMany({active: false})
     }
     ]);
 
-  await Notice.deleteMany({ createdAt: {
-    $lt: new Date(thirtyDays)} 
-  });
+    const inactiveNotices = await Notice.find({ createdAt: {
+          $lte: new Date()} 
+        }).populate("owner");
+      
+        const noticesWithActiveUsers = inactiveNotices.filter(notice => notice.owner !== null)
+    
+  for (i = 0; i < noticesWithActiveUsers.length; i += 1) {
+    noticeTitle = noticesWithActiveUsers[i].title;
+    email = noticesWithActiveUsers[i].owner.email;
+    id = noticesWithActiveUsers[i]._id;
+    noticeCategory = noticesWithActiveUsers[i].category;
+
+    const deactivationEmail = {
+      to: email,
+      subject: "Сповіщення про деактивацію оголошення",
+      html: `${deactivationNotificationHtml}
+      Шановний користувачу! Повідомляємо про деактивацію вашого оголошення "${noticeTitle}".
+      Якщо Ви хочете активувати оголошення, перейдіть, будь ласка, на сторінку оголошення за посиланням:</p>
+      <a style="
+      font-family: 'Roboto', sans-serif;
+      font-weight: 700;
+      font-size: 20px;
+      line-height: 1.14;
+      letter-spacing: 0.02em;"
+      target="_blank" href="https://yarmarok.netlify.app/#/${noticeCategory}/${id}">Перейти до оголошення</a>
+      </div>
+      `
+    };
+  
+      await sendEmail(deactivationEmail);
+    }
+    await Notice.deleteMany({ createdAt: {
+      $lt: new Date(thirtyDays)} 
+    });
+
+  res.status(200).json({
+    message: 'ok'
+      });
 };
 
 const getAllUserNotices = async (req, res) => {
@@ -378,7 +415,30 @@ const searchNoticesByKeywords = async (req, res) => {
     limit: +limit,
     notices,
   });
-};
+}; 
+
+const removeFromInactive = async (req, res) => {
+  const today = new Date();
+  const thirtyDays = today.getTime() - (1*24*60*60*1000);
+  await InactiveNotice.aggregate([
+    { $match: 
+      { createdAt: {
+          $lt: new Date(thirtyDays)} 
+      }
+    }, 
+    {
+        $merge: {
+            into: "notices",
+            on: "_id",
+            whenMatched: "replace",
+            whenNotMatched: "insert"
+        }
+    }
+    ]);
+    await InactiveNotice.deleteMany({ createdAt: {
+      $lt: new Date(thirtyDays)} 
+    });
+}
 
 module.exports = {
   getAllNotices: controllerWrapper(getAllNotices),
@@ -393,5 +453,7 @@ module.exports = {
   getAllUserNotices: controllerWrapper(getAllUserNotices),
   getFavoriteUserNotices: controllerWrapper(getFavoriteUserNotices),
   addNoticeToFavorite: controllerWrapper(addNoticeToFavorite),
+  //sendDeactivationLetter: controllerWrapper(sendDeactivationLetter),
+  removeFromInactive: controllerWrapper(removeFromInactive),
   searchNoticesByKeywords: controllerWrapper(searchNoticesByKeywords),
 };

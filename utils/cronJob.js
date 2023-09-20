@@ -1,7 +1,7 @@
 const cron = require('node-cron');
-const {checkIsActive} = require('../controllers/notices');
+const {checkIsActive, sendDeactivationLetter} = require('../controllers/notices');
 
-const job = cron.schedule("00 04 * * *", 
+const job = cron.schedule("00 05 * * *", 
 async function () {
     await checkIsActive();
 },
