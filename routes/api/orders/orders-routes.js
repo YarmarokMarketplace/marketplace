@@ -9,6 +9,6 @@ const { getOrderById, getUserIBuyNotices } = require('../../../controllers/order
 const router = express.Router();
 
 router.get('/:id', authenticate, isValidId, getOrderById);
-router.get('/buy', authenticate, isValidId, getUserIBuyNotices);
+router.get('/user/buy', authenticate, getUserIBuyNotices);
 
 module.exports = router;

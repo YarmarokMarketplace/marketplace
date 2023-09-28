@@ -257,7 +257,7 @@ const getFavoriteUserNotices = async (req, res) => {
   const skip = (page - 1) * limit;
 
   const result = await User.findById({_id}, 
-    "-_id -email -password -avatarURL -name -lastname -patronymic -phone -accessToken -refreshToken -verify -verificationToken -deliveryType -deliveryData -createdAt -updatedAt")
+    "-_id -email -password -avatarURL -name -lastname -patronymic -phone -accessToken -refreshToken -sell -buy -verify -verificationToken -deliveryType -deliveryData -createdAt -updatedAt")
     .populate({
     path: 'favorite',
     options: {

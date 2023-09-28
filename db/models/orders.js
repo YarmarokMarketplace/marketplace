@@ -157,7 +157,7 @@ const orderSchema = new Schema(
     },
     status: {
         type: String,
-        enum: ["await-confirm", "await-delivery", "cancelled", "received", "not-received"],
+        enum: ["await-confirm", "await-delivery", "cancelled-by-seller", "received"],
         default: "await-confirm",
     },
 },

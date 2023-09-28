@@ -5,7 +5,7 @@ const HttpError = require("../helpers/httpError");
 const controllerWrapper = require("../utils/controllerWrapper");
 
 const createOrder = async (req, res) => {
-    const { _id: owner } = req.user;
+    const { _id: buyerId } = req.user;
     const { id: product } = req.params;
 
     const deliveryDataForTheNextPurchase = {
@@ -13,10 +13,19 @@ const createOrder = async (req, res) => {
         deliveryData: req.body.deliveryData,
     };
 
-    console.log()
+    const order = await Notice.findById(product);
+    const sellerId = order.owner;
 
-    const result = await Order.create({...req.body, owner, product});
-    const user = await User.findByIdAndUpdate(owner, deliveryDataForTheNextPurchase);
+    await User.findByIdAndUpdate(sellerId, {
+        $addToSet: { sell: product }, 
+    }, { new: true });
+
+    await User.findByIdAndUpdate(buyerId, {
+        $addToSet: { buy: product }, 
+    }, { new: true });
+
+    const result = await Order.create({...req.body, buyerId, product});
+    await User.findByIdAndUpdate(buyerId, deliveryDataForTheNextPurchase);
 
     res.status(201).json({
         result,
@@ -43,33 +52,70 @@ const getUserIBuyNotices = async (req, res) => {
     const { _id } = req.user;
     const { page = 1, limit = 3 } = req.query;
     const skip = (page - 1) * limit;
-
+  
     const result = await User.findById({_id}, 
-        "-_id -email -password -avatarURL -name -lastname -patronymic -phone -accessToken -refreshToken -verify -verificationToken -deliveryType -deliveryData -createdAt -updatedAt")
-        .populate({
-        path: 'favorite',
-        options: {
+      "-_id -email -password -avatarURL -name -lastname -patronymic -phone -accessToken -refreshToken -sell -favorite -verify -verificationToken -deliveryType -deliveryData -createdAt -updatedAt")
+      .populate({
+      path: 'buy',
+      model: 'order',
+      options: {
         skip,
         limit: Number(limit)
-    },
-})
-
-    if (result.favorite.length === 0) {
-        throw HttpError.NotFoundError('There any notices for this user');
+      },
+    })
+    
+    if (result.buy.length === 0) {
+      throw HttpError.NotFoundError('There any buy orders for this user');
     };
-
+  
     const user = await User.findById({_id});
-    const totalResult = user.favorite.length; 
+    const totalResult = user.buy.length; 
     const totalPages = Math.ceil(totalResult / limit);
-
+    
     res.status(200).json({
-        totalResult,
-        totalPages,
-        page: Number(page),
-        limit: Number(limit),
-        result,
+      totalResult,
+      totalPages,
+      page: Number(page),
+      limit: Number(limit),
+      result,
     });
-}
+  };
+
+// const getUserIBuyNotices = async (req, res) => {
+//     const { _id} = req.user;
+//     const { page = 1, limit = 3 } = req.query;
+//     const skip = (page - 1) * limit;
+
+//     const result = await User.findById({_id},
+//         "-_id -email -password -avatarURL -name -lastname -patronymic -phone -accessToken -refreshToken -verify -verificationToken -favorite -sell -deliveryType -deliveryData -createdAt -updatedAt"
+//         )
+// //         .populate({
+// //         path: 'buy'
+// //         ,
+// //         options: {
+// //         skip,
+// //         limit: Number(limit)
+// //     },
+// // })
+
+// console.log(result)
+
+//     if (result.buy.length === 0) {
+//         throw HttpError.NotFoundError('There any buy orders for this user');
+//     };
+
+//     const user = await User.findById({_id});
+//     const totalResult = user.buy.length; 
+//     const totalPages = Math.ceil(totalResult / limit);
+
+//     res.status(200).json({
+//         totalResult,
+//         totalPages,
+//         page: Number(page),
+//         limit: Number(limit),
+//         result,
+//     });
+// }
 
 module.exports = {
     createOrder: controllerWrapper(createOrder),
