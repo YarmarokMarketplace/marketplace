@@ -1,4 +1,3 @@
-const natural = require('natural');
 const { Notice, InactiveNotice } = require("../db/models/notices");
 const { User } = require("../db/models/users");
 const { Category } = require("../db/models/categories");
@@ -272,11 +271,21 @@ const getAllUserNotices = async (req, res) => {
     limit,
   }).populate("owner", "email").sort({ createdAt: -1 });
 
+  const inactiveNotices = await InactiveNotice.find({ owner }, "", {
+    skip,
+    limit,
+  }).populate("owner", "email").sort({ createdAt: -1 });
+
+  notices.push(...inactiveNotices);
+
   if (notices.length === 0) {
     throw HttpError.NotFoundError('This user has not any notices');
   };
 
-  const totalResult = await Notice.countDocuments({ owner });
+  const activeResult = await Notice.countDocuments({ owner });
+  const inactiveResult = await InactiveNotice.countDocuments({ owner });
+  const totalResult = activeResult + inactiveResult;
+
   const totalPages = Math.ceil(totalResult / limit);
 
   res.status(200).json({
@@ -417,28 +426,28 @@ const searchNoticesByKeywords = async (req, res) => {
   });
 }; 
 
-const removeFromInactive = async (req, res) => {
-  const today = new Date();
-  const thirtyDays = today.getTime() - (1*24*60*60*1000);
-  await InactiveNotice.aggregate([
-    { $match: 
-      { createdAt: {
-          $lt: new Date(thirtyDays)} 
-      }
-    }, 
-    {
-        $merge: {
-            into: "notices",
-            on: "_id",
-            whenMatched: "replace",
-            whenNotMatched: "insert"
-        }
-    }
-    ]);
-    await InactiveNotice.deleteMany({ createdAt: {
-      $lt: new Date(thirtyDays)} 
-    });
-}
+// const removeFromInactive = async (req, res) => {
+//   const today = new Date();
+//   const thirtyDays = today.getTime() - (1*24*60*60*1000);
+//   await InactiveNotice.aggregate([
+//     { $match: 
+//       { createdAt: {
+//           $lt: new Date(thirtyDays)} 
+//       }
+//     }, 
+//     {
+//         $merge: {
+//             into: "notices",
+//             on: "_id",
+//             whenMatched: "replace",
+//             whenNotMatched: "insert"
+//         }
+//     }
+//     ]);
+//     await InactiveNotice.deleteMany({ createdAt: {
+//       $lt: new Date(thirtyDays)} 
+//     });
+// }
 
 module.exports = {
   getAllNotices: controllerWrapper(getAllNotices),
@@ -454,6 +463,6 @@ module.exports = {
   getFavoriteUserNotices: controllerWrapper(getFavoriteUserNotices),
   addNoticeToFavorite: controllerWrapper(addNoticeToFavorite),
   //sendDeactivationLetter: controllerWrapper(sendDeactivationLetter),
-  removeFromInactive: controllerWrapper(removeFromInactive),
+  //removeFromInactive: controllerWrapper(removeFromInactive),
   searchNoticesByKeywords: controllerWrapper(searchNoticesByKeywords),
 };
