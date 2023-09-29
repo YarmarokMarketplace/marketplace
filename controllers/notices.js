@@ -103,7 +103,7 @@ const getNoticeById = async (req, res) => {
 const removeNotice = async (req, res) => {
   const { id } = req.params;
 
-  const result = await Notice.findByIdAndDelete(id);
+  const result = await InactiveNotice.findByIdAndDelete(id);
   if (!result) {
     throw HttpError.NotFoundError("Notice not found");
   }
