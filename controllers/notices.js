@@ -306,6 +306,7 @@ const getFavoriteUserNotices = async (req, res) => {
     "-_id -email -password -avatarURL -name -lastname -patronymic -phone -accessToken -refreshToken -verify -verificationToken -deliveryType -deliveryData -createdAt -updatedAt")
     .populate({
     path: 'favorite',
+    
     options: {
       skip,
       limit: Number(limit)
