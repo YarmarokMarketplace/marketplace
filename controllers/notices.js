@@ -303,15 +303,23 @@ const getFavoriteUserNotices = async (req, res) => {
   const skip = (page - 1) * limit;
 
   const result = await User.findById({_id}, 
-    "-_id -email -password -avatarURL -name -lastname -patronymic -phone -accessToken -refreshToken -verify -verificationToken -deliveryType -deliveryData -createdAt -updatedAt")
-    .populate({
-    path: 'favorite',
-    
-    options: {
-      skip,
-      limit: Number(limit)
-    },
-  })
+    "-_id -email -password -avatarURL -name -lastname -patronymic -phone -accessToken -refreshToken -verify -verificationToken -deliveryType -deliveryData -buy -sell -createdAt -updatedAt")
+  //   .populate({
+  //   path: 'favorite',
+  //   model: 'notice',
+  //   options: {
+  //     skip,
+  //     limit: Number(limit)
+  //   },
+  // })
+  // .populate({
+  //   path: 'favorite',
+  //   model: 'inactivenotice',
+  //   options: {
+  //     skip,
+  //     limit: Number(limit)
+  //   },
+  // })
   
   if (result.favorite.length === 0) {
     throw HttpError.NotFoundError('There any notices for this user');
