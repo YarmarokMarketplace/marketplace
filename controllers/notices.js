@@ -1,7 +1,7 @@
-const natural = require('natural');
 const { Notice, InactiveNotice } = require("../db/models/notices");
 const { User } = require("../db/models/users");
 const { Category } = require("../db/models/categories");
+const { Order } = require("../db/models/orders");
 const HttpError = require("../helpers/httpError");
 const controllerWrapper = require("../utils/controllerWrapper");
 const buildFilterObject = require("../utils/filterObject");
@@ -101,6 +101,12 @@ const getNoticeById = async (req, res) => {
     
 const removeNotice = async (req, res) => {
   const { id } = req.params;
+
+  const orders = await Order.find({product: id});
+  const awaitDeliveryOrder = orders.filter(order => order.status === 'await-delivery')
+  if (awaitDeliveryOrder.length > 0) {
+    throw HttpError.BadRequest("You can't remove this notice due to status 'await-delivery'");
+  }
 
   const result = await Notice.findByIdAndDelete(id);
   if (!result) {

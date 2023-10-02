@@ -800,7 +800,7 @@
             "description": "Notice deleted"
           },
           "400": {
-            "description": "Bad request"
+            "description": "You can't remove this notice due to status 'await-delivery'"
           },
           "401": {
             "description": "Not authorized"
