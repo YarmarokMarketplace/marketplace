@@ -303,19 +303,35 @@ const getFavoriteUserNotices = async (req, res) => {
   const { page = 1, limit = 3 } = req.query;
   const skip = (page - 1) * limit;
 
-  const result = await User.findById({_id}, 
-    "-_id -email -password -avatarURL -name -lastname -patronymic -phone -accessToken -refreshToken -verify -verificationToken -deliveryType -deliveryData -createdAt -updatedAt")
+  let result = [];
+
+  const result1 = await User.findById({_id},
+    "-_id -email -password -avatarURL -name -lastname -patronymic -phone -accessToken -refreshToken -verify -verificationToken -deliveryType -deliveryData -buy -sell -createdAt -updatedAt")
     .populate({
     path: 'favorite',
+    model: 'notice',
     options: {
       skip,
       limit: Number(limit)
-    },
-  })
-  
-  if (result.favorite.length === 0) {
-    throw HttpError.NotFoundError('There any notices for this user');
-  };
+    }})
+
+    if (result1.favorite.length === 0) {
+      throw HttpError.NotFoundError('There any notices for this user');
+    };
+
+    result.push(...result1.favorite);
+
+    const result2 = await User.findById({_id},
+      "-_id -email -password -avatarURL -name -lastname -patronymic -phone -accessToken -refreshToken -verify -verificationToken -deliveryType -deliveryData -buy -sell -createdAt -updatedAt")
+      .populate({
+      path: 'favorite',
+      model: 'inactivenotice',
+      options: {
+        skip,
+        limit: Number(limit)
+      }})
+
+      result.push(...result2.favorite);
 
   const user = await User.findById({_id});
   const totalResult = user.favorite.length; 
