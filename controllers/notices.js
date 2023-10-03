@@ -102,8 +102,12 @@ const getNoticeById = async (req, res) => {
 const removeNotice = async (req, res) => {
   const { id } = req.params;
 
-  const orders = await Order.find({product: id});
-  const awaitDeliveryOrder = orders.filter(order => order.status === 'await-delivery')
+  const today = new Date();
+  const thirtyDays = today.getTime() - (30*24*60*60*1000);
+
+  const awaitDeliveryOrder = await Order.find({product: id, status: 'await-delivery', createdAt: {
+    $gt: new Date(thirtyDays)}});
+
   if (awaitDeliveryOrder.length > 0) {
     throw HttpError.BadRequest("You can't remove this notice due to status 'await-delivery'");
   }
@@ -138,7 +142,7 @@ const updateNotice = async (req, res) => {
     status: 'success',
     code: 201,
     result,
-   });
+  });
 };
 
 const toggleActive = async (req, res) => {
