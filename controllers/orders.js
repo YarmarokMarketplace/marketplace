@@ -81,7 +81,7 @@ const getUserIBuyNotices = async (req, res) => {
       totalPages,
       page: Number(page),
       limit: Number(limit),
-      result,
+      result: result.buy,
     });
 };
 
@@ -118,7 +118,7 @@ const getUserISellNotices = async (req, res) => {
       totalPages,
       page: Number(page),
       limit: Number(limit),
-      result,
+      result: result.sell,
     });
 };
 

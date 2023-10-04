@@ -138,10 +138,20 @@ const orderSchema = new Schema(
         enum: ["new-post", "ukr-post", "other"],
         required: true,
     },
-    deliveryData: {
-        type: Schema.Types.Mixed,
+    typeOfDelivery: {
+        type: Schema.Types.Object,
         required: true,
-        enum: [NewPost, UkrPost, Other]
+    },
+
+    // deliveryData: {
+    //     type: Schema.Types.Object,
+    //     required: true,
+    //     refPath: 'deliveryModel'
+    // },
+    deliveryModel: {
+        type: String,
+        required: true,
+        enum: ['NewPost', 'UkrPost', 'Other']
     },
     comments: {
         type: String,
