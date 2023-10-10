@@ -1435,22 +1435,6 @@
                   "type": "boolean",
                   "example": true
                 },
-                "totalResults": {
-                  "type": "integer",
-                  "example": 8
-                },
-                "totalPages": {
-                  "type": "integer",
-                  "example": 2
-                },
-                "page": {
-                  "type": "integer",
-                  "example": 1
-                },
-                "limit": {
-                  "type": "integer",
-                  "example": 6
-                },
                 "maxPriceInCategory": {
                   "type": "integer",
                   "example": 84450
