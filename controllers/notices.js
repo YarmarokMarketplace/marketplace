@@ -299,8 +299,7 @@ const getAllUserNotices = async (req, res) => {
 
 const getFavoriteUserNotices = async (req, res) => {
   const { _id } = req.user;
-  const { page = 1, limit = 3 } = req.query;
-  const skip = (page - 1) * limit;
+  
 
   let result = [];
 
@@ -309,10 +308,7 @@ const getFavoriteUserNotices = async (req, res) => {
     .populate({
     path: 'favorite',
     model: 'notice',
-    options: {
-      skip,
-      limit: Number(limit)
-    }})
+  })
 
     if (result1.favorite.length === 0) {
       throw HttpError.NotFoundError('There any notices for this user');
@@ -325,22 +321,19 @@ const getFavoriteUserNotices = async (req, res) => {
       .populate({
       path: 'favorite',
       model: 'inactivenotice',
-      options: {
-        skip,
-        limit: Number(limit)
-      }})
+    })
 
       result.push(...result2.favorite);
 
   const user = await User.findById({_id});
-  const totalResult = user.favorite.length; 
-  const totalPages = Math.ceil(totalResult / limit);
+  // const totalResult = user.favorite.length; 
+  // const totalPages = Math.ceil(totalResult / limit);
   
   res.status(200).json({
-    totalResult,
-    totalPages,
-    page: Number(page),
-    limit: Number(limit),
+    // totalResult,
+    // totalPages,
+    // page: Number(page),
+    // limit: Number(limit),
     result,
   });
 };
