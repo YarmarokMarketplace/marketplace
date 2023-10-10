@@ -57,7 +57,7 @@ const googleAuth = async(req, res)=> {
     const refreshToken = jwt.sign(payload, REFRESH_SECRET_KEY, {expiresIn: "7d"});
     await User.findByIdAndUpdate(id, {accessToken, refreshToken});
 
-    res.redirect(`${FRONTEND_URL}?accessToken=${accessToken}&refreshToken=${refreshToken}&email=${email}&name=${name}`)
+    res.redirect(`https://deploy-preview-27--yarmarok-test.netlify.app/?accessToken=${accessToken}&refreshToken=${refreshToken}`)
 }
 
 const verifyEmail = async(req, res)=> {
