@@ -266,7 +266,7 @@ const getAllUserNotices = async (req, res) => {
   const { _id: owner } = req.user;
   const { page = 1, limit = 3 } = req.query;
   const skip = (page - 1) * limit;
-  const notices = await Notice.find({ owner }, "", {
+  const activeNotices = await Notice.find({ owner }, "", {
     skip,
     limit,
   }).populate("owner", "email").sort({ createdAt: -1 });
@@ -276,24 +276,25 @@ const getAllUserNotices = async (req, res) => {
     limit,
   }).populate("owner", "email").sort({ createdAt: -1 });
 
-  notices.push(...inactiveNotices);
-
-  if (notices.length === 0) {
+  if (activeNotices.length === 0 && inactiveNotices === 0) {
     throw HttpError.NotFoundError('This user has not any notices');
   };
 
   const activeResult = await Notice.countDocuments({ owner });
   const inactiveResult = await InactiveNotice.countDocuments({ owner });
-  const totalResult = activeResult + inactiveResult;
 
-  const totalPages = Math.ceil(totalResult / limit);
+  const totalPagesActive = Math.ceil(activeResult / limit);
+  const totalPagesInactive = Math.ceil(inactiveResult / limit);
 
   res.status(200).json({
-    totalResult,
-    totalPages,
+    totalPagesActive,
+    totalPagesInactive,
+    activeResult,
+    inactiveResult,
     page: Number(page),
     limit: Number(limit),
-    notices,
+    activeNotices,
+    inactiveNotices,
   });
 };
 
