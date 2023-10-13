@@ -12,6 +12,12 @@ const userSchema = new Schema({
         unique: true,
         required: [true, "Email is required"],
     },
+    newEmail: {
+        type: String,
+        match: emailRegex,
+        unique: true,
+        default: "",
+    },
     password: {
         type: String,
         minlength: 8,
@@ -46,6 +52,10 @@ const userSchema = new Schema({
         default: "",
     },
     verify: {
+        type: Boolean,
+        default: false,
+    },
+    verifyForChangeEmail: {
         type: Boolean,
         default: false,
     },
