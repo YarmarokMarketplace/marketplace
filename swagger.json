@@ -509,6 +509,45 @@
         }
       }
     },
+    "/user/user/change-password": {
+      "patch": {
+        "summary": "Change user password",
+        "tags": [
+          "Authorization"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "description": "Change user password in the database from the personal cabinet",
+        "operationId": "changePassword",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password changed"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Not authorized"
+          },
+          "404": {
+            "description": "Password is wrong or User not found"
+          }
+        }
+      }
+    },
     "/notices": {
       "get": {
         "summary": "Get all notices",
@@ -2060,6 +2099,21 @@
             "example": "2023-09-16T19:17:04.611Z"
           }
         }
+      },
+      "ChangePasswordRequest": {
+        "type": "object",
+          "properties": {
+            "password": {
+              "type": "string",
+              "description": "Current user password",
+              "example": "qwerty"
+            },
+            "newPassword": {
+              "type": "string",
+              "description": "New user password",
+              "example": "asdfg"
+            }
+          }
       }
     }
   },
