@@ -13,11 +13,8 @@ const createOrder = async (req, res) => {
         deliveryData: req.body.deliveryData,
     };
 
-    console.log()
-
     const result = await Order.create({...req.body, owner, product});
     const user = await User.findByIdAndUpdate(owner, deliveryDataForTheNextPurchase);
-    console.log(user);
 
     res.status(201).json({
         result,

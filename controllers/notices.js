@@ -91,13 +91,19 @@ const addNotice = async (req, res) => {
 const getNoticeById = async (req, res) => {
   const { id } = req.params;
 
-  const notice = await Notice.findById(id);
+  const notice = await Notice.findById(id).populate({
+    path: 'reviews',
+    model: 'review',
+  })
   if (!notice) {
     throw HttpError.NotFoundError("Notice not found");
   }
+
   res.status(201).json({
     data: notice,
   });
+
+
 };
 
 const removeNotice = async (req, res) => {
@@ -300,10 +306,7 @@ const getAllUserNotices = async (req, res) => {
 
 const getFavoriteUserNotices = async (req, res) => {
   const { _id } = req.user;
-  
-
   let result = [];
-
   const result1 = await User.findById({_id},
     "-_id -email -password -avatarURL -name -lastname -patronymic -phone -accessToken -refreshToken -verify -verificationToken -deliveryType -deliveryData -buy -sell -createdAt -updatedAt")
     .populate({

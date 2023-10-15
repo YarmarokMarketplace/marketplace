@@ -50,6 +50,7 @@ const noticeSchema = new Schema(
       type: Boolean,
       default: true,
     },
+    reviews: [{ type: Schema.Types.ObjectId, ref: 'review'} ],
     owner: {
       type: Schema.Types.ObjectId,
       ref: 'user',

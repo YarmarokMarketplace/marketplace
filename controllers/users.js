@@ -1,4 +1,6 @@
 const { User } = require("../db/models/users");
+const { Notice } = require("../db/models/notices");
+const { Review } = require("../db/models/reviews");
 const HttpError = require("../helpers/httpError");
 const controllerWrapper = require("../utils/controllerWrapper");
 
@@ -47,7 +49,27 @@ const updateUserData = async (req, res) => {
     });
 };
 
+const addReview = async (req, res) => {
+    const { _id: owner } = req.user;
+    const { id: product } = req.params;
+    const notice = await Notice.findById(product);
+    if (!notice) {
+        throw HttpError.NotFoundError("Notice not found");
+    }
+
+    const review = await Review.create({...req.body, owner, product});
+
+    const result = await Notice.findByIdAndUpdate(product, {
+        $addToSet: { reviews: review._id }, 
+    }, { new: true });
+
+    res.status(201).json({
+        review,
+    });  
+};
+
 module.exports = {
     removeUser: controllerWrapper(removeUser),
     updateUserData: controllerWrapper(updateUserData),
+    addReview: controllerWrapper(addReview),
 };
