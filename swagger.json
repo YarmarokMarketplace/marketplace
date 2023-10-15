@@ -1233,6 +1233,46 @@
           }
         }
       }
+    },
+    "orders/{id}": {
+      "get": {
+        "summary": "Get the order by ID",
+        "tags": [
+          "Order"
+        ],
+        "description": "Find the order by it's unique identifier",
+        "operationId": "getOrderById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Find the order by id",
+              "example": "6494c145ddb3a57412f3d4b4"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddOrderResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authorized"
+          },
+          "404": {
+            "description": "Order not found or User not found"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1917,6 +1957,11 @@
                   }
                 }
               }
+          },
+          "saveData": {
+            "type": "boolean",
+            "description": "the identifier for saving or not saving delivery data for the next purchase",
+            "example": true
           }
         }
       },
