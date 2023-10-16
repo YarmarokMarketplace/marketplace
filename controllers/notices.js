@@ -90,11 +90,11 @@ const addNotice = async (req, res) => {
 
 const getNoticeById = async (req, res) => {
   const { id } = req.params;
-
-  const notice = await Notice.findById(id);
+  let notice;
+  notice = await Notice.findById(id);
   if (!notice) {
-    throw HttpError.NotFoundError("Notice not found");
-  }
+    notice = await InactiveNotice.findById(id)
+  } else if (!notice) throw HttpError.NotFoundError("Notice not found");
   res.status(201).json({
     data: notice,
   });
