@@ -5,7 +5,7 @@ const controllerWrapper = require("../utils/controllerWrapper");
 const sendEmail = require('../helpers/sendEmail');
 const emailVerificationHtml = require('../utils/verificationEmail');
 
-const { RESET_EMAIL_SECRET_KEY } = process.env;
+const { RESET_EMAIL_SECRET_KEY, BASE_URL } = process.env;
 
 const removeUser = async (req, res) => {
     const { id } = req.params;
@@ -61,7 +61,7 @@ const changeUserEmailRequest = async (req, res) => {
 
     const verificationToken = jwt.sign(payload, RESET_EMAIL_SECRET_KEY, { expiresIn: 24*60*60 });
     
-    const result = await User.findByIdAndUpdate(_id, {newEmail: email, verifyForChangeEmail: false, verificationToken: verificationToken});
+    const result = await User.findByIdAndUpdate(_id, {newEmail: email, verifyForChangeEmail: false, verificationToken: verificationToken}, {new: true});
 
     if(!result){
         throw new HttpError(404, "User not found")
@@ -71,7 +71,7 @@ const changeUserEmailRequest = async (req, res) => {
         to: email,
         subject: "Підтвердження зміни електронної пошти на маркетплейсі Yarmarok",
         html: `${emailVerificationHtml}
-        target="_blank" href="https://yarmarok.onrender.com/api/auth/verify/${verificationToken}">Підтвердити</a>
+        target="_blank" href="${BASE_URL}/api/user/verify/${verificationToken}">Підтвердити</a>
         </div>
         `
     };
@@ -97,7 +97,6 @@ const changeUserEmailRequest = async (req, res) => {
 const verifyNewEmail = async(req, res)=> {
     const { verificationToken } = req.params;
     const user = await User.findOne({verificationToken});
-    console.log(user)
     if(!user){
         throw new HttpError(404, "User not found")
     }

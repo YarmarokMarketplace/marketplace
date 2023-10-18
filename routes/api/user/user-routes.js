@@ -12,7 +12,7 @@ const router = express.Router();
 
 router.delete('/:id', authenticate, isValidId, removeUser);
 router.patch('/:id', authenticate, isValidId, upload.single('avatarURL'), validateBody(updateSchema), updateUserData);
-router.post('/email/:id', authenticate, isValidId, changeUserEmailRequest);
+router.post('/email', authenticate, changeUserEmailRequest);
 router.get('/verify/:verificationToken', verifyNewEmail);
 
 module.exports = router;
