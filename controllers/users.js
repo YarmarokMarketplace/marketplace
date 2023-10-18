@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 const { User } = require("../db/models/users");
 const HttpError = require("../helpers/httpError");
 const controllerWrapper = require("../utils/controllerWrapper");
@@ -47,7 +48,28 @@ const updateUserData = async (req, res) => {
     });
 };
 
+const changePassword = async (req, res) => {
+    const { password, newPassword } = req.body;
+
+    const passwordCompare = await bcrypt.compare(password, req.user.password);
+        if (!passwordCompare) { 
+            throw new HttpError(404, "Password is wrong");
+        }
+        const hashPassword = await bcrypt.hash(newPassword, 10);
+        const user = await User.findByIdAndUpdate(req.user._id, { password: hashPassword });
+
+        if (!user) { 
+        throw new HttpError(404, "User not found");
+        }
+
+        res.status(200).json({
+        message: "Password changed"
+        })
+}
+
+
 module.exports = {
     removeUser: controllerWrapper(removeUser),
     updateUserData: controllerWrapper(updateUserData),
+    changePassword: controllerWrapper(changePassword),
 };
