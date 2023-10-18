@@ -414,6 +414,8 @@ const searchNoticesByKeywords = async (req, res) => {
       buildFilterAfterSearchByKeywords(query)]}, 
       {score: {$meta: "textScore"}}, {skip, limit: Number(limit)}).sort({score:{$meta:"textScore"}}
   );
+  const maxPriceNotice = notices.reduce((acc, curr) => acc.price > curr.price ? acc : curr);
+  const maxPrice = maxPriceNotice.price;
 
   if (sort) {
     await buildSortObjectAfterSearchByKeywords(notices, sort)
@@ -432,6 +434,7 @@ const searchNoticesByKeywords = async (req, res) => {
     totalPages,
     page: +page,
     limit: +limit,
+    maxPrice,
     notices,
   });
 }; 
