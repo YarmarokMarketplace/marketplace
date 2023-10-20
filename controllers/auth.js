@@ -86,7 +86,7 @@ const resendVerifyEmail = async (req, res) => {
         to: email,
         subject: "Підтвердження реєстрації на маркетплейсі Yarmarok",
         html: `${emailVerificationHtml}
-        target="_blank" href="${BASE_URL}/api/auth/verify/${user.verificationToken}">Підтвердити</a>
+        target="_blank" href="https://yarmarok.onrender.com/api/auth/verify/${user.verificationToken}">Підтвердити</a>
         </div>
         `
     };

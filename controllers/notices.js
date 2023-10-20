@@ -90,11 +90,11 @@ const addNotice = async (req, res) => {
 
 const getNoticeById = async (req, res) => {
   const { id } = req.params;
-
-  const notice = await Notice.findById(id);
+  let notice;
+  notice = await Notice.findById(id);
   if (!notice) {
-    throw HttpError.NotFoundError("Notice not found");
-  }
+    notice = await InactiveNotice.findById(id)
+  } else if (!notice) throw HttpError.NotFoundError("Notice not found");
   res.status(201).json({
     data: notice,
   });
@@ -404,8 +404,8 @@ const searchNoticesByKeywords = async (req, res) => {
 
   if (priceRange) {
     const formattedPriceRange = priceRange.split("-");
-    minPrice = Number(formattedPriceRange[0]);
-    maxPrice = Number(formattedPriceRange[1]);
+    const minPrice = Number(formattedPriceRange[0]);
+    const maxPrice = Number(formattedPriceRange[1]);
   }
   
   let notices = await Notice.find(
@@ -414,6 +414,8 @@ const searchNoticesByKeywords = async (req, res) => {
       buildFilterAfterSearchByKeywords(query)]}, 
       {score: {$meta: "textScore"}}, {skip, limit: Number(limit)}).sort({score:{$meta:"textScore"}}
   );
+  const maxPriceNotice = notices.reduce((acc, curr) => acc.price > curr.price ? acc : curr);
+  const maxPriceInSearchResult = maxPriceNotice.price;
 
   if (sort) {
     await buildSortObjectAfterSearchByKeywords(notices, sort)
@@ -432,6 +434,7 @@ const searchNoticesByKeywords = async (req, res) => {
     totalPages,
     page: +page,
     limit: +limit,
+    maxPriceInSearchResult,
     notices,
   });
 }; 

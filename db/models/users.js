@@ -99,7 +99,11 @@ const updateSchema = Joi.object({
     patronymic: Joi.string(),
     avatarURL: Joi.string(),
     phone: Joi.string(),
+});
 
+const changePasswordSchema = Joi.object({
+    password: Joi.string().required(),
+    newPassword: Joi.string().required(),
 });
 
 const User = model("user", userSchema);
@@ -110,4 +114,5 @@ module.exports = {
     loginSchema,
     emailSchema,
     updateSchema,
+    changePasswordSchema,
 };

@@ -509,7 +509,7 @@
         }
       }
     },
-    "/user/email/{id}": {
+     "/user/email/{id}": {
       "post": {
         "summary": "Send change-email letter to the user",
         "security": [{ "Bearer": [] }],
@@ -595,6 +595,45 @@
           },
           "404": {
             "description": "User not found"
+          }
+        }
+      }
+    },
+    "/user/user/change-password": {
+      "patch": {
+        "summary": "Change user password",
+        "tags": [
+          "Authorization"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "description": "Change user password in the database from the personal cabinet",
+        "operationId": "changePassword",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password changed"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Not authorized"
+          },
+          "404": {
+            "description": "Password is wrong or User not found"
           }
         }
       }
@@ -1323,6 +1362,46 @@
           }
         }
       }
+    },
+    "orders/{id}": {
+      "get": {
+        "summary": "Get the order by ID",
+        "tags": [
+          "Order"
+        ],
+        "description": "Find the order by it's unique identifier",
+        "operationId": "getOrderById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Find the order by id",
+              "example": "6494c145ddb3a57412f3d4b4"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddOrderResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authorized"
+          },
+          "404": {
+            "description": "Order not found or User not found"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2007,6 +2086,11 @@
                   }
                 }
               }
+          },
+          "saveData": {
+            "type": "boolean",
+            "description": "the identifier for saving or not saving delivery data for the next purchase",
+            "example": true
           }
         }
       },
@@ -2188,6 +2272,21 @@
             "example": "estasjuk@gmail.com"
           }
         }
+      },
+      "ChangePasswordRequest": {
+        "type": "object",
+          "properties": {
+            "password": {
+              "type": "string",
+              "description": "Current user password",
+              "example": "qwerty"
+            },
+            "newPassword": {
+              "type": "string",
+              "description": "New user password",
+              "example": "asdfg"
+            }
+          }
       }
     }
   },

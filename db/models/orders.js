@@ -128,6 +128,7 @@ const orderSchema = new Schema(
     buyerPatronymic: {
         type: String,
         required: false,
+        default: "",
     },
     buyerPhone: {
         type: String,
@@ -146,6 +147,12 @@ const orderSchema = new Schema(
     comments: {
         type: String,
         required: false,
+        default: "",
+    },
+    saveData: {
+        type: Boolean,
+        required: false,
+        default: false
     },
     owner: {
         type: Schema.Types.ObjectId,
