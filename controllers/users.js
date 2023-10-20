@@ -132,3 +132,4 @@ module.exports = {
     changeUserEmailRequest: controllerWrapper(changeUserEmailRequest),
     verifyNewEmail: controllerWrapper(verifyNewEmail),
 };
+
