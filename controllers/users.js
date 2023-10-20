@@ -123,11 +123,13 @@ const changePassword = async (req, res) => {
         res.status(200).json({
         message: "Password changed"
         })
-}
+};
 
 module.exports = {
     removeUser: controllerWrapper(removeUser),
     updateUserData: controllerWrapper(updateUserData),
+    changePassword: controllerWrapper(changePassword),
     changeUserEmailRequest: controllerWrapper(changeUserEmailRequest),
     verifyNewEmail: controllerWrapper(verifyNewEmail),
-}
+};
+
