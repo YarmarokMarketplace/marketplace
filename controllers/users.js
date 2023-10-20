@@ -130,3 +130,4 @@ module.exports = {
     updateUserData: controllerWrapper(updateUserData),
     changeUserEmailRequest: controllerWrapper(changeUserEmailRequest),
     verifyNewEmail: controllerWrapper(verifyNewEmail),
+}
