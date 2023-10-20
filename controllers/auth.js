@@ -158,7 +158,7 @@ const login = async (req, res) => {
         throw new HttpError(401, "Email or password is wrong");
     };
 
-    if (!user.verify) { 
+    if (!user.verify && !user.verifyForChangeEmail) { 
         throw new HttpError(400, "Email is not verified");
     }
 
@@ -172,7 +172,7 @@ const login = async (req, res) => {
 
     const accessToken = jwt.sign(payload, ACCESS_SECRET_KEY, { expiresIn: 300000 });
     const refreshToken = jwt.sign(payload, REFRESH_SECRET_KEY, {expiresIn: 604800});
-    await User.findOneAndUpdate({ _id: payload.id }, { $set: { accessToken, refreshToken } });
+    await User.findOneAndUpdate({ _id: payload.id }, { $set: { accessToken, refreshToken }, verify: true, verifyForChangeEmail: false });
 
     res.status(200).json({
         status: 'success',

@@ -1,7 +1,12 @@
+const jwt = require("jsonwebtoken");
 const bcrypt = require('bcrypt');
 const { User } = require("../db/models/users");
 const HttpError = require("../helpers/httpError");
 const controllerWrapper = require("../utils/controllerWrapper");
+const sendEmail = require('../helpers/sendEmail');
+const emailVerificationHtml = require('../utils/verificationEmail');
+
+const { RESET_EMAIL_SECRET_KEY, BASE_URL } = process.env;
 
 const removeUser = async (req, res) => {
     const { id } = req.params;
@@ -26,7 +31,6 @@ const updateUserData = async (req, res) => {
     } else {
         data = { ...userData }
     }
-    console.log(data)
     
     const result = await User.findByIdAndUpdate(_id, data, { new: true });
     
@@ -48,6 +52,60 @@ const updateUserData = async (req, res) => {
     });
 };
 
+const changeUserEmailRequest = async (req, res) => {
+    const { _id } = req.user;
+    const { email } = req.body;
+    
+    const payload = {
+        id: _id,
+    };
+
+    const verificationToken = jwt.sign(payload, RESET_EMAIL_SECRET_KEY, { expiresIn: 24*60*60 });
+    
+    const result = await User.findByIdAndUpdate(_id, {newEmail: email, verifyForChangeEmail: false, verificationToken: verificationToken}, {new: true});
+
+    if(!result){
+        throw new HttpError(404, "User not found")
+    }
+
+    const verificationEmail = {
+        to: email,
+        subject: "Підтвердження зміни електронної пошти на маркетплейсі Yarmarok",
+        html: `${emailVerificationHtml}
+        target="_blank" href="${BASE_URL}/api/user/verify/${verificationToken}">Підтвердити</a>
+        </div>
+        `
+    };
+
+    await sendEmail(verificationEmail);
+
+    res.status(201).json({
+        status: 'success',
+        code: 201,
+        user: {
+            _id: result.id,
+            email: result.email,
+            name: result.name,
+            lastname: result.lastname,
+            patronymic: result.patronymic,
+            avatarURL: result.avatarURL,
+            phone: result.phone,
+            newEmail: result.newEmail
+        }
+    });
+};
+
+const verifyNewEmail = async(req, res)=> {
+    const { verificationToken } = req.params;
+    const user = await User.findOne({verificationToken});
+    if(!user){
+        throw new HttpError(404, "User not found")
+    }
+    await User.findByIdAndUpdate(user._id, {email: user.newEmail, verify: false, verifyForChangeEmail: true, verificationToken: "", newEmail: ""});
+
+    res.render('verificationPage');
+};
+
 const changePassword = async (req, res) => {
     const { password, newPassword } = req.body;
 
@@ -67,9 +125,8 @@ const changePassword = async (req, res) => {
         })
 }
 
-
 module.exports = {
     removeUser: controllerWrapper(removeUser),
     updateUserData: controllerWrapper(updateUserData),
-    changePassword: controllerWrapper(changePassword),
-};
+    changeUserEmailRequest: controllerWrapper(changeUserEmailRequest),
+    verifyNewEmail: controllerWrapper(verifyNewEmail),
