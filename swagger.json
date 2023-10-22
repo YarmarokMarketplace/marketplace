@@ -1022,7 +1022,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AddNoticeResponse"
+                  "$ref": "#/components/schemas/GetNoticeByIdResponse"
                 }
               }
             }
@@ -1387,7 +1387,7 @@
           }
         ],
         "description": "Add new order",
-        "operationId": "addOrder",
+        "operationId": "createOrder",
         "requestBody": {
           "required": true,
           "content": {
