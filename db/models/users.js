@@ -12,6 +12,12 @@ const userSchema = new Schema({
         unique: true,
         required: [true, "Email is required"],
     },
+    newEmail: {
+        type: String,
+        match: emailRegex,
+        unique: true,
+        default: "",
+    },
     password: {
         type: String,
         minlength: 8,
@@ -20,7 +26,9 @@ const userSchema = new Schema({
     avatarURL: {
         type: String,
     },
-    favorite: [{ type: Schema.Types.ObjectId, ref: 'notice', required: true} ],
+    favorite: [{ type: Schema.Types.ObjectId, ref: "notice" }],
+    buy: [{ type: Schema.Types.ObjectId, ref: "order" }],
+    sell: [{ type: Schema.Types.ObjectId, ref: "order" }],
     name: {
         type: String,
         required: [true, "Name is required"],
@@ -46,6 +54,10 @@ const userSchema = new Schema({
         default: "",
     },
     verify: {
+        type: Boolean,
+        default: false,
+    },
+    verifyForChangeEmail: {
         type: Boolean,
         default: false,
     },
@@ -89,7 +101,11 @@ const updateSchema = Joi.object({
     patronymic: Joi.string(),
     avatarURL: Joi.string(),
     phone: Joi.string(),
+});
 
+const changePasswordSchema = Joi.object({
+    password: Joi.string().required(),
+    newPassword: Joi.string().required(),
 });
 
 const User = model("user", userSchema);
@@ -100,4 +116,5 @@ module.exports = {
     loginSchema,
     emailSchema,
     updateSchema,
+    changePasswordSchema,
 };

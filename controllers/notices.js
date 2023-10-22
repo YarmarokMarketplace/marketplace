@@ -1,6 +1,7 @@
 const { Notice, InactiveNotice } = require("../db/models/notices");
 const { User } = require("../db/models/users");
 const { Category } = require("../db/models/categories");
+const { Order } = require("../db/models/orders");
 const HttpError = require("../helpers/httpError");
 const controllerWrapper = require("../utils/controllerWrapper");
 const buildFilterObject = require("../utils/filterObject");
@@ -90,25 +91,37 @@ const addNotice = async (req, res) => {
 
 const getNoticeById = async (req, res) => {
   const { id } = req.params;
-
-  const notice = await Notice.findById(id).populate({
+  let notice;
+  notice = await Notice.findById(id).populate({
+    path: 'reviews',
+    model: 'review',
+  });
+   if (!notice) {
+    notice = await InactiveNotice.findById(id).populate({
     path: 'reviews',
     model: 'review',
   })
-  if (!notice) {
-    throw HttpError.NotFoundError("Notice not found");
-  }
+  } else if (!notice) throw HttpError.NotFoundError("Notice not found");
 
   res.status(201).json({
     data: notice,
   });
-
-
 };
 
 const removeNotice = async (req, res) => {
   const { id } = req.params;
 
+  const today = new Date();
+  const thirtyDays = today.getTime() - (30*24*60*60*1000);
+
+  const awaitDeliveryOrder = await Order.find({product: id, status: 'await-delivery', createdAt: {
+    $gt: new Date(thirtyDays)}});
+
+  if (awaitDeliveryOrder.length > 0) {
+    throw HttpError.BadRequest("You can't remove this notice due to status 'await-delivery'");
+  }
+
+  const result = await Notice.findByIdAndDelete(id);
   const result = await InactiveNotice.findByIdAndDelete(id);
   if (!result) {
     throw HttpError.NotFoundError("Notice not found");
@@ -407,8 +420,8 @@ const searchNoticesByKeywords = async (req, res) => {
 
   if (priceRange) {
     const formattedPriceRange = priceRange.split("-");
-    minPrice = Number(formattedPriceRange[0]);
-    maxPrice = Number(formattedPriceRange[1]);
+    const minPrice = Number(formattedPriceRange[0]);
+    const maxPrice = Number(formattedPriceRange[1]);
   }
   
   let notices = await Notice.find(
@@ -417,6 +430,8 @@ const searchNoticesByKeywords = async (req, res) => {
       buildFilterAfterSearchByKeywords(query)]}, 
       {score: {$meta: "textScore"}}, {skip, limit: Number(limit)}).sort({score:{$meta:"textScore"}}
   );
+  const maxPriceNotice = notices.reduce((acc, curr) => acc.price > curr.price ? acc : curr);
+  const maxPriceInSearchResult = maxPriceNotice.price;
 
   if (sort) {
     await buildSortObjectAfterSearchByKeywords(notices, sort)
@@ -435,6 +450,7 @@ const searchNoticesByKeywords = async (req, res) => {
     totalPages,
     page: +page,
     limit: +limit,
+    maxPriceInSearchResult,
     notices,
   });
 }; 
