@@ -6,6 +6,8 @@ const HttpError = require("../helpers/httpError");
 const controllerWrapper = require("../utils/controllerWrapper");
 const buildFilterObject = require("../utils/filterObject");
 const buildSortObject = require("../utils/sortObject");
+const deactivationNotificationHtml = require("../utils/deactivationNotification");
+const sendEmail = require('../helpers/sendEmail');
 const buildFilterAfterSearchByKeywords = require("../utils/filterAfterSearchByKeywords");
 const buildSortObjectAfterSearchByKeywords = require("../utils/sortObjectAfterSearchByKeywords");
 
@@ -16,7 +18,7 @@ const getAllNotices = async (req, res) => {
   const result = await Notice.find({}, "", {
     skip,
     limit: Number(limit),
-  }).sort({ createdAt: -1 });
+  }).populate("owner", "email").sort({ createdAt: -1 });
 
   if (result.length === 0) {
     throw HttpError.NotFoundError("Notices not found");
@@ -89,16 +91,16 @@ const addNotice = async (req, res) => {
 
 const getNoticeById = async (req, res) => {
   const { id } = req.params;
-
-  const notice = await Notice.findById(id);
+  let notice;
+  notice = await Notice.findById(id);
   if (!notice) {
-    throw HttpError.NotFoundError("Notice not found");
-  }
+    notice = await InactiveNotice.findById(id)
+  } else if (!notice) throw HttpError.NotFoundError("Notice not found");
   res.status(201).json({
     data: notice,
   });
 };
-    
+
 const removeNotice = async (req, res) => {
   const { id } = req.params;
 
@@ -113,6 +115,7 @@ const removeNotice = async (req, res) => {
   }
 
   const result = await Notice.findByIdAndDelete(id);
+  const result = await InactiveNotice.findByIdAndDelete(id);
   if (!result) {
     throw HttpError.NotFoundError("Notice not found");
   }
@@ -213,7 +216,7 @@ const checkIsActive = async (req, res) => {
     $lt: new Date(thirtyDays)} 
 }, { active: false })
 
-await InactiveNotice.updateMany({active: false})
+await InactiveNotice.updateMany({active: false});
   
   await Notice.aggregate([
     { $match: 
@@ -231,64 +234,117 @@ await InactiveNotice.updateMany({active: false})
     }
     ]);
 
-  await Notice.deleteMany({ createdAt: {
-    $lt: new Date(thirtyDays)} 
-  });
+    const inactiveNotices = await Notice.find({ createdAt: {
+          $lte: new Date()} 
+        }).populate("owner");
+      
+        const noticesWithActiveUsers = inactiveNotices.filter(notice => notice.owner !== null)
+    
+  for (i = 0; i < noticesWithActiveUsers.length; i += 1) {
+    noticeTitle = noticesWithActiveUsers[i].title;
+    email = noticesWithActiveUsers[i].owner.email;
+    id = noticesWithActiveUsers[i]._id;
+    noticeCategory = noticesWithActiveUsers[i].category;
+
+    const deactivationEmail = {
+      to: email,
+      subject: "Сповіщення про деактивацію оголошення",
+      html: `${deactivationNotificationHtml}
+      Шановний користувачу! Повідомляємо про деактивацію вашого оголошення "${noticeTitle}".
+      Якщо Ви хочете активувати оголошення, перейдіть, будь ласка, на сторінку оголошення за посиланням:</p>
+      <a style="
+      font-family: 'Roboto', sans-serif;
+      font-weight: 700;
+      font-size: 20px;
+      line-height: 1.14;
+      letter-spacing: 0.02em;"
+      target="_blank" href="https://yarmarok.netlify.app/#/${noticeCategory}/${id}">Перейти до оголошення</a>
+      </div>
+      `
+    };
+  
+      await sendEmail(deactivationEmail);
+    }
+    await Notice.deleteMany({ createdAt: {
+      $lt: new Date(thirtyDays)} 
+    });
+
+  res.status(200).json({
+    message: 'ok'
+      });
 };
 
 const getAllUserNotices = async (req, res) => {
   const { _id: owner } = req.user;
   const { page = 1, limit = 3 } = req.query;
   const skip = (page - 1) * limit;
-  const notices = await Notice.find({ owner }, "", {
+  const activeNotices = await Notice.find({ owner }, "", {
     skip,
     limit,
   }).populate("owner", "email").sort({ createdAt: -1 });
 
-  if (notices.length === 0) {
+  const inactiveNotices = await InactiveNotice.find({ owner }, "", {
+    skip,
+    limit,
+  }).populate("owner", "email").sort({ createdAt: -1 });
+
+  if (activeNotices.length === 0 && inactiveNotices === 0) {
     throw HttpError.NotFoundError('This user has not any notices');
   };
 
-  const totalResult = await Notice.countDocuments({ owner });
-  const totalPages = Math.ceil(totalResult / limit);
+  const activeResult = await Notice.countDocuments({ owner });
+  const inactiveResult = await InactiveNotice.countDocuments({ owner });
+
+  const totalPagesActive = Math.ceil(activeResult / limit);
+  const totalPagesInactive = Math.ceil(inactiveResult / limit);
 
   res.status(200).json({
-    totalResult,
-    totalPages,
+    totalPagesActive,
+    totalPagesInactive,
+    activeResult,
+    inactiveResult,
     page: Number(page),
     limit: Number(limit),
-    notices,
+    activeNotices,
+    inactiveNotices,
   });
 };
 
 const getFavoriteUserNotices = async (req, res) => {
   const { _id } = req.user;
-  const { page = 1, limit = 3 } = req.query;
-  const skip = (page - 1) * limit;
-
-  const result = await User.findById({_id}, 
-    "-_id -email -password -avatarURL -name -lastname -patronymic -phone -accessToken -refreshToken -sell -buy -verify -verificationToken -deliveryType -deliveryData -createdAt -updatedAt")
+  
+  let result = [];
+  const result1 = await User.findById({_id},
+    "-_id -email -password -avatarURL -name -lastname -patronymic -phone -accessToken -refreshToken -verify -verificationToken -deliveryType -deliveryData -buy -sell -createdAt -updatedAt")
     .populate({
     path: 'favorite',
-    options: {
-      skip,
-      limit: Number(limit)
-    },
+    model: 'notice',
   })
-  
-  if (result.favorite.length === 0) {
-    throw HttpError.NotFoundError('There any notices for this user');
-  };
+
+    if (result1.favorite.length === 0) {
+      throw HttpError.NotFoundError('There any notices for this user');
+    };
+
+    result.push(...result1.favorite);
+
+    const result2 = await User.findById({_id},
+      "-_id -email -password -avatarURL -name -lastname -patronymic -phone -accessToken -refreshToken -verify -verificationToken -deliveryType -deliveryData -buy -sell -createdAt -updatedAt")
+      .populate({
+      path: 'favorite',
+      model: 'inactivenotice',
+    })
+
+      result.push(...result2.favorite);
 
   const user = await User.findById({_id});
-  const totalResult = user.favorite.length; 
-  const totalPages = Math.ceil(totalResult / limit);
+  // const totalResult = user.favorite.length; 
+  // const totalPages = Math.ceil(totalResult / limit);
   
   res.status(200).json({
-    totalResult,
-    totalPages,
-    page: Number(page),
-    limit: Number(limit),
+    // totalResult,
+    // totalPages,
+    // page: Number(page),
+    // limit: Number(limit),
     result,
   });
 };
@@ -358,8 +414,8 @@ const searchNoticesByKeywords = async (req, res) => {
 
   if (priceRange) {
     const formattedPriceRange = priceRange.split("-");
-    minPrice = Number(formattedPriceRange[0]);
-    maxPrice = Number(formattedPriceRange[1]);
+    const minPrice = Number(formattedPriceRange[0]);
+    const maxPrice = Number(formattedPriceRange[1]);
   }
   
   let notices = await Notice.find(
@@ -368,6 +424,8 @@ const searchNoticesByKeywords = async (req, res) => {
       buildFilterAfterSearchByKeywords(query)]}, 
       {score: {$meta: "textScore"}}, {skip, limit: Number(limit)}).sort({score:{$meta:"textScore"}}
   );
+  const maxPriceNotice = notices.reduce((acc, curr) => acc.price > curr.price ? acc : curr);
+  const maxPriceInSearchResult = maxPriceNotice.price;
 
   if (sort) {
     await buildSortObjectAfterSearchByKeywords(notices, sort)
@@ -386,9 +444,33 @@ const searchNoticesByKeywords = async (req, res) => {
     totalPages,
     page: +page,
     limit: +limit,
+    maxPriceInSearchResult,
     notices,
   });
-};
+}; 
+
+// const removeFromInactive = async (req, res) => {
+//   const today = new Date();
+//   const thirtyDays = today.getTime() - (1*24*60*60*1000);
+//   await InactiveNotice.aggregate([
+//     { $match: 
+//       { createdAt: {
+//           $lt: new Date(thirtyDays)} 
+//       }
+//     }, 
+//     {
+//         $merge: {
+//             into: "notices",
+//             on: "_id",
+//             whenMatched: "replace",
+//             whenNotMatched: "insert"
+//         }
+//     }
+//     ]);
+//     await InactiveNotice.deleteMany({ createdAt: {
+//       $lt: new Date(thirtyDays)} 
+//     });
+// }
 
 module.exports = {
   getAllNotices: controllerWrapper(getAllNotices),
@@ -403,5 +485,7 @@ module.exports = {
   getAllUserNotices: controllerWrapper(getAllUserNotices),
   getFavoriteUserNotices: controllerWrapper(getFavoriteUserNotices),
   addNoticeToFavorite: controllerWrapper(addNoticeToFavorite),
+  //sendDeactivationLetter: controllerWrapper(sendDeactivationLetter),
+  //removeFromInactive: controllerWrapper(removeFromInactive),
   searchNoticesByKeywords: controllerWrapper(searchNoticesByKeywords),
 };

@@ -1,4 +1,3 @@
-const { Notice } = require("../db/models/notices");
 const { Order } = require("../db/models/orders");
 const { User } = require("../db/models/users");
 const HttpError = require("../helpers/httpError");
@@ -7,10 +6,14 @@ const controllerWrapper = require("../utils/controllerWrapper");
 const createOrder = async (req, res) => {
     const { _id: buyerId } = req.user;
     const { id: product } = req.params;
-
-    const deliveryDataForTheNextPurchase = {
-        deliveryType: req.body.deliveryType,
-        deliveryData: req.body.deliveryData,
+    const { saveData } = req.body;
+  
+  if (saveData) {
+        const deliveryDataForTheNextPurchase = {
+            deliveryType: req.body.deliveryType,
+            deliveryData: req.body.deliveryData,
+        };
+        const user = await User.findByIdAndUpdate(owner, deliveryDataForTheNextPurchase);
     };
 
     const result = await Order.create({...req.body, buyerId, product});

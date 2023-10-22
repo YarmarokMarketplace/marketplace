@@ -24,6 +24,7 @@ const { addNoticeSchema, updateNoticeSchema, toggleActiveSchema} = require('../.
 const router = express.Router();
 
 router.get('/', getAllNotices);
+//router.get('/inactive', checkIsActive);
 router.get('/:category', getNoticesByCategory);
 router.post('/', authenticate, upload.array('photos', 6), validateBody(addNoticeSchema), addNotice);
 router.patch('/:id', authenticate, isValidId, validateBody(updateNoticeSchema), upload.array('photos', 6), updateNotice);
@@ -35,6 +36,7 @@ router.get('/user/notices', authenticate, getAllUserNotices);
 router.get('/user/favorites', authenticate, getFavoriteUserNotices);
 router.post('/favorites/:id', authenticate, addNoticeToFavorite);
 router.get('/search/search-notice', searchNoticesByKeywords);
+
 
 
 module.exports = router;

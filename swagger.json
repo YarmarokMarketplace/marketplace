@@ -509,6 +509,135 @@
         }
       }
     },
+     "/user/email/{id}": {
+      "post": {
+        "summary": "Send change-email letter to the user",
+        "security": [{ "Bearer": [] }],
+        "tags": [
+          "User"
+        ],
+        "description": "Send the email with link for changing email",
+        "operationId": "changeUserEmailRequest",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of user that needs to be updated",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResendVerifyEmailRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangeEmailRequest"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Not authorized"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/user/verify/{verificationToken}": {
+      "get": {
+        "summary": "Verify new user email",
+        "tags": [
+          "Authorization"
+        ],
+        "description": "Verify new user email",
+        "operationId": "verifyNewEmail",
+        "parameters": [
+          {
+            "name": "verificationToken",
+            "in": "params",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Backend-generated unique verificationToken"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "example": "Ваша електронна пошта підтверджена! Перехід на головну через 5 секунд...",
+                  "description": "returns HTML page with automated redirecting to the Homepage after 5 second"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/user/user/change-password": {
+      "patch": {
+        "summary": "Change user password",
+        "tags": [
+          "Authorization"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "description": "Change user password in the database from the personal cabinet",
+        "operationId": "changePassword",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password changed"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Not authorized"
+          },
+          "404": {
+            "description": "Password is wrong or User not found"
+          }
+        }
+      }
+    },
     "/notices": {
       "get": {
         "summary": "Get all notices",
@@ -1599,22 +1728,6 @@
                   "type": "boolean",
                   "example": true
                 },
-                "totalResults": {
-                  "type": "integer",
-                  "example": 8
-                },
-                "totalPages": {
-                  "type": "integer",
-                  "example": 2
-                },
-                "page": {
-                  "type": "integer",
-                  "example": 1
-                },
-                "limit": {
-                  "type": "integer",
-                  "example": 6
-                },
                 "maxPriceInCategory": {
                   "type": "integer",
                   "example": 84450
@@ -1975,7 +2088,7 @@
           }
         }
       },
-      "AddOrderRequest": {
+ "AddOrderRequest": {
         "type": "object",
         "required": [
           "buyerName",
@@ -2477,6 +2590,59 @@
             }
           }
         }
+      },
+      "ChangeEmailRequest": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Backend-generated unique identifier",
+            "example": "GGHJlhkj668__hjkhjkhh$%"
+          },
+          "email": {
+            "type": "string",
+            "example": "estasjuk@gmail.com"
+          },
+          "name": {
+            "type": "string",
+            "example": "Olena"
+          },
+          "lastname": {
+            "type": "string",
+            "example": "Ivanova"
+          },
+          "patronymic": {
+            "type": "string",
+            "example": "Ivanivna"
+          },
+          "phone": {
+            "type": "string",
+            "example": "380961112233"
+          },
+          "avatarURL": {
+            "type": "string",
+            "example": "https://yarmarok-bucket.s3.amazonaws.com/1-kisb82VT8IOXQ3RbXa9.jpg"
+          },
+          "newEmail": {
+            "type": "string",
+            "example": "estasjuk@gmail.com"
+          }
+        }
+      },
+      "ChangePasswordRequest": {
+        "type": "object",
+          "properties": {
+            "password": {
+              "type": "string",
+              "description": "Current user password",
+              "example": "qwerty"
+            },
+            "newPassword": {
+              "type": "string",
+              "description": "New user password",
+              "example": "asdfg"
+            }
+          }
       }
     },
     "securitySchemes": {

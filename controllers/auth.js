@@ -57,7 +57,7 @@ const googleAuth = async(req, res)=> {
     const refreshToken = jwt.sign(payload, REFRESH_SECRET_KEY, {expiresIn: "7d"});
     await User.findByIdAndUpdate(id, {accessToken, refreshToken});
 
-    res.redirect(`${FRONTEND_URL}?accessToken=${accessToken}&refreshToken=${refreshToken}&email=${email}&name=${name}`)
+    res.redirect(`https://deploy-preview-27--yarmarok-test.netlify.app/?accessToken=${accessToken}&refreshToken=${refreshToken}`)
 }
 
 const verifyEmail = async(req, res)=> {
@@ -86,7 +86,7 @@ const resendVerifyEmail = async (req, res) => {
         to: email,
         subject: "Підтвердження реєстрації на маркетплейсі Yarmarok",
         html: `${emailVerificationHtml}
-        target="_blank" href="${BASE_URL}/api/auth/verify/${user.verificationToken}">Підтвердити</a>
+        target="_blank" href="https://yarmarok.onrender.com/api/auth/verify/${user.verificationToken}">Підтвердити</a>
         </div>
         `
     };
@@ -158,7 +158,7 @@ const login = async (req, res) => {
         throw new HttpError(401, "Email or password is wrong");
     };
 
-    if (!user.verify) { 
+    if (!user.verify && !user.verifyForChangeEmail) { 
         throw new HttpError(400, "Email is not verified");
     }
 
@@ -172,7 +172,7 @@ const login = async (req, res) => {
 
     const accessToken = jwt.sign(payload, ACCESS_SECRET_KEY, { expiresIn: 300000 });
     const refreshToken = jwt.sign(payload, REFRESH_SECRET_KEY, {expiresIn: 604800});
-    await User.findOneAndUpdate({ _id: payload.id }, { $set: { accessToken, refreshToken } });
+    await User.findOneAndUpdate({ _id: payload.id }, { $set: { accessToken, refreshToken }, verify: true, verifyForChangeEmail: false });
 
     res.status(200).json({
         status: 'success',
@@ -229,7 +229,7 @@ const logout = async(req, res)=> {
 };
 
 const getCurrent = (req, res) => {
-    const {name, email, _id, lastname, patronymic, deliveryData, deliveryType, avatarURL, phone } = req.user;
+    const {name, email, _id, lastname, patronymic, deliveryData, deliveryType, avatarURL, phone, favorite } = req.user;
 
     res.status(200).json({
         id: _id,
@@ -241,6 +241,7 @@ const getCurrent = (req, res) => {
         phone,
         deliveryData,
         deliveryType,
+        favorite,
     })
 }
 
