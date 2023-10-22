@@ -71,7 +71,8 @@ const addReview = async (req, res) => {
     res.status(201).json({
         review,
     });  
-  
+};
+
 const changeUserEmailRequest = async (req, res) => {
     const { _id } = req.user;
     const { email } = req.body;
@@ -152,4 +153,4 @@ module.exports = {
     changePassword: controllerWrapper(changePassword),
     changeUserEmailRequest: controllerWrapper(changeUserEmailRequest),
     verifyNewEmail: controllerWrapper(verifyNewEmail),
-};
+}

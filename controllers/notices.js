@@ -121,8 +121,11 @@ const removeNotice = async (req, res) => {
     throw HttpError.BadRequest("You can't remove this notice due to status 'await-delivery'");
   }
 
-  const result = await Notice.findByIdAndDelete(id);
-  const result = await InactiveNotice.findByIdAndDelete(id);
+  let result;
+
+  result = await Notice.findByIdAndDelete(id);
+  result = await InactiveNotice.findByIdAndDelete(id);
+  
   if (!result) {
     throw HttpError.NotFoundError("Notice not found");
   }
