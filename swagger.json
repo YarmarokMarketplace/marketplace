@@ -509,6 +509,64 @@
         }
       }
     },
+    "/user/reviews/{id}": {
+      "post": {
+        "summary": "Add new review",
+        "tags": [
+          "User"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "description": "Add new review",
+        "operationId": "addReview",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of notice that needs to be assessed",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Update the user with the specified ID"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddReviewRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddReviewResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Not authorized"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
      "/user/email/{id}": {
       "post": {
         "summary": "Send change-email letter to the user",
@@ -2643,6 +2701,247 @@
               "example": "asdfg"
             }
           }
+      },
+      "GetNoticeByIdResponse": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Backend-generated unique identifier",
+            "example": "GGHJlhkj668__hjkhjkhh$%"
+          },
+          "category": {
+            "type": "string",
+            "description": "notice's category",
+            "enum": [
+              "auto",
+              "business-and-services",
+              "for-free",
+              "children's-world",
+              "home-and-garden",
+              "help",
+              "electricity",
+              "spare-parts-for-transport",
+              "fashion-and-style",
+              "realty",
+              "exchange",
+              "repair",
+              "work",
+              "animals",
+              "goods-to-win",
+              "hobbies-recreation-sports"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "description": "the title of user notice",
+            "example": "The chair for sale"
+          },
+          "description": {
+            "type": "string",
+            "example": "Very good chair for your home"
+          },
+          "photos": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "notice image url",
+              "example": "https://yarmarok-bucket.s3.amazonaws.com/BSqREaubo3hWhDvb6lNZ3_2.jpg"
+            }
+          },
+          "location": {
+            "type": "string",
+            "example": "Kyiv"
+          },
+          "goodtype": {
+            "type": "string",
+            "enum": ["new", "used"]
+          },
+          "price": {
+            "type": "integer",
+            "example": 2500
+          },
+          "active": {
+            "type": "boolean",
+            "example": false
+          },
+          "owner": {
+            "type": "object",
+            "properties": {
+              "_id": {
+                "type": "string",
+                "example": "64ea254f910ee531cf282d3e",
+                "description": "Backend-generated unique user id"
+              },
+              "email": {
+                "type": "string",
+                "example": "estasjuk@gmail.com",
+                "description": "user email"
+              }
+            }
+          },
+          "contactName": {
+            "type": "string",
+            "example": "Olena"
+          },
+          "contactNumber": {
+            "type": "string",
+            "example": "380961112233"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "the creation time of notice (backend-generated)",
+            "example": "2023-05-15T10:51:30.531Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "the update time of notice (backend-generated)",
+            "example": "2023-05-15T10:51:30.531Z"
+          },
+          "reviews": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "description": "notice reviews",
+              "properties": {
+                "_id": {
+                  "type": "string",
+                  "description": "Backend-generated unique review identifier",
+                  "example": "GGHJlhkj668__hjkhjkhh$%"
+                },
+                "compliance": {
+                  "type": "number",
+                  "description": "Assessment of product compliance with declared characteristics",
+                  "enum": [1, 2, 3, 4, 5],
+                  "example": 5
+                },
+                "delivery_speed": {
+                  "type": "number",
+                  "description": "Assessment of product delivery speed",
+                  "enum": [1, 2, 3, 4, 5],
+                  "example": 5
+                },
+                "communication": {
+                  "type": "number",
+                  "description": "Assessment of communication with seller",
+                  "enum": [1, 2, 3, 4, 5],
+                  "example": 5
+                },
+                "comments": {
+                  "type": "string",
+                  "description": "Some additional information about product and seller assessment",
+                  "example": "Very good seller"
+                },
+                "product": {
+                  "type": "string",
+                  "description": "The product unique id",
+                  "example": "65001fef31a839a590ba9054"
+                },
+                "owner": {
+                  "type": "string",
+                  "description": "The user unique id who wrote this review",
+                  "example": "65001fef31a839a590ba9054"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "description": "the creation time of review (backend-generated)",
+                  "example": "2023-05-15T10:51:30.531Z"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "description": "the update time of notice (backend-generated),always equal to createdAt ",
+                  "example": "2023-05-15T10:51:30.531Z"
+                }
+              }
+            }
+          }
+        }
+      },
+      "AddReviewRequest": {
+        "type": "object",
+        "required": [
+          "compliance",
+          "delivery_speed",
+          "communication"
+        ],
+        "properties": {
+          "compliance": {
+            "type": "number",
+            "description": "Assessment of product compliance with declared characteristics",
+            "enum": [1, 2, 3, 4, 5],
+            "example": 5
+          },
+          "delivery_speed": {
+            "type": "number",
+            "description": "Assessment of product delivery speed",
+            "enum": [1, 2, 3, 4, 5],
+            "example": 5
+          },
+          "communication": {
+            "type": "number",
+            "description": "Assessment of communication with seller",
+            "enum": [1, 2, 3, 4, 5],
+            "example": 5
+          },
+          "comments": {
+            "type": "string",
+            "description": "Some additional information about product and seller assessment",
+            "example": "Very good seller"
+          }
+        }
+      },
+      "AddReviewResponse": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Backend-generated unique review identifier",
+            "example": "GGHJlhkj668__hjkhjkhh$%"
+          },
+          "compliance": {
+            "type": "number",
+            "description": "Assessment of product compliance with declared characteristics",
+            "enum": [1, 2, 3, 4, 5],
+            "example": 5
+          },
+          "delivery_speed": {
+            "type": "number",
+            "description": "Assessment of product delivery speed",
+            "enum": [1, 2, 3, 4, 5],
+            "example": 5
+          },
+          "communication": {
+            "type": "number",
+            "description": "Assessment of communication with seller",
+            "enum": [1, 2, 3, 4, 5],
+            "example": 5
+          },
+          "comments": {
+            "type": "string",
+            "description": "Some additional information about product and seller assessment",
+            "example": "Very good seller"
+          },
+          "product": {
+            "type": "string",
+            "description": "The product unique id",
+            "example": "65001fef31a839a590ba9054"
+          },
+          "owner": {
+            "type": "string",
+            "description": "The user unique id who wrote this review",
+            "example": "65001fef31a839a590ba9054"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "the creation time of review (backend-generated)",
+            "example": "2023-05-15T10:51:30.531Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "the update time of notice (backend-generated),always equal to createdAt ",
+            "example": "2023-05-15T10:51:30.531Z"
+          }
+        }
       }
     },
     "securitySchemes": {

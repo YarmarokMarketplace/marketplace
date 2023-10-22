@@ -1,6 +1,8 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require('bcrypt');
 const { User } = require("../db/models/users");
+const { Notice } = require("../db/models/notices");
+const { Review } = require("../db/models/reviews");
 const HttpError = require("../helpers/httpError");
 const controllerWrapper = require("../utils/controllerWrapper");
 const sendEmail = require('../helpers/sendEmail');
@@ -52,6 +54,24 @@ const updateUserData = async (req, res) => {
     });
 };
 
+const addReview = async (req, res) => {
+    const { _id: owner } = req.user;
+    const { id: product } = req.params;
+    const notice = await Notice.findById(product);
+    if (!notice) {
+        throw HttpError.NotFoundError("Notice not found");
+    }
+
+    const review = await Review.create({...req.body, owner, product});
+
+    const result = await Notice.findByIdAndUpdate(product, {
+        $addToSet: { reviews: review._id }, 
+    }, { new: true });
+
+    res.status(201).json({
+        review,
+    });  
+  
 const changeUserEmailRequest = async (req, res) => {
     const { _id } = req.user;
     const { email } = req.body;
@@ -128,8 +148,8 @@ const changePassword = async (req, res) => {
 module.exports = {
     removeUser: controllerWrapper(removeUser),
     updateUserData: controllerWrapper(updateUserData),
+    addReview: controllerWrapper(addReview),
     changePassword: controllerWrapper(changePassword),
     changeUserEmailRequest: controllerWrapper(changeUserEmailRequest),
     verifyNewEmail: controllerWrapper(verifyNewEmail),
 };
-
