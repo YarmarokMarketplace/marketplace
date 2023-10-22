@@ -26,7 +26,9 @@ const userSchema = new Schema({
     avatarURL: {
         type: String,
     },
-    favorite: [{ type: Schema.Types.ObjectId, ref: 'notice', required: true} ],
+    favorite: [{ type: Schema.Types.ObjectId, ref: "notice" }],
+    buy: [{ type: Schema.Types.ObjectId, ref: "order" }],
+    sell: [{ type: Schema.Types.ObjectId, ref: "order" }],
     name: {
         type: String,
         required: [true, "Name is required"],

@@ -47,7 +47,7 @@
       "description": "User endpoints"
     },
     {
-      "name": "Order",
+      "name": "Orders",
       "description": "Order endpoints"
     }
   ],
@@ -929,7 +929,7 @@
             "description": "Notice deleted"
           },
           "400": {
-            "description": "Bad request"
+            "description": "You can't remove this notice due to status 'await-delivery'"
           },
           "401": {
             "description": "Not authorized"
@@ -1182,52 +1182,6 @@
         }
       }
     },
-    "/notices/{id}/order": {
-      "post": {
-        "summary": "Add new order",
-        "tags": [
-          "Notice"
-        ],
-        "security": [
-          {
-            "Bearer": []
-          }
-        ],
-        "description": "Add new order",
-        "operationId": "addOrder",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AddOrderRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AddOrderResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Not authorized"
-          },
-          "404": {
-            "description": "User not found"
-          }
-        }
-      }
-    },
     "/main": {
       "get": {
         "summary": "Get all categories",
@@ -1363,13 +1317,64 @@
         }
       }
     },
-    "orders/{id}": {
-      "get": {
-        "summary": "Get the order by ID",
+    "/orders/{id}/order": {
+      "post": {
+        "summary": "Add new order",
         "tags": [
-          "Order"
+          "Orders"
         ],
-        "description": "Find the order by it's unique identifier",
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "description": "Add new order",
+        "operationId": "addOrder",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddOrderRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddOrderResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Not authorized"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/orders/{id}": {
+      "get": {
+        "summary": "Find order by id",
+        "tags": [
+          "Orders"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "description": "Find the notices by it's unique identifier",
         "operationId": "getOrderById",
         "parameters": [
           {
@@ -1389,6 +1394,125 @@
             "content": {
               "application/json": {
                 "schema": {
+                  "$ref": "#/components/schemas/GetOrderByIdResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          }
+        }
+      }
+    },
+    "/orders/user/buy": {
+      "get": {
+        "summary": "Get all user I-buy orders",
+        "tags": [
+          "Orders"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "description": "Find all existing orders created by specific user",
+        "operationId": "getUserIBuyNotices",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListOfOrdersResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "There any buy orders for this user"
+          }
+        }
+      }
+    },
+    "/orders/user/sell": {
+      "get": {
+        "summary": "Get all user I-sell orders",
+        "tags": [
+          "Orders"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "description": "Find all existing orders received by seller",
+        "operationId": "getUserISellNotices",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListOfOrdersResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "There any sell orders for this user"
+          }
+        }
+      }
+    },
+    "/orders/status/{id}": {
+      "patch": {
+        "summary": "Change order status",
+        "tags": [
+          "Orders"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "description": "Update order status in the database",
+        "operationId": "changeStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "example": "6490564f8f85c705511c5de2",
+            "schema": {
+              "type": "string",
+              "description": "Backend-generated unique identifier"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "description": "Status to be changed",
+                    "enum": ["await-confirm", "await-delivery", "cancelled-by-seller", "received"]
+                  } 
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
                   "$ref": "#/components/schemas/AddOrderResponse"
                 }
               }
@@ -1398,7 +1522,7 @@
             "description": "Not authorized"
           },
           "404": {
-            "description": "Order not found or User not found"
+            "description": "Order not found"
           }
         }
       }
@@ -1964,7 +2088,7 @@
           }
         }
       },
-      "AddOrderRequest": {
+ "AddOrderRequest": {
         "type": "object",
         "required": [
           "buyerName",
@@ -2086,11 +2210,6 @@
                   }
                 }
               }
-          },
-          "saveData": {
-            "type": "boolean",
-            "description": "the identifier for saving or not saving delivery data for the next purchase",
-            "example": true
           }
         }
       },
@@ -2124,6 +2243,11 @@
             "type": "string",
             "description": "The identifier of notice of this order",
             "example": "64fb44158a217ff792230717"
+          },
+          "status": {
+            "type": "string",
+            "description": "order status",
+            "enum": ["await-confirm", "await-delivery", "cancelled-by-seller", "received"]
           },
           "deliveryData": {
             "type": "object",
@@ -2235,6 +2359,238 @@
           }
         }
       },
+      "GetOrderByIdResponse": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Backend-generated unique order identifier",
+            "example": "6505ff300a697ff593008414"
+          },
+          "buyerName": {
+            "type": "string",
+            "example": "Olena"
+          },
+          "buyerLastname": {
+            "type": "string",
+            "example": "Ivanova"
+          },
+          "buyerPhone": {
+            "type": "string",
+            "example": "380961112233"
+          },
+          "deliveryType": {
+            "type": "string",
+            "enum": ["new-post", "ukr-post", "other"],
+            "example": "ukr-post"
+          },
+          "owner": {
+            "type": "string",
+            "description": "The identifier of creator of this order",
+            "example": "64fb44158a217ff792230717"
+          },
+          "product": {
+            "type": "object",
+            "properties": {
+              "_id": {
+                "type": "string",
+                "example": "6500210231a839a590ba9062"
+              },
+              "category": {
+                "type": "string",
+                "example": "electronics"
+              },
+              "goodtype": {
+                "type": "string",
+                "example": "new"
+              },
+              "title": {
+                "type": "string",
+                "example": "тостер"
+              },
+              "description": {
+                "type": "string",
+                "example": "дуже якісний тостер"
+              },
+              "photos": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "description": "notice image url",
+                  "example": "https://yarmarok-bucket.s3.amazonaws.com/BSqREaubo3hWhDvb6lNZ3_2.jpg"
+                }
+              },
+              "location": {
+                "type": "string",
+                "example": "Одеса"
+              },
+              "price": {
+                "type": "number",
+                "example": 500
+              },
+              "contactName": {
+                "type": "stringг",
+                "example": "Олег"
+              },
+              "contactNumber": {
+                "type": "string",
+                "example": "+380961112233"
+              },
+              "active": {
+                "type": "boolean",
+                "example": true
+              },
+              "owner": {
+                "type": "string",
+                "example": "64f8964dd6524156e93cf71d"
+              },
+              "createdAt": {
+                "type": "date",
+                "example": "2023-09-30T21:05:35.098Z"
+              },
+              "updatedAt": {
+                "type": "date",
+                "example": "2023-09-30T21:05:35.098Z"
+              }
+            }
+          },
+          "deliveryData": {
+            "type": "object",
+            "properties": {
+                "otherSchema": {
+                  "type": "object",
+                  "properties": {
+                    "typeOfOtherDelivery": {
+                      "type": "string",
+                      "example": "I would like to get parcel from 09:00 till 11:00"
+                    }
+                  }
+                },
+                "ukrPostSchema": {
+                  "type": "object",
+                  "properties": {
+                    "city": {
+                      "type": "string",
+                      "example": "Kyiv"
+                    },
+                    "index": {
+                      "type": "string",
+                      "example": "01001"
+                    },
+                    "street": {
+                      "type": "string",
+                      "example": "Soborna"
+                    },
+                    "house": {
+                      "type": "string",
+                      "example": "12"
+                    },
+                    "apartments": {
+                      "type": "string",
+                      "example": "25"
+                    }
+                  }
+                },
+                "newPostSchema": {
+                  "type": "object",
+                  "properties": {
+                    "typeOfNovaPostDelivery": {
+                      "type": "object",
+                      "properties": {
+                        "postOfficeSchema": {
+                          "type": "object",
+                          "properties": {
+                            "postOfficeNumber": {
+                              "type": "string",
+                              "example": "322"
+                            },
+                            "city": {
+                              "type": "string",
+                              "example": "Kyiv"
+                            }
+                          }
+                        },
+                        "addressSchema": {
+                          "type": "object",
+                          "properties": {
+                            "city": {
+                              "type": "string",
+                              "example": "Kyiv"
+                            },
+                            "street": {
+                              "type": "string",
+                              "example": "Soborna"
+                            },
+                            "house": {
+                              "type": "string",
+                              "example": "12"
+                            },
+                            "apartments": {
+                              "type": "string",
+                              "example": "132"
+                            }
+                          }
+                        },
+                        "postBoxSchema": {
+                          "type": "object",
+                          "properties": {
+                            "postBoxNumber": {
+                              "type": "string",
+                              "example": "322"
+                            },
+                            "city": {
+                              "type": "string",
+                              "example": "Kyiv"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+          },
+          "status": {
+            "type": "string",
+            "enum": ["await-confirm", "await-delivery", "cancelled-by-seller", "received"]
+          },
+          "createdAt": {
+            "type": "date",
+            "example": "2023-09-16T19:17:04.611Z"
+          },
+          "updatedAt": {
+            "type": "date",
+            "example": "2023-09-16T19:17:04.611Z"
+          }
+        }
+      },
+      "ListOfOrdersResponse": {
+        "type": "object",
+        "properties": {
+          "totalResult": {
+            "type": "number",
+            "example": 6
+          },
+          "totalPages": {
+            "type": "number",
+            "example": 3
+          },
+          "page": {
+            "type": "number",
+            "example": 1
+          },
+          "limit": {
+            "type": "number",
+            "example": 3
+          },
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddOrderResponse"
+            }
+          }
+        }
+      },
       "ChangeEmailRequest": {
         "type": "object",
         "properties": {
@@ -2288,13 +2644,13 @@
             }
           }
       }
-    }
-  },
-  "securitySchemes": {
+    },
+    "securitySchemes": {
       "Bearer": {
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT"
       }
+    }
   }
 }

@@ -1,6 +1,7 @@
 const { Notice, InactiveNotice } = require("../db/models/notices");
 const { User } = require("../db/models/users");
 const { Category } = require("../db/models/categories");
+const { Order } = require("../db/models/orders");
 const HttpError = require("../helpers/httpError");
 const controllerWrapper = require("../utils/controllerWrapper");
 const buildFilterObject = require("../utils/filterObject");
@@ -103,6 +104,17 @@ const getNoticeById = async (req, res) => {
 const removeNotice = async (req, res) => {
   const { id } = req.params;
 
+  const today = new Date();
+  const thirtyDays = today.getTime() - (30*24*60*60*1000);
+
+  const awaitDeliveryOrder = await Order.find({product: id, status: 'await-delivery', createdAt: {
+    $gt: new Date(thirtyDays)}});
+
+  if (awaitDeliveryOrder.length > 0) {
+    throw HttpError.BadRequest("You can't remove this notice due to status 'await-delivery'");
+  }
+
+  const result = await Notice.findByIdAndDelete(id);
   const result = await InactiveNotice.findByIdAndDelete(id);
   if (!result) {
     throw HttpError.NotFoundError("Notice not found");
@@ -301,9 +313,7 @@ const getAllUserNotices = async (req, res) => {
 const getFavoriteUserNotices = async (req, res) => {
   const { _id } = req.user;
   
-
   let result = [];
-
   const result1 = await User.findById({_id},
     "-_id -email -password -avatarURL -name -lastname -patronymic -phone -accessToken -refreshToken -verify -verificationToken -deliveryType -deliveryData -buy -sell -createdAt -updatedAt")
     .populate({
