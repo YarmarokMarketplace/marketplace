@@ -162,7 +162,7 @@ const orderSchema = new Schema(
     saveData: {
         type: Boolean,
         required: false,
-        default: false
+        default: false,
     },
     owner: {
         type: Schema.Types.ObjectId,
