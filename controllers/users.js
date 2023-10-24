@@ -82,12 +82,23 @@ const changeUserEmailRequest = async (req, res) => {
     };
 
     const verificationToken = jwt.sign(payload, RESET_EMAIL_SECRET_KEY, { expiresIn: 24*60*60 });
-    
+
+
+    const isEmailIsCurrent = await User.find({_id, email:email});
+    if (isEmailIsCurrent.length > 0) {
+        throw new HttpError(400, "You have entered current email")
+    };
+
+    const isEmailExists = await User.find({email: email});
+    if (isEmailExists.length > 0) {
+        throw new HttpError(400, "This email already exists")
+    };
+
     const result = await User.findByIdAndUpdate(_id, {newEmail: email, verifyForChangeEmail: false, verificationToken: verificationToken}, {new: true});
 
     if(!result){
         throw new HttpError(404, "User not found")
-    }
+    };
 
     const verificationEmail = {
         to: email,

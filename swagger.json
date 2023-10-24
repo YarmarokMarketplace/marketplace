@@ -567,7 +567,7 @@
         }
       }
     },
-     "/user/email/{id}": {
+    "/user/email": {
       "post": {
         "summary": "Send change-email letter to the user",
         "security": [{ "Bearer": [] }],
@@ -576,17 +576,6 @@
         ],
         "description": "Send the email with link for changing email",
         "operationId": "changeUserEmailRequest",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "ID of user that needs to be updated",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -609,7 +598,7 @@
             }
           },
           "400": {
-            "description": "Bad request"
+            "description": "You have entered current email or This email already exists"
           },
           "401": {
             "description": "Not authorized"
