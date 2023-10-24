@@ -16,7 +16,7 @@ const createOrder = async (req, res) => {
             deliveryType: req.body.deliveryType,
             deliveryData: req.body.deliveryData,
         };
-        const user = await User.findByIdAndUpdate(owner, deliveryDataForTheNextPurchase);
+        const user = await User.findByIdAndUpdate(buyerId, deliveryDataForTheNextPurchase);
     };
 
     const result = await Order.create({...req.body, buyerId, product});
