@@ -57,16 +57,34 @@ const updateUserData = async (req, res) => {
 const addReview = async (req, res) => {
     const { _id: owner } = req.user;
     const { id: product } = req.params;
+    const { compliance, delivery_speed, communication } = req.body;
+
     const notice = await Notice.findById(product);
     if (!notice) {
         throw HttpError.NotFoundError("Notice not found");
     }
 
-    const review = await Review.create({...req.body, owner, product});
+    const averageMark = ((compliance + delivery_speed + communication) / 3).toFixed(2);
+    const review = await Review.create({...req.body, averageMark: averageMark, owner, product});
+
+    const sellerId = notice.owner;
+    const seller = await User.findById(sellerId);
+    if (!seller) {
+        throw HttpError.NotFoundError("Seller not found");
+    };
+
+    let rating = 0;
+    if (seller.rating === 0) {
+        rating = ((compliance + delivery_speed + communication) / 3).toFixed(2);
+    } else {
+        rating = ((compliance + delivery_speed + communication + seller.rating) / 4).toFixed(2);
+    }
 
     const result = await Notice.findByIdAndUpdate(product, {
         $addToSet: { reviews: review._id }, 
     }, { new: true });
+
+    await User.findByIdAndUpdate(sellerId, {rating: rating})
 
     res.status(201).json({
         review,

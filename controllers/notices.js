@@ -96,15 +96,20 @@ const getNoticeById = async (req, res) => {
     path: 'reviews',
     model: 'review',
   });
-   if (!notice) {
+  if (!notice) {
     notice = await InactiveNotice.findById(id).populate({
     path: 'reviews',
     model: 'review',
   })
   } else if (!notice) throw HttpError.NotFoundError("Notice not found");
 
-  res.status(201).json({
-    data: notice,
+  const sellerId = notice.owner;
+  const seller = await User.findById(sellerId);
+  const sellerRating = seller.rating;
+
+  res.status(200).json({
+    notice,
+    sellerRating,
   });
 };
 

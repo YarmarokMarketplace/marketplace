@@ -8,14 +8,21 @@ const reviewSchema = new Schema(
     compliance: {
         type: Number,
         enum: [1, 2, 3, 4, 5],
+        required: true,
     },
     delivery_speed: {
         type: Number,
         enum: [1, 2, 3, 4, 5],
+        required: true,
     },
     communication: {
         type: Number,
         enum: [1, 2, 3, 4, 5],
+        required: true,
+    },
+    averageMark: {
+        type: Number,
+        default: 0,
     },
     comments: {
         type: String,
