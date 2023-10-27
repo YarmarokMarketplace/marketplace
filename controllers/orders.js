@@ -72,7 +72,7 @@ const getUserIBuyNotices = async (req, res) => {
         path: 'product',
         model: 'notice'
       }
-    })
+    }).sort({ createdAt: -1 });
     
     if (result.buy.length === 0) {
       throw HttpError.NotFoundError('There any buy orders for this user');
@@ -109,7 +109,7 @@ const getUserISellNotices = async (req, res) => {
         path: 'product',
         model: 'notice'
       }
-    })
+    }).sort({ createdAt: -1 });
     
     if (result.sell.length === 0) {
       throw HttpError.NotFoundError('There any sell orders for this user');
