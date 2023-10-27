@@ -413,18 +413,12 @@ const removeNoticeFromFavorite = async (req, res) => {
 };
 
 const searchNoticesByKeywords = async (req, res) => {
-  const { page = 1, limit = 9, keywords = "", goodtype, priceRange, location, sort } = req.query;
+  const { page = 1, limit = 9, keywords = "", goodtype, priceRange, location, sort, category } = req.query;
   const skip = (page - 1) * limit;
-  const query = { goodtype, priceRange, location };
+  const query = { goodtype, priceRange, location, category };
   
   if (!keywords) {
     throw HttpError.BadRequest("The search keywords is empty");
-  }
-
-  if (priceRange) {
-    const formattedPriceRange = priceRange.split("-");
-    const minPrice = Number(formattedPriceRange[0]);
-    const maxPrice = Number(formattedPriceRange[1]);
   }
   
   let notices = await Notice.find(
@@ -433,6 +427,12 @@ const searchNoticesByKeywords = async (req, res) => {
       buildFilterAfterSearchByKeywords(query)]}, 
       {score: {$meta: "textScore"}}, {skip, limit: Number(limit)}).sort({score:{$meta:"textScore"}}
   );
+
+
+  if (notices.length === 0) {
+    throw HttpError.NotFoundError("Notices not found");
+  }
+
   const maxPriceNotice = notices.reduce((acc, curr) => acc.price > curr.price ? acc : curr);
   const maxPriceInSearchResult = maxPriceNotice.price;
 
