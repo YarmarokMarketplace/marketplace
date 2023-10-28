@@ -132,7 +132,7 @@ const changeStatus = async (req, res) => {
     const { id } = req.params;
     const newStatus = req.body;
 
-    const result = await Order.findByIdAndUpdate(id, newStatus, { new: true });
+    const result = await Order.findByIdAndUpdate(id, newStatus, { new: true }).populate("product");
     if (!result) {
         throw new HttpError(404, 'Order not found');
     }
