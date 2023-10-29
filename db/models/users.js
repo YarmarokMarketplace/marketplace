@@ -73,7 +73,12 @@ const userSchema = new Schema({
     deliveryData: {
         type: Schema.Types.Mixed,
         default: "",
-    }
+    },
+    rating: {
+        type: Number,
+        default: 0,
+        required: true,
+    },
 },
 { versionKey: false, timestamps: true }
 );

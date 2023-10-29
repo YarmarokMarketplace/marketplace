@@ -529,8 +529,7 @@
             "description": "ID of notice that needs to be assessed",
             "required": true,
             "schema": {
-              "type": "string",
-              "description": "Update the user with the specified ID"
+              "type": "string"
             }
           }
         ],
@@ -1006,7 +1005,7 @@
           }
         ],
         "responses": {
-          "201": {
+          "200": {
             "description": "Successful operation",
             "content": {
               "application/json": {
@@ -2843,6 +2842,11 @@
                 }
               }
             }
+          },
+          "sellerRating": {
+            "type": "number",
+            "description": "the average seller rating",
+            "example": "4.33"
           }
         }
       },
@@ -2904,6 +2908,11 @@
             "description": "Assessment of communication with seller",
             "enum": [1, 2, 3, 4, 5],
             "example": 5
+          },
+          "averageMark": {
+            "type": "number",
+            "description": "Average mark by all criteria",
+            "example": 4.33
           },
           "comments": {
             "type": "string",
