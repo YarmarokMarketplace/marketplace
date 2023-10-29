@@ -59,7 +59,7 @@ const addReview = async (req, res) => {
     const { id: product } = req.params;
     const { compliance, delivery_speed, communication } = req.body;
 
-    const notice = await Notice.findById(product);
+    const notice = await Notice.findById(product).populate("reviews");
     if (!notice) {
         throw HttpError.NotFoundError("Notice not found");
     }
@@ -77,7 +77,10 @@ const addReview = async (req, res) => {
     if (seller.rating === 0) {
         rating = ((compliance + delivery_speed + communication) / 3).toFixed(2);
     } else {
-        rating = ((compliance + delivery_speed + communication + seller.rating) / 4).toFixed(2);
+        const currentRatingSum = notice.reviews.reduce((total, review) => {
+            return total + review.averageMark;
+        }, 0 );
+        rating = ((currentRatingSum + ((compliance + delivery_speed + communication) / 3))/ (notice.reviews.length + 1)).toFixed(2);
     }
 
     const result = await Notice.findByIdAndUpdate(product, {
