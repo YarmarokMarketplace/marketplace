@@ -101,7 +101,7 @@ const getNoticeById = async (req, res) => {
     path: 'reviews',
     model: 'review',
   })
-  } else if (!notice) throw HttpError.NotFoundError("Notice not found");
+  } if (!notice) throw HttpError.NotFoundError("Notice not found");
 
   const sellerId = notice.owner;
   const seller = await User.findById(sellerId);
