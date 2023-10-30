@@ -1,6 +1,6 @@
 const buildFilterObject = (params) => { 
-  
-    const { category, goodtype, priceRange, location } = params;
+
+    const { category, goodtype, priceRange, location, minSellerRating } = params;
     let minPrice = 0;
     let maxPrice = 0;
 
@@ -10,19 +10,19 @@ const buildFilterObject = (params) => {
         maxPrice = Number(formattedPriceRange[1]);
     }
 
-    if (goodtype && !priceRange && !location) { 
+    if (goodtype && !priceRange && !location && !minSellerRating) { 
         return { $and: [{ category }, { goodtype }] }
     }
 
-    if (!goodtype && !priceRange && location) {
+    if (!goodtype && !priceRange && location && !minSellerRating) {
         return { $and: [{ category }, { location }] }
     }
 
-    if (goodtype && !priceRange && location) {
+    if (goodtype && !priceRange && location && !minSellerRating) {
         return { $and: [{ category }, { goodtype }, {location}] }
     }
 
-    if (!goodtype && priceRange && location) { 
+    if (!goodtype && priceRange && location && !minSellerRating) { 
         return { $and: 
             [{ category }, 
             { location }, 
@@ -31,7 +31,7 @@ const buildFilterObject = (params) => {
         }
     }
 
-    if (goodtype && priceRange && !location) { 
+    if (goodtype && priceRange && !location && !minSellerRating) { 
         return { $and: 
             [{ category }, 
             { goodtype },
@@ -41,7 +41,7 @@ const buildFilterObject = (params) => {
         }
     }
 
-    if (goodtype && priceRange && location) { 
+    if (goodtype && priceRange && location && !minSellerRating) { 
         return { $and: 
             [{ category }, 
             { goodtype },
@@ -51,8 +51,58 @@ const buildFilterObject = (params) => {
         }
     }
 
-    if (!goodtype && priceRange && !location) {
+    if (!goodtype && priceRange && !location && !minSellerRating) {
         return { $and: [{ category },  { $and: [ { price: { $gte: minPrice, $lte: maxPrice } }]}] }
+    }
+
+    if (goodtype && !priceRange && !location && minSellerRating) { 
+        return { $and: [{ category }, { goodtype }, { $and: [ { "owner.rating" : { $gte: Number(minSellerRating) } }]}] }
+    }
+
+    if (!goodtype && !priceRange && location && minSellerRating) {
+        return { $and: [{ category }, { location }, { $and: [ { "owner.rating": { $gte: Number(minSellerRating) } }]}] }
+    }
+
+    if (goodtype && !priceRange && location && minSellerRating) {
+        return { $and: [{ category }, { goodtype }, {location}, { $and: [ { "owner.rating": { $gte: Number(minSellerRating) } }]}] }
+    }
+
+    if (!goodtype && priceRange && location && minSellerRating) { 
+        return { $and: 
+            [{ category }, 
+            { location }, 
+            { $and: [ { price: { $gte: minPrice, $lte: maxPrice } }]},
+            { $and: [ { "owner.rating": { $gte: Number(minSellerRating) } }]}
+            ] 
+        }
+    }
+
+    if (goodtype && priceRange && !location && minSellerRating) { 
+        return { $and: 
+            [{ category }, 
+            { goodtype },
+            { $and: [ { price: { $gte: minPrice, $lte: maxPrice }}]},
+            {active: true},
+            { $and: [ { "owner.rating": { $gte: Number(minSellerRating) } }]}
+            ] 
+        }
+    }
+
+    if (goodtype && priceRange && location && minSellerRating) { 
+        return { $and: 
+            [{ category }, 
+            { goodtype },
+            { location },
+            { $and: [ { price: { $gte: minPrice, $lte: maxPrice } }]},
+            { $and: [ { "owner.rating": { $gte: Number(minSellerRating) } }]}
+            ] 
+        }
+    }
+
+    if (!goodtype && priceRange && !location && minSellerRating) {
+        return { $and: [{ category },  
+            { $and: [ { price: { $gte: minPrice, $lte: maxPrice } }]},
+            { $and: [ { "owner.rating": { $gte: Number(minSellerRating) } }]}] }
     }
 
     else return { category };

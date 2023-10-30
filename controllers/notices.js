@@ -38,15 +38,17 @@ const getAllNotices = async (req, res) => {
 
 const getNoticesByCategory = async (req, res) => {
 
-  const { page = 1, limit = 9, goodtype, priceRange, sort, location} = req.query;
+  const { page = 1, limit = 9, goodtype, priceRange, sort, location, minSellerRating} = req.query;
   const { category } = req.params;
   const skip = (page - 1) * limit;
-  const query = { category, goodtype, priceRange, location };
+  const query = { category, goodtype, priceRange, location, minSellerRating };
 
   const result = await Notice.find(buildFilterObject(query))
   .limit(limit * 1)
   .skip(skip)
-  .sort(buildSortObject(sort));
+  .sort(buildSortObject(sort))
+  .populate("owner");
+  
   
     if (result.length === 0) {
       throw HttpError.NotFoundError("Notices not found");
@@ -54,9 +56,7 @@ const getNoticesByCategory = async (req, res) => {
 
   const name = category;
   const cat = await Category.find({name});
-
   const isGoodType = cat[0].isGoodType;
-
 
   const maxPriceNotice = await Notice.find({category}).sort({"price" : -1}).limit(1)
   const maxPriceInCategory = maxPriceNotice[0].price;
