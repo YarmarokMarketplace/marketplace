@@ -72,11 +72,12 @@ const getUserIBuyNotices = async (req, res) => {
         path: 'product',
         model: 'notice'
       }
-    }).sort({ createdAt: -1 });
+    });
     
     if (result.buy.length === 0) {
       throw HttpError.NotFoundError('There any buy orders for this user');
     };
+    const sortedResult = [...result.buy].sort((firstElem, secondElem) => secondElem.createdAt - firstElem.createdAt)
   
     const user = await User.findById({_id});
     const totalResult = user.buy.length; 
@@ -87,7 +88,7 @@ const getUserIBuyNotices = async (req, res) => {
       totalPages,
       page: Number(page),
       limit: Number(limit),
-      result: result.buy,
+      result: sortedResult,
     });
 };
 
@@ -109,11 +110,13 @@ const getUserISellNotices = async (req, res) => {
         path: 'product',
         model: 'notice'
       }
-    }).sort({ createdAt: -1 });
+    })
     
     if (result.sell.length === 0) {
       throw HttpError.NotFoundError('There any sell orders for this user');
     };
+
+    const sortedResult = [...result.sell].sort((firstElem, secondElem) => secondElem.createdAt - firstElem.createdAt)
   
     const user = await User.findById({_id});
     const totalResult = user.sell.length; 
@@ -124,7 +127,7 @@ const getUserISellNotices = async (req, res) => {
       totalPages,
       page: Number(page),
       limit: Number(limit),
-      result: result.sell,
+      result: sortedResult,
     });
 };
 
