@@ -13,6 +13,7 @@ const { RESET_EMAIL_SECRET_KEY, BASE_URL } = process.env;
 const removeUser = async (req, res) => {
     const { id } = req.params;
 
+    await Notice.deleteMany({ owner: id })
     const result = await User.findByIdAndDelete(id);
     if (!result) {
         throw HttpError.NotFoundError("User not found");
