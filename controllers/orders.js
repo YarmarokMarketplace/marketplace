@@ -66,7 +66,8 @@ const getUserIBuyNotices = async (req, res) => {
       model: 'order',
       options: {
         skip,
-        limit: Number(limit)
+        limit: Number(limit),
+        sort: { 'createdAt': -1 }
       },
       populate: {
         path: 'product',
@@ -104,7 +105,8 @@ const getUserISellNotices = async (req, res) => {
       model: 'order',
       options: {
         skip,
-        limit: Number(limit)
+        limit: Number(limit),
+        sort: { 'createdAt': -1 }
       },
       populate: {
         path: 'product',
