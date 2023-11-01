@@ -10,7 +10,6 @@ const deactivationNotificationHtml = require("../utils/deactivationNotification"
 const sendEmail = require('../helpers/sendEmail');
 const buildFilterAfterSearchByKeywords = require("../utils/filterAfterSearchByKeywords");
 const buildSortObjectAfterSearchByKeywords = require("../utils/sortObjectAfterSearchByKeywords");
-const { min } = require("moment/moment");
 
 const getAllNotices = async (req, res) => {
   const { page = 1, limit = 9 } = req.query;
@@ -39,31 +38,48 @@ const getAllNotices = async (req, res) => {
 
 const getNoticesByCategory = async (req, res) => {
 
-  const { page = 1, limit = 9, goodtype, priceRange, sort, location, minSellerRating} = req.query;
+  const { page = 1, limit = 9, goodtype, priceRange, sort, location, minSellerRating } = req.query;
   const { category } = req.params;
   const skip = (page - 1) * limit;
-  const query = { category, goodtype, priceRange, location };
+  const query = { category, goodtype, priceRange, location, minSellerRating };
 
-  let result = await Notice.find(buildFilterObject(query))
-  .limit(limit * 1)
-  .skip(skip)
-  .sort(buildSortObject(sort))
-  .populate("owner")
-  
-    if (result.length === 0) {
-      throw HttpError.NotFoundError("Notices not found");
-    };
-
-    if (minSellerRating) {
-      result = result.filter(elem => 
-        {
-          console.log(elem.owner)
-          elem.owner.rating >= minSellerRating
-        } );
-      if (result.length === 0) {
-        throw HttpError.NotFoundError("Notices not found");
+  let result = await Notice.aggregate([ 
+    {
+      $lookup: {
+        from: "users",
+        localField: "owner",
+        foreignField: "_id",
+        as: "owner",
       }
-    }
+    },
+    {
+      $match : buildFilterObject(query)
+    },
+    ])
+    .limit(limit * 1)
+    .skip(skip)
+    .sort(buildSortObject(sort))
+  
+    const resultForTotalResult = await Notice.aggregate([ 
+      {
+        $lookup: {
+          from: "users",
+          localField: "owner",
+          foreignField: "_id",
+          as: "owner",
+        }
+      },
+      {
+        $match : buildFilterObject(query)
+      },
+      ])
+  
+  if (result.length === 0) {
+      throw HttpError.NotFoundError("Notices not found");
+  };
+
+  const totalResult = resultForTotalResult.length;
+  const totalPages = Math.ceil(totalResult / limit);
 
   const name = category;
   const cat = await Category.find({name});
@@ -71,9 +87,6 @@ const getNoticesByCategory = async (req, res) => {
 
   const maxPriceNotice = await Notice.find({category}).sort({"price" : -1}).limit(1)
   const maxPriceInCategory = maxPriceNotice[0].price;
-
-  const totalResult = await Notice.countDocuments(buildFilterObject(query));
-  const totalPages = Math.ceil(totalResult / limit);
 
   res.status(200).json({
       isGoodType,
