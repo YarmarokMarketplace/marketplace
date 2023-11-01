@@ -865,6 +865,16 @@
               "description": "Type of filtering.",
               "example": "Kyiv"
             }
+          },
+          {
+            "name": "minSellerRating",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Type of filtering.",
+              "example": "4"
+            }
           }
         ],
         "responses": {
