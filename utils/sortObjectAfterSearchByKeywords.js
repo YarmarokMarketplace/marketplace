@@ -1,7 +1,7 @@
 const buildSortObjectAfterSearchByKeywords = (notices, param) => { 
     switch (param) { 
         case "newest": return notices.sort(
-            (firstNotice, secondNotice) => firstNotice.createdDate - secondNotice.createdDate
+            (firstNotice, secondNotice) => secondNotice.createdAt - firstNotice.createdAt
         );
         case "cheapest": return notices.sort(
             (firstNotice, secondNotice) => firstNotice.price - secondNotice.price
