@@ -442,7 +442,7 @@ const searchNoticesByKeywords = async (req, res) => {
   const maxPriceInSearchResult = maxPriceNotice.price;
 
   if (sort) {
-    await buildSortObjectAfterSearchByKeywords(notices, sort)
+    notices = await buildSortObjectAfterSearchByKeywords(notices, sort)
   }
 
   let totalResult = await Notice.countDocuments(
