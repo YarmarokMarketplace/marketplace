@@ -4,7 +4,7 @@ const Joi = require("joi");
 const handleMongooseError = require("../../utils/handleMongooseError");
 
 const reviewSchema = new Schema(
-  {
+{
     compliance: {
         type: Number,
         enum: [1, 2, 3, 4, 5],
