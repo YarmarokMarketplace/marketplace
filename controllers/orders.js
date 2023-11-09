@@ -71,7 +71,12 @@ const getUserIBuyNotices = async (req, res) => {
       },
       populate: {
         path: 'product',
-        model: 'notice'
+        model: 'notice',
+        populate: {
+          path: "owner",
+          model: "user",
+          select: "-password -accessToken -refreshToken",
+        }
       }
     });
     
