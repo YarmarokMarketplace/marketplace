@@ -43,7 +43,7 @@ const getNoticesByCategory = async (req, res) => {
   const skip = (page - 1) * limit;
   const query = { category, goodtype, priceRange, location, minSellerRating };
 
-  let result = await Notice.aggregate([ 
+  let result = await Notice.aggregate([
     {
       $lookup: {
         from: "users",
@@ -55,24 +55,34 @@ const getNoticesByCategory = async (req, res) => {
     {
       $match : buildFilterObject(query)
     },
-    ])
-    .limit(limit * 1)
-    .skip(skip)
-    .sort(buildSortObject(sort))
+    {
+      $project: {
+        "owner.password": 0,
+        "owner.accessToken": 0,
+        "owner.refreshToken": 0,
+      }
+    },
+    {
+      $skip: skip*1
+    }, 
+    {
+      $limit: limit*1
+    }
+    ]).sort(buildSortObject(sort))
   
-    const resultForTotalResult = await Notice.aggregate([ 
-      {
-        $lookup: {
-          from: "users",
-          localField: "owner",
-          foreignField: "_id",
-          as: "owner",
-        }
-      },
-      {
-        $match : buildFilterObject(query)
-      },
-      ])
+  const resultForTotalResult = await Notice.aggregate([ 
+    {
+      $lookup: {
+        from: "users",
+        localField: "owner",
+        foreignField: "_id",
+        as: "owner",
+      }
+    },
+    {
+      $match : buildFilterObject(query)
+    },
+  ])
   
   if (result.length === 0) {
       throw HttpError.NotFoundError("Notices not found");
