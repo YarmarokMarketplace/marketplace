@@ -452,20 +452,53 @@ const removeNoticeFromFavorite = async (req, res) => {
 };
 
 const searchNoticesByKeywords = async (req, res) => {
-  const { page = 1, limit = 9, keywords = "", goodtype, priceRange, location, sort, category } = req.query;
+  const { page = 1, limit = 9, keywords = "", goodtype, priceRange, location, sort, category, minSellerRating } = req.query;
   const skip = (page - 1) * limit;
-  const query = { goodtype, priceRange, location, category };
+  const query = { goodtype, priceRange, location, category, minSellerRating };
   
   if (!keywords) {
     throw HttpError.BadRequest("The search keywords is empty");
   }
+
+  let notices = await Notice.aggregate([
+    { $match: {
+      $and: [
+          {$text: {$search: keywords}}, 
+          buildFilterAfterSearchByKeywords(query)
+        ]}
+    },
+    { $sort: { score: { $meta: "textScore" } } },
+    {
+      $lookup: {
+        from: "users",
+        localField: "owner",
+        foreignField: "_id",
+        as: "owner",
+      }
+    },
+    {
+      $project: {
+        "owner.password": 0,
+        "owner.accessToken": 0,
+        "owner.refreshToken": 0,
+      }
+    },
+    {
+      $skip: skip*1
+    }, 
+    {
+      $limit: limit*1
+    }
+    ])
+
   
-  let notices = await Notice.find(
-    {$and: [
-      {$text: {$search: keywords}}, 
-      buildFilterAfterSearchByKeywords(query)]}, 
-      {score: {$meta: "textScore"}}, {skip, limit: Number(limit)}).sort({score:{$meta:"textScore"}}
-  );
+  // let notices = await Notice.find(
+  //   {$and: [
+  //     {$text: {$search: keywords}}, 
+  //     buildFilterAfterSearchByKeywords(query)
+  //   ]}, 
+  //     {score: {$meta: "textScore"}}, {skip, limit: Number(limit)}).sort({score:{$meta:"textScore"}}
+  // );
 
 
   if (notices.length === 0) {
