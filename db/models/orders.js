@@ -170,7 +170,11 @@ const orderSchema = new Schema(
     },
     product: {
         type: Schema.Types.ObjectId,
-        ref: 'notice',
+        refPath: 'onModel',
+    },
+    onModel: {
+        type: String,
+        enum: ["notice", "inactivenotice", "deletednotice"],
     },
     status: {
         type: String,

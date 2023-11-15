@@ -50,6 +50,10 @@ const noticeSchema = new Schema(
       type: Boolean,
       default: true,
     },
+    deleted: {
+      type: Boolean,
+      default: false,
+    },
     reviews: [{ type: Schema.Types.ObjectId, ref: 'review'} ],
     owner: {
       type: Schema.Types.ObjectId,
@@ -118,10 +122,12 @@ const toggleActiveSchema = Joi.object({
 
 const Notice = model("notice", noticeSchema);
 const InactiveNotice = model("inactivenotice", noticeSchema);
+const DeletedNotice = model("deletednotice", noticeSchema);
 
 module.exports = {
   Notice,
   InactiveNotice,
+  DeletedNotice,
   addNoticeSchema,
   updateNoticeSchema,
   toggleActiveSchema

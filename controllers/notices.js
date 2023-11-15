@@ -160,14 +160,54 @@ const removeNotice = async (req, res) => {
     throw HttpError.BadRequest("You can't remove this notice due to status 'await-delivery'");
   }
 
+  const isOrderExists = await Order.find({product: id})
+
+  if (isOrderExists) {
+    await Order.updateMany({product: id}, {noticeModel: "deletednotice"}, {new: true})
+  }
+
   let result;
 
-  result = await Notice.findByIdAndDelete(id);
-  result = await InactiveNotice.findByIdAndDelete(id);
-  
+  result = await Notice.findByIdAndUpdate(id, {deleted: true}, { new: true });
   if (!result) {
-    throw HttpError.NotFoundError("Notice not found");
+    result = await InactiveNotice.findByIdAndUpdate(id, {deleted: true}, { new: true });
+    if (!result) {
+      throw HttpError.NotFoundError("Notice not found");
+    }
   }
+
+  await Notice.aggregate([
+    { $match: 
+        { deleted: true },
+    }, 
+    {
+        $merge: {
+            into: "deletednotices",
+            on: "_id",
+            whenMatched: "replace",
+            whenNotMatched: "insert"
+        }
+    }
+    ]);
+  
+    let notice = await Notice.findByIdAndDelete(id);
+    if (!notice) {
+      await InactiveNotice.aggregate([
+        { $match: 
+            { deleted: true },
+        }, 
+        {
+            $merge: {
+                into: "deletednotices",
+                on: "_id",
+                whenMatched: "replace",
+                whenNotMatched: "insert"
+            }
+        }
+        ]);
+        await InactiveNotice.findByIdAndDelete(id);
+    }
+
   res.status(200).json({
     data: {
       message: "Notice deleted",
@@ -204,6 +244,11 @@ const toggleActive = async (req, res) => {
 
   if (active === false) {
     result = await Notice.findByIdAndUpdate(id, req.body, { new: true });
+    const isOrderExists = await Order.find({product: id})
+
+    if (isOrderExists) {
+      await Order.updateMany({product: id}, {noticeModel: "inactivenotice"}, {new: true})
+    }
   
     if (!result) {
       throw HttpError.NotFoundError("Notice not found");
@@ -229,6 +274,11 @@ const toggleActive = async (req, res) => {
   
     if (!result) {
       throw HttpError.NotFoundError("Notice not found");
+    }
+    const isOrderExists = await Order.find({product: id})
+
+    if (isOrderExists) {
+      await Order.updateMany({product: id}, {noticeModel: "notice"}, {new: true})
     }
 
     await InactiveNotice.aggregate([
@@ -266,6 +316,12 @@ const checkIsActive = async (req, res) => {
 }, { active: false })
 
 await InactiveNotice.updateMany({active: false});
+
+const isOrderExists = await Order.find({product: id})
+
+  if (isOrderExists) {
+    await Order.updateMany({product: id}, {noticeModel: "inactivenotice"}, {new: true})
+  }
   
   await Notice.aggregate([
     { $match: 
@@ -533,7 +589,6 @@ module.exports = {
   getAllUserNotices: controllerWrapper(getAllUserNotices),
   getFavoriteUserNotices: controllerWrapper(getFavoriteUserNotices),
   addNoticeToFavorite: controllerWrapper(addNoticeToFavorite),
-  //sendDeactivationLetter: controllerWrapper(sendDeactivationLetter),
   //removeFromInactive: controllerWrapper(removeFromInactive),
   searchNoticesByKeywords: controllerWrapper(searchNoticesByKeywords),
 };

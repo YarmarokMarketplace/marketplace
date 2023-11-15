@@ -69,15 +69,33 @@ const getUserIBuyNotices = async (req, res) => {
         limit: Number(limit),
         sort: { 'createdAt': -1 }
       },
-      populate: {
-        path: 'product',
-        model: 'notice',
+      populate: [{
+        path: "product",
+        model: "notice",
         populate: {
           path: "owner",
           model: "user",
           select: "-password -accessToken -refreshToken",
         }
-      }
+      },
+      {
+        path: "product",
+        model: "inactivenotice",
+        populate: {
+          path: "owner",
+          model: "user",
+          select: "-password -accessToken -refreshToken",
+        }
+      },
+      {
+        path: "product",
+        model: "deletednotice",
+        populate: {
+          path: "owner",
+          model: "user",
+          select: "-password -accessToken -refreshToken",
+        }
+      }]
     });
     
     if (result.buy.length === 0) {
@@ -113,10 +131,18 @@ const getUserISellNotices = async (req, res) => {
         limit: Number(limit),
         sort: { 'createdAt': -1 }
       },
-      populate: {
-        path: 'product',
-        model: 'notice'
-      }
+      populate: [{
+        path: "product",
+        model: "notice",
+      },
+      {
+        path: "product",
+        model: "inactivenotice",
+      },
+      {
+        path: "product",
+        model: "deletednotice",
+      }]
     })
     
     if (result.sell.length === 0) {
