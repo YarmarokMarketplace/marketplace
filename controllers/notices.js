@@ -491,6 +491,8 @@ const searchNoticesByKeywords = async (req, res) => {
     }
     ])
 
+    console.log(notices)
+
   
   // let notices = await Notice.find(
   //   {$and: [
