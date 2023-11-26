@@ -40,7 +40,7 @@ const getNoticesByCategory = async (req, res) => {
 
   const { page = 1, limit = 9, goodtype, priceRange, sort, location, minSellerRating } = req.query;
   const { category } = req.params;
-  const skip = (page - 1) * limit;
+  const skip = ( page - 1 ) * limit;
   const query = { category, goodtype, priceRange, location, minSellerRating };
 
   let result = await Notice.aggregate([
@@ -160,14 +160,54 @@ const removeNotice = async (req, res) => {
     throw HttpError.BadRequest("You can't remove this notice due to status 'await-delivery'");
   }
 
+  const isOrderExists = await Order.find({product: id})
+
+  if (isOrderExists) {
+    await Order.updateMany({product: id}, {noticeModel: "deletednotice"}, {new: true})
+  }
+
   let result;
 
-  result = await Notice.findByIdAndDelete(id);
-  result = await InactiveNotice.findByIdAndDelete(id);
-  
+  result = await Notice.findByIdAndUpdate(id, {deleted: true}, { new: true });
   if (!result) {
-    throw HttpError.NotFoundError("Notice not found");
+    result = await InactiveNotice.findByIdAndUpdate(id, {deleted: true}, { new: true });
+    if (!result) {
+      throw HttpError.NotFoundError("Notice not found");
+    }
   }
+
+  await Notice.aggregate([
+    { $match: 
+        { deleted: true },
+    }, 
+    {
+        $merge: {
+            into: "deletednotices",
+            on: "_id",
+            whenMatched: "replace",
+            whenNotMatched: "insert"
+        }
+    }
+    ]);
+  
+    let notice = await Notice.findByIdAndDelete(id);
+    if (!notice) {
+      await InactiveNotice.aggregate([
+        { $match: 
+            { deleted: true },
+        }, 
+        {
+            $merge: {
+                into: "deletednotices",
+                on: "_id",
+                whenMatched: "replace",
+                whenNotMatched: "insert"
+            }
+        }
+        ]);
+        await InactiveNotice.findByIdAndDelete(id);
+    }
+
   res.status(200).json({
     data: {
       message: "Notice deleted",
@@ -204,6 +244,11 @@ const toggleActive = async (req, res) => {
 
   if (active === false) {
     result = await Notice.findByIdAndUpdate(id, req.body, { new: true });
+    const isOrderExists = await Order.find({product: id})
+
+    if (isOrderExists) {
+      await Order.updateMany({product: id}, {noticeModel: "inactivenotice"}, {new: true})
+    }
   
     if (!result) {
       throw HttpError.NotFoundError("Notice not found");
@@ -229,6 +274,11 @@ const toggleActive = async (req, res) => {
   
     if (!result) {
       throw HttpError.NotFoundError("Notice not found");
+    }
+    const isOrderExists = await Order.find({product: id})
+
+    if (isOrderExists) {
+      await Order.updateMany({product: id}, {noticeModel: "notice"}, {new: true})
     }
 
     await InactiveNotice.aggregate([
@@ -266,6 +316,12 @@ const checkIsActive = async (req, res) => {
 }, { active: false })
 
 await InactiveNotice.updateMany({active: false});
+
+const isOrderExists = await Order.find({product: id})
+
+  if (isOrderExists) {
+    await Order.updateMany({product: id}, {noticeModel: "inactivenotice"}, {new: true})
+  }
   
   await Notice.aggregate([
     { $match: 
@@ -454,20 +510,16 @@ const removeNoticeFromFavorite = async (req, res) => {
 const searchNoticesByKeywords = async (req, res) => {
   const { page = 1, limit = 9, keywords = "", goodtype, priceRange, location, sort, category, minSellerRating } = req.query;
   const skip = (page - 1) * limit;
-  const query = { goodtype, priceRange, location, category, minSellerRating };
+  const query = { category, goodtype, priceRange, location, minSellerRating };
   
   if (!keywords) {
     throw HttpError.BadRequest("The search keywords is empty");
   }
 
   let notices = await Notice.aggregate([
-    { $match: {
-      $and: [
-          {$text: {$search: keywords}}, 
-          buildFilterAfterSearchByKeywords(query)
-        ]}
+    { $match: 
+      {$text: {$search: keywords}}, 
     },
-    { $sort: { score: { $meta: "textScore" } } },
     {
       $lookup: {
         from: "users",
@@ -476,11 +528,16 @@ const searchNoticesByKeywords = async (req, res) => {
         as: "owner",
       }
     },
+    { $match:
+          buildFilterAfterSearchByKeywords(query)
+    },
+    { $sort: { score: { $meta: "textScore" } } },
     {
       $project: {
         "owner.password": 0,
         "owner.accessToken": 0,
         "owner.refreshToken": 0,
+        score: { $meta: "textScore" }
       }
     },
     {
@@ -491,22 +548,6 @@ const searchNoticesByKeywords = async (req, res) => {
     }
     ])
 
-    console.log(notices)
-
-  
-  // let notices = await Notice.find(
-  //   {$and: [
-  //     {$text: {$search: keywords}}, 
-  //     buildFilterAfterSearchByKeywords(query)
-  //   ]}, 
-  //     {score: {$meta: "textScore"}}, {skip, limit: Number(limit)}).sort({score:{$meta:"textScore"}}
-  // );
-
-
-  if (notices.length === 0) {
-    throw HttpError.NotFoundError("Notices not found");
-  }
-
   const maxPriceNotice = notices.reduce((acc, curr) => acc.price > curr.price ? acc : curr);
   const maxPriceInSearchResult = maxPriceNotice.price;
 
@@ -514,13 +555,37 @@ const searchNoticesByKeywords = async (req, res) => {
     notices = await buildSortObjectAfterSearchByKeywords(notices, sort)
   }
 
-  let totalResult = await Notice.countDocuments(
-    {$and: [{$text: {$search: keywords}}, buildFilterAfterSearchByKeywords(query)]}, {score: {$meta: "textScore"}}, 
-    '-createdAt -updatedAt', 
-    {skip, limit: Number(limit)})
-    .sort({score:{$meta:"textScore"}})
+  // let totalResult = Notice.aggregate([
+  //   { $match: {$and: [{$text: {$search: keywords}}, buildFilterAfterSearchByKeywords(query)] }},
+  //   { $group: { _id: null, n: { $sum: 1 } } }
+  // ])
 
-    const totalPages = Math.ceil(totalResult / limit);
+  // let totalResult = await Notice.countDocuments(
+  //   {$and: [{$text: {$search: keywords}}, buildFilterAfterSearchByKeywords(query)]})
+
+  const resultForTotalResult = await Notice.aggregate([
+    { $match: 
+      {$text: {$search: keywords}}, 
+    }, 
+    {
+      $lookup: {
+        from: "users",
+        localField: "owner",
+        foreignField: "_id",
+        as: "owner",
+      }
+    },
+    {
+      $match : buildFilterAfterSearchByKeywords(query)
+    },
+  ])
+  
+  if (notices.length === 0) {
+      throw HttpError.NotFoundError("Notices not found");
+  };
+
+  const totalResult = resultForTotalResult.length;
+  const totalPages = Math.ceil(totalResult / limit);
 
   res.status(200).json({
     totalResult,
@@ -568,7 +633,6 @@ module.exports = {
   getAllUserNotices: controllerWrapper(getAllUserNotices),
   getFavoriteUserNotices: controllerWrapper(getFavoriteUserNotices),
   addNoticeToFavorite: controllerWrapper(addNoticeToFavorite),
-  //sendDeactivationLetter: controllerWrapper(sendDeactivationLetter),
   //removeFromInactive: controllerWrapper(removeFromInactive),
   searchNoticesByKeywords: controllerWrapper(searchNoticesByKeywords),
 };

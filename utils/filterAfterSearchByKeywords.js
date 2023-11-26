@@ -1,4 +1,4 @@
-const buildFilterAfterSearchByKeywords = (params) => { 
+const buildFilterAfterSearchByKeywords = params => { 
 
     const { goodtype, priceRange, location, category, minSellerRating } = params;
 
@@ -107,23 +107,36 @@ const buildFilterAfterSearchByKeywords = (params) => {
 
     //
     if (goodtype && !priceRange && !location && !category && minSellerRating) { 
-        return { $and: [{goodtype}, { "owner.0.rating": { $gte: Number(minSellerRating) } }]
+        return { $and: 
+            [{goodtype}, 
+                { $and: [ { "owner.0.rating": { $gte: Number(minSellerRating) } }]}]}
     }
 
     if (goodtype && !priceRange && !location && category && minSellerRating) { 
-        return { $and: [{goodtype}, {category}, { $and: [ { "owner.0.rating": { $gte: Number(minSellerRating) } }]} ]}
+        return { $and: 
+            [{goodtype}, 
+                {category}, 
+                { $and: [ { "owner.0.rating": { $gte: Number(minSellerRating) } }]} ]}
     }
 
     if (!goodtype && !priceRange && location && !category && minSellerRating) {
-        return { $and: [{location}, { $and: [ { "owner.0.rating": { $gte: Number(minSellerRating) } }]} ] }
+        return { $and: 
+            [{location}, 
+                { $and: [ { "owner.0.rating": { $gte: Number(minSellerRating) } }]} ] }
     }
 
     if (!goodtype && !priceRange && location && category && minSellerRating) {
-        return { $and: [{location}, {category}, { $and: [ { "owner.0.rating": { $gte: Number(minSellerRating) } }]} ] }
+        return { $and: [
+            {location}, 
+            {category}, 
+            { $and: [ { "owner.0.rating": { $gte: Number(minSellerRating) } }]} ] }
     }
 
     if (goodtype && !priceRange && location && !category && minSellerRating) {
-        return { $and: [{ goodtype }, {location}, { $and: [ { "owner.0.rating": { $gte: Number(minSellerRating) } }]}] }
+        return { $and: 
+            [{ goodtype }, 
+                {location}, 
+                { $and: [ { "owner.0.rating": { $gte: Number(minSellerRating) } }]}] }
     }
 
     if (goodtype && !priceRange && location && category && minSellerRating) {
@@ -157,7 +170,6 @@ const buildFilterAfterSearchByKeywords = (params) => {
             { goodtype }, 
             { $and: [ { "owner.0.rating": { $gte: Number(minSellerRating) } }]},
             { $and: [ { price: { $gte: minPrice, $lte: maxPrice }}]},
-            {active: true},
             ] 
         }
     }
@@ -168,7 +180,6 @@ const buildFilterAfterSearchByKeywords = (params) => {
             { goodtype }, {category}, 
             { $and: [ { "owner.0.rating": { $gte: Number(minSellerRating) } }]},
             { $and: [ { price: { $gte: minPrice, $lte: maxPrice }}]},
-            {active: true},
             ] 
         }
     }
@@ -211,10 +222,12 @@ const buildFilterAfterSearchByKeywords = (params) => {
     }
 
     if (!goodtype && !priceRange && !location && !category && minSellerRating) {
-        return { "owner.0.rating": Number(minSellerRating) }
+        return { $and: [ { "owner.0.rating": { $gte: Number(minSellerRating) }}]}
     }
 
     else return { };
+
 }
+
 
 module.exports = buildFilterAfterSearchByKeywords;
