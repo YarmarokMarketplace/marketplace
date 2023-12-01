@@ -18,6 +18,7 @@ const { addNotice,
         getFavoriteUserNotices, 
         removeNoticeFromFavorite,
         searchNoticesByKeywords,
+        getNoticeContacts,
     } = require('../../../controllers/notices');
 const { addNoticeSchema, updateNoticeSchema, toggleActiveSchema} = require('../../../db/models/notices');
 
@@ -36,6 +37,7 @@ router.get('/user/notices', authenticate, getAllUserNotices);
 router.get('/user/favorites', authenticate, getFavoriteUserNotices);
 router.post('/favorites/:id', authenticate, addNoticeToFavorite);
 router.get('/search/search-notice', searchNoticesByKeywords);
+router.get('/notice/contacts-views/:id', getNoticeContacts);
 
 
 

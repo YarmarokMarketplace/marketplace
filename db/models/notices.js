@@ -58,7 +58,11 @@ const noticeSchema = new Schema(
     owner: {
       type: Schema.Types.ObjectId,
       ref: 'user',
-    }
+    },
+    contactsViews: {
+      type: Number,
+      default: 0,
+    },
   },
   { versionKey: false, timestamps: true }
 );
