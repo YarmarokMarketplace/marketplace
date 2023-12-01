@@ -130,12 +130,16 @@ const getNoticeById = async (req, res) => {
     path: 'reviews',
     model: 'review',
   });
-  if (!notice) {
+  if (notice) {
+    await Notice.findByIdAndUpdate(id, { $inc: { views: 1 } })
+  } else if (!notice) {
     notice = await InactiveNotice.findById(id).populate({
     path: 'reviews',
     model: 'review',
   })
-  } if (!notice) throw HttpError.NotFoundError("Notice not found");
+  } else if (!notice) throw HttpError.NotFoundError("Notice not found");
+
+
 
   const sellerId = notice.owner;
   const seller = await User.findById(sellerId);
