@@ -313,15 +313,19 @@ const checkIsActive = async (req, res) => {
 
   await Notice.updateMany({ createdAt: {
     $lt: new Date(thirtyDays)} 
-}, { active: false })
+}, { active: false });
 
-await InactiveNotice.updateMany({active: false});
+const inactives = await Notice.find({active: false})
 
-const isOrderExists = await Order.find({product: id})
-
-  if (isOrderExists) {
-    await Order.updateMany({product: id}, {noticeModel: "inactivenotice"}, {new: true})
+if (inactives.length > 0) {
+  const inactivesId = inactives.map(inactive => inactive._id);
+  const orders = await Order.find({product: {$in: inactivesId}})
+  if (orders.length > 0) {
+    await Order.updateMany({product: {$in: inactivesId}}, {noticeModel: "inactivenotice"}, {new: true})
   }
+}
+
+//await InactiveNotice.updateMany({active: false});
   
   await Notice.aggregate([
     { $match: 
@@ -343,7 +347,7 @@ const isOrderExists = await Order.find({product: id})
           $lte: new Date()} 
         }).populate("owner");
       
-        const noticesWithActiveUsers = inactiveNotices.filter(notice => notice.owner !== null)
+    const noticesWithActiveUsers = inactiveNotices.filter(notice => notice.owner !== null)
     
   for (i = 0; i < noticesWithActiveUsers.length; i += 1) {
     noticeTitle = noticesWithActiveUsers[i].title;
