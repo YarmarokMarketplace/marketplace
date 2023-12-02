@@ -587,6 +587,7 @@ const getNoticeContacts = async (req, res) => {
 
   res.status(200).json({
     contactsViews: notice.contactsViews,
+    contactNumber: notice.contactNumber,
   });
 };
 
