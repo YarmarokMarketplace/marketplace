@@ -138,12 +138,13 @@ const getNoticeById = async (req, res) => {
   } if (!notice) throw HttpError.NotFoundError("Notice not found");
 
   const sellerId = notice.owner;
-  const seller = await User.findById(sellerId);
+  const seller = await User.findById(sellerId).populate("reviews");
   const sellerRating = seller.rating;
 
   res.status(200).json({
     notice,
     sellerRating,
+    sellerReviews: seller.reviews,
   });
 };
 

@@ -58,6 +58,11 @@ const noticeSchema = new Schema(
     owner: {
       type: Schema.Types.ObjectId,
       ref: 'user',
+    },
+    onModel: {
+      type: String,
+      enum: ["notice", "inactivenotice", "deletednotice"],
+      default: "notice",
     }
   },
   { versionKey: false, timestamps: true }
