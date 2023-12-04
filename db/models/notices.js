@@ -63,6 +63,10 @@ const noticeSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'user',
     },
+    contactsViews: {
+      type: Number,
+      default: 0,
+    },
     onModel: {
       type: String,
       enum: ["notice", "inactivenotice", "deletednotice"],

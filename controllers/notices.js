@@ -611,7 +611,7 @@ const searchNoticesByKeywords = async (req, res) => {
     maxPriceInSearchResult,
     notices,
   });
-}; 
+};
 
 // const removeFromInactive = async (req, res) => {
 //   const today = new Date();
@@ -636,6 +636,21 @@ const searchNoticesByKeywords = async (req, res) => {
 //     });
 // }
 
+const getNoticeContacts = async (req, res) => {
+  const { id } = req.params;
+  const notice = await Notice.findById(id)
+  if (!notice) {
+    throw HttpError.NotFoundError("Notice not found");
+  }
+
+  await Notice.findByIdAndUpdate(id, { $inc: { contactsViews: 1 }});
+
+  res.status(200).json({
+    contactsViews: notice.contactsViews,
+    contactNumber: notice.contactNumber,
+  });
+};
+
 module.exports = {
   getAllNotices: controllerWrapper(getAllNotices),
   getNoticesByCategory: controllerWrapper(getNoticesByCategory),
@@ -651,4 +666,5 @@ module.exports = {
   addNoticeToFavorite: controllerWrapper(addNoticeToFavorite),
   //removeFromInactive: controllerWrapper(removeFromInactive),
   searchNoticesByKeywords: controllerWrapper(searchNoticesByKeywords),
+  getNoticeContacts: controllerWrapper(getNoticeContacts),
 };

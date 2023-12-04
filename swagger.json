@@ -1582,6 +1582,49 @@
           }
         }
       }
+    },
+    "/notices/notice/contacts-views/{id}": {
+      "get": {
+        "summary": "Get the quantity of contacts views",
+        "tags": [
+          "Notices"
+        ],
+        "description": "Get the quantity of contacts views",
+        "operationId": "getNoticeContacts",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "notice id",
+              "example": "6494c145ddb3a57412f3d4b4"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "contactsViews": {
+                      "type": "number",
+                      "example": 5
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Notice not found"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2148,7 +2191,7 @@
           }
         }
       },
- "AddOrderRequest": {
+      "AddOrderRequest": {
         "type": "object",
         "required": [
           "buyerName",
@@ -2881,6 +2924,10 @@
             "type": "number",
             "description": "the average seller rating",
             "example": "4.33"
+          },
+          "contactsViews": {
+            "type": "number",
+            "example": 5
           }
         }
       },
