@@ -40,7 +40,7 @@ const getNoticesByCategory = async (req, res) => {
 
   const { page = 1, limit = 9, goodtype, priceRange, sort, location, minSellerRating } = req.query;
   const { category } = req.params;
-  const skip = (page - 1) * limit;
+  const skip = ( page - 1 ) * limit;
   const query = { category, goodtype, priceRange, location, minSellerRating };
 
   let result = await Notice.aggregate([
@@ -326,7 +326,14 @@ if (inactives.length > 0) {
   }
 }
 
-//await InactiveNotice.updateMany({active: false});
+await InactiveNotice.updateMany({active: false});
+
+const isOrderExists = await Order.find({product: id})
+
+  if (isOrderExists) {
+    await Order.updateMany({product: id}, {noticeModel: "inactivenotice"}, {new: true})
+  }
+
   
   await Notice.aggregate([
     { $match: 
@@ -513,25 +520,45 @@ const removeNoticeFromFavorite = async (req, res) => {
 };
 
 const searchNoticesByKeywords = async (req, res) => {
-  const { page = 1, limit = 9, keywords = "", goodtype, priceRange, location, sort, category } = req.query;
+  const { page = 1, limit = 9, keywords = "", goodtype, priceRange, location, sort, category, minSellerRating } = req.query;
   const skip = (page - 1) * limit;
-  const query = { goodtype, priceRange, location, category };
+  const query = { category, goodtype, priceRange, location, minSellerRating };
   
   if (!keywords) {
     throw HttpError.BadRequest("The search keywords is empty");
   }
-  
-  let notices = await Notice.find(
-    {$and: [
+
+  let notices = await Notice.aggregate([
+    { $match: 
       {$text: {$search: keywords}}, 
-      buildFilterAfterSearchByKeywords(query)]}, 
-      {score: {$meta: "textScore"}}, {skip, limit: Number(limit)}).sort({score:{$meta:"textScore"}}
-  );
-
-
-  if (notices.length === 0) {
-    throw HttpError.NotFoundError("Notices not found");
-  }
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "owner",
+        foreignField: "_id",
+        as: "owner",
+      }
+    },
+    { $match:
+          buildFilterAfterSearchByKeywords(query)
+    },
+    { $sort: { score: { $meta: "textScore" } } },
+    {
+      $project: {
+        "owner.password": 0,
+        "owner.accessToken": 0,
+        "owner.refreshToken": 0,
+        score: { $meta: "textScore" }
+      }
+    },
+    {
+      $skip: skip*1
+    }, 
+    {
+      $limit: limit*1
+    }
+    ])
 
   const maxPriceNotice = notices.reduce((acc, curr) => acc.price > curr.price ? acc : curr);
   const maxPriceInSearchResult = maxPriceNotice.price;
@@ -540,13 +567,37 @@ const searchNoticesByKeywords = async (req, res) => {
     notices = await buildSortObjectAfterSearchByKeywords(notices, sort)
   }
 
-  let totalResult = await Notice.countDocuments(
-    {$and: [{$text: {$search: keywords}}, buildFilterAfterSearchByKeywords(query)]}, {score: {$meta: "textScore"}}, 
-    '-createdAt -updatedAt', 
-    {skip, limit: Number(limit)})
-    .sort({score:{$meta:"textScore"}})
+  // let totalResult = Notice.aggregate([
+  //   { $match: {$and: [{$text: {$search: keywords}}, buildFilterAfterSearchByKeywords(query)] }},
+  //   { $group: { _id: null, n: { $sum: 1 } } }
+  // ])
 
-    const totalPages = Math.ceil(totalResult / limit);
+  // let totalResult = await Notice.countDocuments(
+  //   {$and: [{$text: {$search: keywords}}, buildFilterAfterSearchByKeywords(query)]})
+
+  const resultForTotalResult = await Notice.aggregate([
+    { $match: 
+      {$text: {$search: keywords}}, 
+    }, 
+    {
+      $lookup: {
+        from: "users",
+        localField: "owner",
+        foreignField: "_id",
+        as: "owner",
+      }
+    },
+    {
+      $match : buildFilterAfterSearchByKeywords(query)
+    },
+  ])
+  
+  if (notices.length === 0) {
+      throw HttpError.NotFoundError("Notices not found");
+  };
+
+  const totalResult = resultForTotalResult.length;
+  const totalPages = Math.ceil(totalResult / limit);
 
   res.status(200).json({
     totalResult,

@@ -1,6 +1,7 @@
-const buildFilterAfterSearchByKeywords = (params) => { 
-  
-    const { goodtype, priceRange, location, category } = params;
+const buildFilterAfterSearchByKeywords = params => { 
+
+    const { goodtype, priceRange, location, category, minSellerRating } = params;
+
     let minPrice = 0;
     let maxPrice = 0;
 
@@ -10,31 +11,31 @@ const buildFilterAfterSearchByKeywords = (params) => {
         maxPrice = Number(formattedPriceRange[1]);
     }
 
-    if (goodtype && !priceRange && !location && !category) { 
+    if (goodtype && !priceRange && !location && !category && !minSellerRating) { 
         return { goodtype }
     }
 
-    if (goodtype && !priceRange && !location && category) { 
+    if (goodtype && !priceRange && !location && category && !minSellerRating) { 
         return { $and: [{goodtype}, {category} ]}
     }
 
-    if (!goodtype && !priceRange && location && !category) {
+    if (!goodtype && !priceRange && location && !category && !minSellerRating) {
         return { location }
     }
 
-    if (!goodtype && !priceRange && location && category) {
+    if (!goodtype && !priceRange && location && category && !minSellerRating) {
         return { $and: [{location}, {category} ] }
     }
 
-    if (goodtype && !priceRange && location && !category) {
+    if (goodtype && !priceRange && location && !category && !minSellerRating) {
         return { $and: [{ goodtype }, {location}] }
     }
 
-    if (goodtype && !priceRange && location && category) {
+    if (goodtype && !priceRange && location && category && !minSellerRating) {
         return { $and: [{ goodtype }, {location}, {category}] }
     }
 
-    if (!goodtype && priceRange && location && !category) { 
+    if (!goodtype && priceRange && location && !category && !minSellerRating) { 
         return { $and: 
             [ 
             { location }, 
@@ -43,7 +44,7 @@ const buildFilterAfterSearchByKeywords = (params) => {
         }
     }
 
-    if (!goodtype && priceRange && location && category) { 
+    if (!goodtype && priceRange && location && category && !minSellerRating) { 
         return { $and: 
             [ 
             { location }, {category},
@@ -52,7 +53,7 @@ const buildFilterAfterSearchByKeywords = (params) => {
         }
     }
 
-    if (goodtype && priceRange && !location && !category) { 
+    if (goodtype && priceRange && !location && !category && !minSellerRating) { 
         return { $and: 
             [ 
             { goodtype },
@@ -62,7 +63,7 @@ const buildFilterAfterSearchByKeywords = (params) => {
         }
     }
 
-    if (goodtype && priceRange && !location && category) { 
+    if (goodtype && priceRange && !location && category && !minSellerRating) { 
         return { $and: 
             [ 
             { goodtype }, {category},
@@ -72,7 +73,7 @@ const buildFilterAfterSearchByKeywords = (params) => {
         }
     }
 
-    if (goodtype && priceRange && location && !category) { 
+    if (goodtype && priceRange && location && !category && !minSellerRating) { 
         return { $and: 
             [ 
             { goodtype },
@@ -82,7 +83,7 @@ const buildFilterAfterSearchByKeywords = (params) => {
         }
     }
 
-    if (goodtype && priceRange && location && category) { 
+    if (goodtype && priceRange && location && category && !minSellerRating) { 
         return { $and: 
             [ 
             { goodtype }, {category},
@@ -92,19 +93,141 @@ const buildFilterAfterSearchByKeywords = (params) => {
         }
     }
 
-    if (!goodtype && priceRange && !location && !category) {
+    if (!goodtype && priceRange && !location && !category && !minSellerRating) {
         return { $and: [{ $and: [ { price: { $gte: minPrice, $lte: maxPrice } }]}] }
     }
 
-    if (!goodtype && priceRange && !location && category) {
+    if (!goodtype && priceRange && !location && category && !minSellerRating) {
         return { $and: [{category}, { $and: [ { price: { $gte: minPrice, $lte: maxPrice } }]}] }
     }
 
-    if (!goodtype && !priceRange && !location && category) {
+    if (!goodtype && !priceRange && !location && category && !minSellerRating) {
         return { category }
     }
 
+    //
+    if (goodtype && !priceRange && !location && !category && minSellerRating) { 
+        return { $and: 
+            [{goodtype}, 
+                { $and: [ { "owner.0.rating": { $gte: Number(minSellerRating) } }]}]}
+    }
+
+    if (goodtype && !priceRange && !location && category && minSellerRating) { 
+        return { $and: 
+            [{goodtype}, 
+                {category}, 
+                { $and: [ { "owner.0.rating": { $gte: Number(minSellerRating) } }]} ]}
+    }
+
+    if (!goodtype && !priceRange && location && !category && minSellerRating) {
+        return { $and: 
+            [{location}, 
+                { $and: [ { "owner.0.rating": { $gte: Number(minSellerRating) } }]} ] }
+    }
+
+    if (!goodtype && !priceRange && location && category && minSellerRating) {
+        return { $and: [
+            {location}, 
+            {category}, 
+            { $and: [ { "owner.0.rating": { $gte: Number(minSellerRating) } }]} ] }
+    }
+
+    if (goodtype && !priceRange && location && !category && minSellerRating) {
+        return { $and: 
+            [{ goodtype }, 
+                {location}, 
+                { $and: [ { "owner.0.rating": { $gte: Number(minSellerRating) } }]}] }
+    }
+
+    if (goodtype && !priceRange && location && category && minSellerRating) {
+        return { $and: [{ goodtype }, {location}, {category}, 
+            { $and: [ { "owner.0.rating": { $gte: Number(minSellerRating) } }]}] }
+    }
+
+    if (!goodtype && priceRange && location && !category && minSellerRating) { 
+        return { $and: 
+            [ 
+            { location }, 
+            { $and: [ { "owner.0.rating": { $gte: Number(minSellerRating) } }]},
+            { $and: [ { price: { $gte: minPrice, $lte: maxPrice } }]}
+            ] 
+        }
+    }
+
+    if (!goodtype && priceRange && location && category && minSellerRating) { 
+        return { $and: 
+            [ 
+            { location }, {category}, 
+            { $and: [ { "owner.0.rating": { $gte: Number(minSellerRating) } }]},
+            { $and: [ { price: { $gte: minPrice, $lte: maxPrice } }]}
+            ] 
+        }
+    }
+
+    if (goodtype && priceRange && !location && !category && minSellerRating) { 
+        return { $and: 
+            [ 
+            { goodtype }, 
+            { $and: [ { "owner.0.rating": { $gte: Number(minSellerRating) } }]},
+            { $and: [ { price: { $gte: minPrice, $lte: maxPrice }}]},
+            ] 
+        }
+    }
+
+    if (goodtype && priceRange && !location && category && minSellerRating) { 
+        return { $and: 
+            [ 
+            { goodtype }, {category}, 
+            { $and: [ { "owner.0.rating": { $gte: Number(minSellerRating) } }]},
+            { $and: [ { price: { $gte: minPrice, $lte: maxPrice }}]},
+            ] 
+        }
+    }
+
+    if (goodtype && priceRange && location && !category && minSellerRating) { 
+        return { $and: 
+            [ 
+            { goodtype },
+            { location },
+            { $and: [ { "owner.0.rating": { $gte: Number(minSellerRating) } }]},
+            { $and: [ { price: { $gte: minPrice, $lte: maxPrice } }]}
+            ] 
+        }
+    }
+
+    if (goodtype && priceRange && location && category && minSellerRating) { 
+        return { $and: 
+            [ 
+            { goodtype }, {category},
+            { location }, 
+            { $and: [ { "owner.0.rating": { $gte: Number(minSellerRating) } }]},
+            { $and: [ { price: { $gte: minPrice, $lte: maxPrice } }]}
+            ] 
+        }
+    }
+
+    if (!goodtype && priceRange && !location && !category && minSellerRating) {
+        return { $and: [
+            { $and: [ { "owner.0.rating": { $gte: Number(minSellerRating) } }]},
+            { $and: [ { price: { $gte: minPrice, $lte: maxPrice } }]}] }
+    }
+
+    if (!goodtype && priceRange && !location && category && minSellerRating) {
+        return { $and: [{ $and: [ { $and: [ { "owner.0.rating": { $gte: Number(minSellerRating) } }]}]}, 
+                {category}, { $and: [ { price: { $gte: minPrice, $lte: maxPrice } }]}] }
+    }
+
+    if (!goodtype && !priceRange && !location && category && minSellerRating) {
+        return { $and: [{category}, { $and: [ { "owner.0.rating": { $gte: Number(minSellerRating) } }]} ] }
+    }
+
+    if (!goodtype && !priceRange && !location && !category && minSellerRating) {
+        return { $and: [ { "owner.0.rating": { $gte: Number(minSellerRating) }}]}
+    }
+
     else return { };
+
 }
+
 
 module.exports = buildFilterAfterSearchByKeywords;
