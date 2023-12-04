@@ -2000,6 +2000,10 @@
             "type": "boolean",
             "example": false
           },
+          "deleted": {
+            "type": "boolean",
+            "example": false
+          },
           "owner": {
             "type": "object",
             "properties": {
@@ -2405,6 +2409,12 @@
             "type": "string",
             "example": "380961112233"
           },
+          "noticeModel": {
+            "type": "string",
+            "enum": ["notice", "inactivenotice", "deletednotice"],
+            "default": "notice",
+            "example": "notice"
+          },
           "createdAt": {
             "type": "date",
             "example": "2023-09-16T19:17:04.611Z"
@@ -2499,6 +2509,12 @@
               "owner": {
                 "type": "string",
                 "example": "64f8964dd6524156e93cf71d"
+              },
+              "noticeModel": {
+                "type": "string",
+                "enum": ["notice", "inactivenotice", "deletednotice"],
+                "default": "notice",
+                "example": "notice"
               },
               "createdAt": {
                 "type": "date",

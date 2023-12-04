@@ -79,6 +79,7 @@ const userSchema = new Schema({
         default: 0,
         required: true,
     },
+    reviews: [{ type: Schema.Types.ObjectId, ref: 'review'} ],
 },
 { versionKey: false, timestamps: true }
 );
