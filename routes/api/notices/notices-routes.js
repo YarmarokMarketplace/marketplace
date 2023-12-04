@@ -19,11 +19,13 @@ const { addNotice,
         removeNoticeFromFavorite,
         searchNoticesByKeywords,
         getNoticeContacts,
+        checkIsActive,
     } = require('../../../controllers/notices');
 const { addNoticeSchema, updateNoticeSchema, toggleActiveSchema} = require('../../../db/models/notices');
 
 const router = express.Router();
 
+router.get('/inactive', checkIsActive);
 router.get('/', getAllNotices);
 //router.get('/inactive', checkIsActive);
 router.get('/:category', getNoticesByCategory);

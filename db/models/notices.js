@@ -54,6 +54,10 @@ const noticeSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    views: {
+      type: Number,
+      default: 0,
+    },
     reviews: [{ type: Schema.Types.ObjectId, ref: 'review'} ],
     owner: {
       type: Schema.Types.ObjectId,
@@ -63,6 +67,11 @@ const noticeSchema = new Schema(
       type: Number,
       default: 0,
     },
+    onModel: {
+      type: String,
+      enum: ["notice", "inactivenotice", "deletednotice"],
+      default: "notice",
+    }
   },
   { versionKey: false, timestamps: true }
 );

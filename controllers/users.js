@@ -84,11 +84,11 @@ const addReview = async (req, res) => {
         rating = ((currentRatingSum + ((compliance + delivery_speed + communication) / 3))/ (notice.reviews.length + 1)).toFixed(2);
     }
 
-    const result = await Notice.findByIdAndUpdate(product, {
+    await Notice.findByIdAndUpdate(product, {
         $addToSet: { reviews: review._id }, 
     }, { new: true });
 
-    await User.findByIdAndUpdate(sellerId, {rating: rating})
+    await User.findByIdAndUpdate(sellerId, {rating: rating, $addToSet: { reviews: review._id }}, { new: true });
 
     res.status(201).json({
         review,

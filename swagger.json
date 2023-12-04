@@ -2822,6 +2822,14 @@
             "type": "boolean",
             "example": false
           },
+          "deleted": {
+            "type": "boolean",
+            "example": false
+          },
+          "views": {
+            "type": "number",
+            "example": 23
+          },
           "owner": {
             "type": "object",
             "properties": {
