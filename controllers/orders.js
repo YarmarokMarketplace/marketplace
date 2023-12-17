@@ -45,14 +45,14 @@ const createOrder = async (req, res) => {
       subject: "Сповіщення про нове замовлення",
       html: `${deactivationNotificationHtml}
       Ви отримале нове замовлення.
-      Для перегляду замовлення, перейдіть, будь ласка, за посиланням:</p>
+      Для перегляду замовлень перейдіть, будь ласка, за посиланням:</p>
       <a style="
       font-family: 'Roboto', sans-serif;
       font-weight: 700;
       font-size: 20px;
       line-height: 1.14;
       letter-spacing: 0.02em;"
-      target="_blank" href="https://yarmarok.netlify.app/#/">Перейти до оголошення</a>
+      target="_blank" href="https://yarmarok.netlify.app/#/profile/sell">Перейти до списку замовлень</a>
       </div>
       `
     };
@@ -95,41 +95,43 @@ const getUserIBuyNotices = async (req, res) => {
         limit: Number(limit),
         sort: { 'createdAt': -1 }
       },
-      // populate: {
-      //   path: "product",
-      //   populate: {
-      //     path: "owner",
-      //     model: "user",
-      //     select: "-password -accessToken -refreshToken",
-      //   }
-      // },
-      // populate: [{
-      //   path: "product",
-      //   model: "notice",
-      //   populate: {
-      //     path: "owner",
-      //     model: "user",
-      //     select: "-password -accessToken -refreshToken",
-      //   }
-      // }],
-      // {
-      //   path: "product",
-      //   model: "inactivenotice",
-      //   populate: {
-      //     path: "owner",
-      //     model: "user",
-      //     select: "-password -accessToken -refreshToken",
-      //   }
-      // },
-      // {
-      //   path: "product",
-      //   model: "deletednotice",
-      //   populate: {
-      //     path: "owner",
-      //     model: "user",
-      //     select: "-password -accessToken -refreshToken",
-      //   }
-      // }]
+      populate: {
+        path: "product",
+        model: "notice",
+        populate: {
+          path: "owner",
+          model: "user",
+          select: "-password -accessToken -refreshToken",
+        }
+      },
+    //   populate: [{
+    //     path: "product",
+    //     model: "notice",
+    //     populate: {
+    //       path: "owner",
+    //       model: "user",
+    //       select: "-password -accessToken -refreshToken",
+    //     }
+    //   },
+    //   {
+    //     path: "product",
+    //     model: "inactivenotice",
+    //     populate: {
+    //       path: "owner",
+    //       model: "user",
+    //       select: "-password -accessToken -refreshToken",
+    //     }
+    //   },
+    //   {
+    //     path: "product",
+    //     model: "deletednotice",
+    //     populate: {
+    //       path: "owner",
+    //       model: "user",
+    //       select: "-password -accessToken -refreshToken",
+    //     }
+    //   }
+    // ]
     });
     
     if (result.buy.length === 0) {
