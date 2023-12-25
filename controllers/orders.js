@@ -146,12 +146,12 @@ const changeStatus = async (req, res) => {
     const result = await Order.findByIdAndUpdate(id, newStatus, { new: true })
     .populate({
       path: "product",
-      model: "notice"
-      // populate: {
-      //   path: "owner",
-      //   model: "user",
-      //   select: "-password -accessToken -refreshToken",
-      // }
+      model: "notice",
+      populate: {
+        path: "owner",
+        model: "user",
+        select: "-password -accessToken -refreshToken",
+      }
     })
     
     if (!result) {
