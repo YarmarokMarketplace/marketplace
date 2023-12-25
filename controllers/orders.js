@@ -144,7 +144,7 @@ const changeStatus = async (req, res) => {
     const newStatus = req.body;
 
     const result = await Order.findByIdAndUpdate(id, newStatus, { new: true })
-    .populate([{
+    .populate({
       path: "product",
       model: "notice",
       populate: {
@@ -152,26 +152,7 @@ const changeStatus = async (req, res) => {
         model: "user",
         select: "-password -accessToken -refreshToken",
       }
-    },
-    {
-      path: "product",
-      model: "inactivenotice",
-      populate: {
-        path: "owner",
-        model: "user",
-        select: "-password -accessToken -refreshToken",
-      }
-    },
-    {
-      path: "product",
-      model: "deletednotice",
-      populate: {
-        path: "owner",
-        model: "user",
-        select: "-password -accessToken -refreshToken",
-      }
-    }])
-    //.populate("product");
+    })
     
     if (!result) {
         throw new HttpError(404, 'Order not found');
