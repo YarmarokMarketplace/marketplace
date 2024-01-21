@@ -328,16 +328,9 @@ if (inactives.length > 0) {
   if (orders.length > 0) {
     await Order.updateMany({product: {$in: inactivesId}}, {noticeModel: "inactivenotice"}, {new: true})
   }
-}
+};
 
 await InactiveNotice.updateMany({active: false});
-
-const isOrderExists = await Order.find({product: id})
-
-  if (isOrderExists) {
-    await Order.updateMany({product: id}, {noticeModel: "inactivenotice"}, {new: true})
-  }
-
   
   await Notice.aggregate([
     { $match: 

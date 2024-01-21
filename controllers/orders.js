@@ -81,131 +81,21 @@ const getOrderById = async (req, res) => {
 };
 
 const getUserIBuyNotices = async (req, res) => {
-    const { _id } = req.user;
-    const { page = 1, limit = 3 } = req.query;
-    const skip = (page - 1) * limit;
-  
-    const result = await User.findById({_id}, 
-      "-_id -email -password -avatarURL -name -lastname -patronymic -phone -accessToken -refreshToken -sell -favorite -verify -verificationToken -deliveryType -deliveryData -createdAt -updatedAt")
-      .populate({
-      path: 'buy',
-      model: 'order',
-      options: {
-        skip,
-        limit: Number(limit),
-        sort: { 'createdAt': -1 }
-      },
-      populate: {
-        path: "product",
-        model: "notice",
-        populate: {
-          path: "owner",
-          model: "user",
-          select: "-password -accessToken -refreshToken",
-        }
-      },
-    //   populate: [{
-    //     path: "product",
-    //     model: "notice",
-    //     populate: {
-    //       path: "owner",
-    //       model: "user",
-    //       select: "-password -accessToken -refreshToken",
-    //     }
-    //   },
-    //   {
-    //     path: "product",
-    //     model: "inactivenotice",
-    //     populate: {
-    //       path: "owner",
-    //       model: "user",
-    //       select: "-password -accessToken -refreshToken",
-    //     }
-    //   },
-    //   {
-    //     path: "product",
-    //     model: "deletednotice",
-    //     populate: {
-    //       path: "owner",
-    //       model: "user",
-    //       select: "-password -accessToken -refreshToken",
-    //     }
-    //   }
-    // ]
-    });
-    
-    if (result.buy.length === 0) {
-      throw HttpError.NotFoundError('There any buy orders for this user');
-    };
-    const sortedResult = [...result.buy].sort((firstElem, secondElem) => secondElem.createdAt - firstElem.createdAt)
-  
-    const user = await User.findById({_id});
-    const totalResult = user.buy.length; 
-    const totalPages = Math.ceil(totalResult / limit);
-    
-    res.status(200).json({
-      totalResult,
-      totalPages,
-      page: Number(page),
+  const { _id } = req.user;
+  const { page = 1, limit = 3 } = req.query;
+  const skip = (page - 1) * limit;
+
+  const result = await User.findById({_id}, 
+    "-_id -email -password -avatarURL -name -lastname -patronymic -phone -accessToken -refreshToken -sell -favorite -verify -verificationToken -deliveryType -deliveryData -createdAt -updatedAt")
+    .populate({
+    path: 'buy',
+    model: 'order',
+    options: {
+      skip,
       limit: Number(limit),
-      result: sortedResult,
-    });
-};
-
-const getUserISellNotices = async (req, res) => {
-    const { _id } = req.user;
-    const { page = 1, limit = 3 } = req.query;
-    const skip = (page - 1) * limit;
-  
-    const result = await User.findById({_id}, 
-      "-_id -email -password -avatarURL -name -lastname -patronymic -phone -accessToken -refreshToken -buy -favorite -verify -verificationToken -deliveryType -deliveryData -createdAt -updatedAt")
-      .populate({
-      path: 'sell',
-      model: 'order',
-      options: {
-        skip,
-        limit: Number(limit),
-        sort: { 'createdAt': -1 }
-      },
-      populate: [{
-        path: "product",
-        model: "notice",
-      },
-      {
-        path: "product",
-        model: "inactivenotice",
-      },
-      {
-        path: "product",
-        model: "deletednotice",
-      }]
-    })
-    
-    if (result.sell.length === 0) {
-      throw HttpError.NotFoundError('There any sell orders for this user');
-    };
-
-    const sortedResult = [...result.sell].sort((firstElem, secondElem) => secondElem.createdAt - firstElem.createdAt)
-  
-    const user = await User.findById({_id});
-    const totalResult = user.sell.length; 
-    const totalPages = Math.ceil(totalResult / limit);
-    
-    res.status(200).json({
-      totalResult,
-      totalPages,
-      page: Number(page),
-      limit: Number(limit),
-      result: sortedResult,
-    });
-};
-
-const changeStatus = async (req, res) => {
-    const { id } = req.params;
-    const newStatus = req.body;
-
-    const result = await Order.findByIdAndUpdate(id, newStatus, { new: true })
-    .populate([{
+      sort: { 'createdAt': -1 }
+    },
+    populate: {
       path: "product",
       model: "notice",
       populate: {
@@ -214,25 +104,81 @@ const changeStatus = async (req, res) => {
         select: "-password -accessToken -refreshToken",
       }
     },
-    {
+  });
+  
+  if (!result) {
+    throw HttpError.NotFoundError('There any buy orders for this user');
+  };
+  const sortedResult = [...result.buy].sort((firstElem, secondElem) => secondElem.createdAt - firstElem.createdAt)
+
+  const user = await User.findById({_id});
+  const totalResult = user.buy.length; 
+  const totalPages = Math.ceil(totalResult / limit);
+
+  res.status(200).json({
+    totalResult,
+    totalPages,
+    page: Number(page),
+    limit: Number(limit),
+    result: sortedResult,
+  });
+};
+
+const getUserISellNotices = async (req, res) => {
+  const { _id } = req.user;
+  const { page = 1, limit = 3 } = req.query;
+  const skip = (page - 1) * limit;
+
+  const result = await User.findById({_id}, 
+      "-_id -email -reviews -newEmail -verifyForChangeEmail -rating -password -avatarURL -name -lastname -patronymic -phone -accessToken -refreshToken -buy -favorite -verify -verificationToken -deliveryType -deliveryData -createdAt -updatedAt")
+      .populate({
+        path: 'sell',
+        model: 'order',
+        options: {
+          skip,
+          limit: Number(limit),
+          sort: { 'createdAt': -1 }
+        },
+        populate: {
+          path: "product",
+          model: "notice",
+        },
+      });
+  
+  if (result.sell.length === 0) {
+    throw HttpError.NotFoundError('There any sell orders for this user');
+  };
+
+  const sortedResult = [...result.sell].sort((firstElem, secondElem) => secondElem.createdAt - firstElem.createdAt)
+
+  const user = await User.findById({_id});
+  const totalResult = user.sell.length; 
+  const totalPages = Math.ceil(totalResult / limit);
+  
+  res.status(200).json({
+    totalResult,
+    totalPages,
+    page: Number(page),
+    limit: Number(limit),
+    result: sortedResult,
+    result
+  });
+};
+
+const changeStatus = async (req, res) => {
+    const { id } = req.params;
+    const newStatus = req.body;
+
+    const result = await Order.findByIdAndUpdate(id, newStatus, { new: true })
+    .populate({
       path: "product",
-      model: "inactivenotice",
+      model: "notice",
       populate: {
         path: "owner",
         model: "user",
         select: "-password -accessToken -refreshToken",
       }
-    },
-    {
-      path: "product",
-      model: "deletednotice",
-      populate: {
-        path: "owner",
-        model: "user",
-        select: "-password -accessToken -refreshToken",
-      }
-    }])
-    //.populate("product");
+    })
     
     if (!result) {
         throw new HttpError(404, 'Order not found');
@@ -245,7 +191,6 @@ const changeStatus = async (req, res) => {
     });
 
 }
-
 
 module.exports = {
     createOrder: controllerWrapper(createOrder),
