@@ -3,6 +3,8 @@ const { User } = require("../db/models/users");
 const { Notice } = require("../db/models/notices");
 const HttpError = require("../helpers/httpError");
 const controllerWrapper = require("../utils/controllerWrapper");
+const deactivationNotificationHtml = require("../utils/deactivationNotification");
+const sendEmail = require('../helpers/sendEmail');
 
 const createOrder = async (req, res) => {
     const { _id: buyerId } = req.user;
@@ -25,6 +27,9 @@ const createOrder = async (req, res) => {
     const order = await Notice.findById(product);
     const sellerId = order.owner;
 
+    const seller = await User.findById(sellerId);
+    const email = seller.email;
+
     await User.findByIdAndUpdate(sellerId, {
         $addToSet: { sell: result._id }, 
     });
@@ -32,6 +37,27 @@ const createOrder = async (req, res) => {
     await User.findByIdAndUpdate(buyerId, {
         $addToSet: { buy: result._id }, 
     });
+
+
+    //send letter about new order
+    const newOrderEmail = {
+      to: email,
+      subject: "Сповіщення про нове замовлення",
+      html: `${deactivationNotificationHtml}
+      Ви отримале нове замовлення.
+      Для перегляду замовлень перейдіть, будь ласка, за посиланням:</p>
+      <a style="
+      font-family: 'Roboto', sans-serif;
+      font-weight: 700;
+      font-size: 20px;
+      line-height: 1.14;
+      letter-spacing: 0.02em;"
+      target="_blank" href="https://yarmarok.netlify.app/#/profile/sell">Перейти до списку замовлень</a>
+      </div>
+      `
+    };
+  
+      await sendEmail(newOrderEmail);
 
     res.status(201).json({
         result,
@@ -88,7 +114,7 @@ const getUserIBuyNotices = async (req, res) => {
   const user = await User.findById({_id});
   const totalResult = user.buy.length; 
   const totalPages = Math.ceil(totalResult / limit);
-  
+
   res.status(200).json({
     totalResult,
     totalPages,
@@ -165,7 +191,6 @@ const changeStatus = async (req, res) => {
     });
 
 }
-
 
 module.exports = {
     createOrder: controllerWrapper(createOrder),
